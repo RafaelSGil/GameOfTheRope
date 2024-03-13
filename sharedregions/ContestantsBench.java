@@ -28,16 +28,14 @@ public class ContestantsBench {
      */
     private final List<Integer> playing;
 
-    /**
-     * Team identifier
-     */
-    private final int team;
+    private final GeneralRepository repository;
 
-    public ContestantsBench(Contestant[] contestants, int team) {
+
+    public ContestantsBench(Contestant[] contestants, GeneralRepository repository) {
         this.contestants = contestants;
         this.bench = new ArrayList<Integer>(SimulationParams.NPLAYERS-SimulationParams.NPLAYERSINCOMPETITION);
         this.playing = new ArrayList<Integer>(SimulationParams.NPLAYERSINCOMPETITION);
-        this.team = team;
+        this.repository = repository;
     }
 
     public synchronized void callContestants(int team) {

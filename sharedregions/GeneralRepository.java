@@ -4,8 +4,6 @@ import entities.Coach;
 import entities.Contestant;
 import entities.Referee;
 
-import java.util.ArrayList;
-
 public class GeneralRepository {
     private Referee referee;
     private Coach[] coaches;
@@ -14,8 +12,10 @@ public class GeneralRepository {
     private int Trial;
     private int ropePosition;
 
-    public GeneralRepository(){
+    private String fileName;
 
+    public GeneralRepository(String fileName){
+        this.fileName = fileName;
     }
 
 }

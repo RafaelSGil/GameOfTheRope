@@ -1,8 +1,9 @@
 package sharedregions;
 
 public class RefereeSite {
-    public RefereeSite(){
-
+    GeneralRepository repository;
+    public RefereeSite(GeneralRepository repository){
+        this.repository = repository;
     }
 
     public synchronized void announceNewGame(){
@@ -18,7 +19,7 @@ public class RefereeSite {
     }
 
     public synchronized boolean endOfMatch(){
-        return false;
+        return true;
     }
 
     public synchronized void informReferee(){}

@@ -1,5 +1,6 @@
 package entities;
 
+import main.SimulationParams;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
@@ -80,7 +81,9 @@ public class Contestant extends Thread{
             playground.amIDone();
             bench.seatDown();
         }
+    }
 
-
+    public static int GenerateRandomStrength(){
+        return (int) (SimulationParams.MINSTRENGTH + Math.random() * (SimulationParams.MAXSTRENGTH - SimulationParams.MINSTRENGTH));
     }
 }

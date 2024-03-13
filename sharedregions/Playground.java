@@ -1,8 +1,9 @@
 package sharedregions;
 
 public class Playground {
-    public Playground(){
-
+    private final GeneralRepository repository;
+    public Playground(GeneralRepository repository){
+        this.repository = repository;
     }
 
     public synchronized void callTrial(){
