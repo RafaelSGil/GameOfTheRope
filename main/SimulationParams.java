@@ -27,7 +27,4 @@ public class SimulationParams {
      * 😕
      */
     public static final int MINSTRENGTH = 3 ;
-
-
-
 }
