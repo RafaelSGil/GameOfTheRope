@@ -1,5 +1,4 @@
 package entities;
-
 import main.SimulationParams;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
