@@ -1,4 +1,20 @@
 package sharedregions;
 
 public class Playground {
+    public Playground(){
+
+    }
+
+    public synchronized void callTrial(){
+
+    }
+
+    public synchronized void startTrial(){
+
+    }
+
+    public synchronized boolean assertTrialDecision(){
+        return false;
+
+    }
 }
