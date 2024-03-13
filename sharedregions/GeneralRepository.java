@@ -1,8 +1,5 @@
 package sharedregions;
-
-import entities.CoachStates;
-import entities.ContestantStates;
-import entities.Referee;
+import entities.data.*;
 import genclass.GenericIO;
 import genclass.TextFile;
 import main.SimulationParams;
@@ -10,11 +7,13 @@ import main.SimulationParams;
 import java.util.Objects;
 
 public class GeneralRepository {
-    private Referee referee;
-    private int[] coachesState;
-    private int[] contestantsState;
-    private int Game;
-    private int Trial;
+    private RefereeData referee;
+    private CoachData[] coaches;
+    private ContestantData[] contestants;
+    private int game;
+
+    private int trial;
+
     private int ropePosition;
     private String fileName;
 
@@ -23,17 +22,62 @@ public class GeneralRepository {
             this.fileName = "logger";
         else this.fileName = fileName;
 
-        coachesState = new int [SimulationParams.NTEAMS];
+        this.referee = new RefereeData();
+        coaches = new CoachData[SimulationParams.NTEAMS];
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            coachesState[i] = CoachStates.WATFORREFEREECOMMAND;
+            coaches[i] = new CoachData();
         }
 
-        contestantsState = new int [SimulationParams.NCONTESTANTS];
+        contestants = new ContestantData[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
-            contestantsState[i] = ContestantStates.SEATATBENCH;
+            contestants[i] = new ContestantData(i);
         }
+
+        this.game = 0;
+        this.trial = 0;
+        this.ropePosition = 0;
+
 
         reportInitialStatus();
+    }
+
+    public void setGame(int game) {
+        this.game = game;
+    }
+
+    public int getGame() {
+        return game;
+    }
+
+    public int getTrial() {
+        return trial;
+    }
+
+    public void setTrial(int trial) {
+        this.trial = trial;
+    }
+
+    public int getRopePosition() {
+        return ropePosition;
+    }
+
+    public void setRopePosition(int ropePosition) {
+        this.ropePosition = ropePosition;
+    }
+
+    public void updateReferee(int refereeState){
+        referee.setState(refereeState);
+    }
+
+    public void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
+        try{
+            contestants[contestantId].setState(contestantState);
+            contestants[contestantId].setStrength(contestantStrength);
+            contestants[contestantId].setTeam(contestantTeam);
+        }catch (ArrayIndexOutOfBoundsException e){
+            GenericIO.writelnString("Error while updating contestant " + contestantId);
+            System.exit(1);
+        }
     }
 
     private void reportInitialStatus(){

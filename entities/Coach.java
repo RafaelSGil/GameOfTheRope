@@ -28,7 +28,8 @@ public class Coach extends Thread {
     /**
      * Create new Coach
      */
-    public Coach(int team, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+    public Coach(String threadName, int team, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+        super(threadName);
         this.coachState = CoachStates.WATFORREFEREECOMMAND;
         this.team = team;
         this.bench = bench;

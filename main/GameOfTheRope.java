@@ -9,7 +9,6 @@ import sharedregions.ContestantsBench;
 import sharedregions.GeneralRepository;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
-import utils.InputProtection;
 
 public class GameOfTheRope {
     public static void main(String[] args) {
@@ -39,15 +38,15 @@ public class GameOfTheRope {
 
         Playground playground = new Playground(repository);                                       // reference to the playground
         RefereeSite refereeSite = new RefereeSite(repository);                                    // reference to the referee site
-        ContestantsBench contestantsBench = new ContestantsBench(contestants, repository);          // reference to the contestants bench
+        ContestantsBench contestantsBench = new ContestantsBench(repository);          // reference to the contestants bench
 
         // referee, coach and contestants initialization
         Referee referee = new Referee("referee", refereeSite, playground);   // referee thread
         for (int i = 0; i < SimulationParams.NTEAMS; ++i){
-            coaches[i] = new Coach((i % 2 == 0 ? 1 : 2), contestantsBench, playground, refereeSite);
+            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 1 : 2), contestantsBench, playground, refereeSite);
         }
         for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
-            contestants[i] = new Contestant((i+1), (i % 2 == 0 ? 1 : 2), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
+            contestants[i] = new Contestant("Cont_" + (i+1), i, (i % 2 == 0 ? 1 : 2), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
         }
 
         // start of the simulation

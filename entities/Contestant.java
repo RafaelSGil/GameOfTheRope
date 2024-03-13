@@ -14,7 +14,7 @@ public class Contestant extends Thread{
     /**
      * Contestant Team
      */
-    private final int contestantTeam;
+    private int contestantTeam;
 
     /**
      * Contestant Strength
@@ -38,7 +38,8 @@ public class Contestant extends Thread{
      * Create new Coach
      */
 
-    public Contestant(int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+        super(threadName);
         this.bench = bench;
         this.contestantState = ContestantStates.SEATATBENCH;
         this.contestantTeam = team;
@@ -58,6 +59,10 @@ public class Contestant extends Thread{
 
     public int getContestantTeam(){
         return contestantTeam;
+    }
+
+    public void setContestantTeam(int contestantTeam) {
+        this.contestantTeam = contestantTeam;
     }
 
     public int getContestantStrength() {
