@@ -12,6 +12,8 @@ public class GeneralRepository {
     private ContestantData[] contestants;
     private int game;
 
+    private String gameWinMsg;
+
     private int trial;
 
     private int ropePosition;
@@ -34,9 +36,9 @@ public class GeneralRepository {
         }
 
         this.game = 0;
+        this.gameWinMsg = "";
         this.trial = 0;
         this.ropePosition = 0;
-
 
         reportInitialStatus();
     }
@@ -47,6 +49,14 @@ public class GeneralRepository {
 
     public int getGame() {
         return game;
+    }
+
+    public String getGameWinMsg() {
+        return gameWinMsg;
+    }
+
+    public void setGameWinMsg(String gameWinMsg) {
+        this.gameWinMsg = gameWinMsg;
     }
 
     public int getTrial() {
@@ -90,6 +100,8 @@ public class GeneralRepository {
 
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
         log.writelnString(printHeader());
+        log.writelnString(printValues());
+        log.writelnString(printGameInfo());
 
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
@@ -132,5 +144,44 @@ public class GeneralRepository {
         sb.append("\tNB\tPS");
 
         return sb.toString();
+    }
+
+    private String printValues(){
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(referee.getState()).append("\t");
+
+        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
+            sb.append(coaches[i].getState()).append("\t\t");
+            for (int j = 0; j < SimulationParams.NPLAYERS; j++) {
+                if (contestants[j].getTeam() == 0){
+                    sb.append("## ##\t");
+                    continue;
+                }
+
+                if(contestants[j].getTeam() == coaches[i].getTeam()){
+                    sb.append(contestants[j].getState()).append(" ")
+                            .append(contestants[j].getStrength()).append("\t");
+                }
+            }
+        }
+
+        for (int i = SimulationParams.NPLAYERSINCOMPETITION; i > 0; i--) {
+            sb.append("-").append(" ");
+        }
+
+        sb.append(". ");
+
+        for (int i = 1; i <= SimulationParams.NPLAYERSINCOMPETITION; i++) {
+            sb.append("-").append(" ");
+        }
+
+        sb.append("\t").append(trial).append("\t").append(ropePosition);
+
+        return sb.toString();
+    }
+
+    private String printGameInfo(){
+        return "Game " + game + gameWinMsg;
     }
 }
