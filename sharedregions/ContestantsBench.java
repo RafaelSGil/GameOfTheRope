@@ -1,6 +1,7 @@
 package sharedregions;
 
 import entities.Contestant;
+import entities.ContestantStates;
 import main.SimulationParams;
 
 import java.util.ArrayList;
@@ -77,10 +78,20 @@ public class ContestantsBench {
     public synchronized void followCoachAdvice(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(), contestants[contestantId].getContestantState(), contestants[contestantId].getContestantTeam());
+        contestants[contestantId].setContestantState(ContestantStates.STANDINPOSITION);
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
 
         // TODO implement the rest
     }
-    public synchronized void seatDown(){}
+    public synchronized void seatDown(){
+        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
+    }
     public synchronized void reviewNotes(){}
 }
