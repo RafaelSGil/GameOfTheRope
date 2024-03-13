@@ -25,13 +25,13 @@ public class Referee extends Thread {
 
     @Override
     public void run() {
-        refereeSite.announceNewGame();
-        for(int i = 0; i < SimulationParams.NUMBERGAMES; ++i){
+        for(int i = 0; i < SimulationParams.GAMES; ++i){
+            refereeSite.announceNewGame();
             do {
                 playground.callTrial();
                 playground.startTrial();
             }while(playground.assertTrialDecision());
-            refereeSite.declareTrialWinner();
+            refereeSite.declareGameWinner();
         }
         refereeSite.declareMatchWinner();
     }

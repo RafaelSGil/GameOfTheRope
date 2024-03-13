@@ -28,16 +28,17 @@ public class ContestantsBench {
      */
     private final List<Integer> playing;
 
-    /**
-     * Team identifier
-     */
-    private final int team;
+    private final GeneralRepository repository;
 
-    public ContestantsBench(Contestant[] contestants, int team) {
-        this.contestants = contestants;
+
+    public ContestantsBench(GeneralRepository repository) {
         this.bench = new ArrayList<Integer>(SimulationParams.NPLAYERS-SimulationParams.NPLAYERSINCOMPETITION);
         this.playing = new ArrayList<Integer>(SimulationParams.NPLAYERSINCOMPETITION);
-        this.team = team;
+        this.repository = repository;
+        this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            contestants[i] = null;
+        }
     }
 
     public synchronized void callContestants(int team) {
@@ -72,4 +73,14 @@ public class ContestantsBench {
             return -1;
         }
     }
+
+    public synchronized void followCoachAdvice(){
+        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(), contestants[contestantId].getContestantState(), contestants[contestantId].getContestantTeam());
+
+        // TODO implement the rest
+    }
+    public synchronized void seatDown(){}
+    public synchronized void reviewNotes(){}
 }
