@@ -1,70 +1,86 @@
 package entities;
 
 import sharedregions.ContestantsBench;
+import sharedregions.Playground;
+import sharedregions.RefereeSite;
 
 public class Contestant extends Thread{
     /**
      * Internal Coach State
      */
-    private int state;
+    private int contestantState;
 
     /**
      * Contestant Team
      */
-    private int team;
+    private final int contestantTeam;
 
     /**
      * Contestant Strength
      */
-    private int strength;
+    private int contestantStrength;
     /**
      * Contestant Number
      */
-    private int number;
+    private final int contestantId;
 
     /**
      * Contestants Bench
      */
     private final ContestantsBench bench;
 
+    private final Playground playground;
+
+    private final RefereeSite refereeSite;
+
     /**
      * Create new Coach
      */
 
-    public Contestant(int team, int strength, int number, ContestantsBench bench){
+    public Contestant(int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
         this.bench = bench;
-        this.state = ContestantStates.SEATATBENCH;
-        this.team = team;
-        this.strength = strength;
-        this.number = number;
-
-
+        this.contestantState = ContestantStates.SEATATBENCH;
+        this.contestantTeam = team;
+        this.contestantStrength = strength;
+        this.contestantId = contestantId;
+        this.playground = playground;
+        this.refereeSite = refereeSite;
     }
 
     public int getContestantState(){
-        return state;
+        return contestantState;
+    }
+
+    public void setContestantState(int contestantState) {
+        this.contestantState = contestantState;
     }
 
     public int getContestantTeam(){
-        return team;
+        return contestantTeam;
     }
 
     public int getContestantStrength() {
-        return strength;
+        return contestantStrength;
     }
 
-    public int getContestantNumber() {
-        return number;
+    public void setContestantStrength(int contestantStrength) {
+        this.contestantStrength = contestantStrength;
+    }
+
+    public int getContestantId() {
+        return contestantId;
     }
 
     @Override
     public void run(){
-        while(!endOfMatch())
-            followcoachAdvice();
-            getready()
-            pullTheRope();
-            amIDone();
-            seatDown();
+        while(!refereeSite.endOfMatch()){
+            bench.followCoachAdvice();
+            playground.getReady();
+            playground.pullTheRope();
+            playground.amIDone();
+            bench.seatDown();
+        }
+
 
     }
 }

@@ -72,4 +72,8 @@ public class ContestantsBench {
             return -1;
         }
     }
+
+    public synchronized void followCoachAdvice(){}
+    public synchronized void seatDown(){}
+    public synchronized void reviewNotes(){}
 }

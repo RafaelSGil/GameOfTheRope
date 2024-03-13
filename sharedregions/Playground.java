@@ -17,4 +17,9 @@ public class Playground {
         return false;
 
     }
+
+    public synchronized void getReady(){}
+    public synchronized void pullTheRope(){}
+
+    public synchronized void amIDone(){}
 }

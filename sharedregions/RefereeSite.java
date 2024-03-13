@@ -16,4 +16,10 @@ public class RefereeSite {
     public synchronized void declareMatchWinner(){
 
     }
+
+    public synchronized boolean endOfMatch(){
+        return false;
+    }
+
+    public synchronized void informReferee(){}
 }
