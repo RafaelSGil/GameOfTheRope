@@ -40,7 +40,14 @@ public class Playground {
     public synchronized void getReady(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        contestants[contestantId].setContestantState(ContestantStates.DOYOURBEST);
+
+        while(contestants[contestantId].getContestantState() != ContestantStates.DOYOURBEST){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
@@ -49,7 +56,17 @@ public class Playground {
     public synchronized void amIDone(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        contestants[contestantId].setContestantState(ContestantStates.DOYOURBEST);
+
+        // wake up the referee
+        notifyAll();
+
+        while(contestants[contestantId].getContestantState() != ContestantStates.SEATATBENCH){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());

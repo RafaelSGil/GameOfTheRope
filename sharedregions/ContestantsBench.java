@@ -78,12 +78,19 @@ public class ContestantsBench {
     public synchronized void followCoachAdvice(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        contestants[contestantId].setContestantState(ContestantStates.STANDINPOSITION);
+        while(contestants[contestantId].getContestantState() != ContestantStates.STANDINPOSITION){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
 
-        // TODO implement the rest
+        // wake up the coach
+        notifyAll();
     }
     public synchronized void seatDown(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
