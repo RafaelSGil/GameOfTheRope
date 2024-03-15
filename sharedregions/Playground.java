@@ -1,5 +1,7 @@
 package sharedregions;
 
+import entities.Contestant;
+import entities.ContestantStates;
 import entities.Referee;
 import entities.RefereeStates;
 
@@ -29,8 +31,14 @@ public class Playground {
 
     }
 
-    public synchronized void getReady(){}
-    public synchronized void pullTheRope(){}
+    public synchronized void informReferee(){
+        
+
+
+    }
+    public synchronized void getReady() {
+
+    }
 
     public synchronized void amIDone(){}
 }

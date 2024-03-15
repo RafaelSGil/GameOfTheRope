@@ -90,6 +90,15 @@ public class GeneralRepository {
         }
     }
 
+    public void updateCoach( int coachState, int coachTeam){
+        try{
+            coaches[coachTeam].setState(coachState);
+        }catch (ArrayIndexOutOfBoundsException e){
+            GenericIO.writelnString("Error while updating coach " + coachTeam);
+            System.exit(1);
+        }
+    }
+
     private void reportInitialStatus(){
         TextFile log = new TextFile();
 

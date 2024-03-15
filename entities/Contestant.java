@@ -82,7 +82,7 @@ public class Contestant extends Thread{
         while(!refereeSite.endOfMatch()){
             bench.followCoachAdvice();
             playground.getReady();
-            playground.pullTheRope();
+            pullTheRope();
             playground.amIDone();
             bench.seatDown();
         }

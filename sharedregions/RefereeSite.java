@@ -38,5 +38,7 @@ public class RefereeSite {
         return matchEnd;
     }
 
-    public synchronized void informReferee(){}
+
+
+
 }
