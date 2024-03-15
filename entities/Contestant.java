@@ -91,4 +91,11 @@ public class Contestant extends Thread{
     public static int GenerateRandomStrength(){
         return (int) (SimulationParams.MINSTRENGTH + Math.random() * (SimulationParams.MAXSTRENGTH - SimulationParams.MINSTRENGTH));
     }
+
+    private void pullTheRope(){
+        try
+        { sleep ((long) (1 + 100 * Math.random ()));
+        }
+        catch (InterruptedException e) {}
+    }
 }

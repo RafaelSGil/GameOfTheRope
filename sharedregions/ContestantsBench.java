@@ -1,6 +1,6 @@
 package sharedregions;
 
-import com.sun.org.apache.xpath.internal.patterns.ContextMatchStepPattern;
+
 import entities.*;
 import main.SimulationParams;
 
@@ -141,13 +141,28 @@ public class ContestantsBench {
     public synchronized void followCoachAdvice(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(), contestants[contestantId].getContestantState(), contestants[contestantId].getContestantTeam());
+        while(contestants[contestantId].getContestantState() != ContestantStates.STANDINPOSITION){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
 
-        // TODO implement the rest
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
 
-
+        // wake up the coach
+        notifyAll();
     }
-    public synchronized void seatDown(){}
+    public synchronized void seatDown(){
+        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
+    }
 
     public synchronized void reviewNotes(){
         while(!hasTrialEnded){
@@ -160,10 +175,5 @@ public class ContestantsBench {
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachTeam(), ((Coach) Thread.currentThread()).getCoachState());
         notifyAll(); //notify referee
-
-
-
-
-
     }
 }

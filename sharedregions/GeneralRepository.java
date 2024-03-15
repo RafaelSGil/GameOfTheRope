@@ -75,11 +75,12 @@ public class GeneralRepository {
         this.ropePosition = ropePosition;
     }
 
-    public void updateReferee(int refereeState){
+    public synchronized void updateReferee(int refereeState){
         referee.setState(refereeState);
+        //reportStatus();
     }
 
-    public void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
+    public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
         try{
             contestants[contestantId].setState(contestantState);
             contestants[contestantId].setStrength(contestantStrength);
@@ -88,6 +89,8 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating contestant " + contestantId);
             System.exit(1);
         }
+
+        reportStatus();
     }
 
     public void updateCoach( int coachState, int coachTeam){
@@ -112,6 +115,23 @@ public class GeneralRepository {
         log.writelnString(printValues());
         log.writelnString(printGameInfo());
 
+        if (!log.close ())
+        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
+            System.exit (1);
+        }
+    }
+
+    private void reportStatus(){
+        GenericIO.writelnString("Will write on file");
+        TextFile log = new TextFile();
+
+        if (!log.openForWriting(".", fileName)){
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+        log.writelnString(printHeader());
+        log.writelnString(printValues());
+        log.writelnString(printGameInfo());
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
             System.exit (1);

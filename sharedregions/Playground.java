@@ -4,11 +4,17 @@ import entities.Contestant;
 import entities.ContestantStates;
 import entities.Referee;
 import entities.RefereeStates;
+import main.SimulationParams;
 
 public class Playground {
+    private Contestant[] contestants;
     private final GeneralRepository repository;
     public Playground(GeneralRepository repository){
         this.repository = repository;
+        this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            contestants[i] = null;
+        }
     }
 
     public synchronized void callTrial(){
@@ -30,15 +36,47 @@ public class Playground {
         return false;
 
     }
-
+  
     public synchronized void informReferee(){
         
 
 
     }
-    public synchronized void getReady() {
+  
+    public synchronized void getReady(){
+        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((Contestant) Thread.currentThread());
 
+        while(contestants[contestantId].getContestantState() != ContestantStates.DOYOURBEST){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
     }
 
-    public synchronized void amIDone(){}
+    public synchronized void amIDone(){
+        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((Contestant) Thread.currentThread());
+
+        // wake up the referee
+        notifyAll();
+
+        while(contestants[contestantId].getContestantState() != ContestantStates.SEATATBENCH){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
+
+        //TODO synchronization, will wake up the referee and then wait for referee
+    }
 }
