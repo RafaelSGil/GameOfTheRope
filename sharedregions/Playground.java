@@ -36,7 +36,13 @@ public class Playground {
         return false;
 
     }
+  
+    public synchronized void informReferee(){
+        
 
+
+    }
+  
     public synchronized void getReady(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());

@@ -1,7 +1,7 @@
 package sharedregions;
 
-import entities.Contestant;
-import entities.ContestantStates;
+
+import entities.*;
 import main.SimulationParams;
 
 import java.util.ArrayList;
@@ -29,13 +29,42 @@ public class ContestantsBench {
      */
     private final List<Integer> playing;
 
+    /**
+     * General Repository
+     */
     private final GeneralRepository repository;
+
+    /**
+     * Number of Trials
+     */
+    private final int numTrials;
+
+    /**
+     * Number of Games
+     */
+    private final int numGames;
+
+    /**
+     * Checks if trial has ended
+     * */
+    private final boolean hasTrialEnded;
+
+    /**
+     * Checks if contestants are ready
+     * */
+    private boolean hasContestansready;
+
+
 
 
     public ContestantsBench(GeneralRepository repository) {
-        this.bench = new ArrayList<Integer>(SimulationParams.NPLAYERS-SimulationParams.NPLAYERSINCOMPETITION);
-        this.playing = new ArrayList<Integer>(SimulationParams.NPLAYERSINCOMPETITION);
+        this.bench = new ArrayList<Integer>((SimulationParams.NPLAYERS-SimulationParams.NPLAYERSINCOMPETITION)*2);
+        this.playing = new ArrayList<Integer>(SimulationParams.NPLAYERSINCOMPETITION*2);
         this.repository = repository;
+        this.numTrials = 0;
+        this.numGames = 0;
+        this.hasTrialEnded = true;
+        this.hasContestansready = false;
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
@@ -43,13 +72,47 @@ public class ContestantsBench {
     }
 
     public synchronized void callContestants(int team) {
-        for(int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION; i++) {
+
+        if (numTrials > 1 || numGames > 1) {
+            while (bench.size() < SimulationParams.NPLAYERS - SimulationParams.NPLAYERSINCOMPETITION * 2)  //waiting for all players to be benched
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+        }
+        while (!hasTrialEnded) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+        notifyAll();
+        //choose the players
+        for(int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION*2; i++) {
             if(team == 0){
-                playing.add(strategy("strength",playing));
+                int idx = strategy("strength",playing);
+                contestants[idx].setContestantState(ContestantStates.STANDINPOSITION);
+                playing.add(idx);
+
+
             }
             else{
-                playing.add(strategy("strength",playing));            }
+                int idx = strategy("random",playing);
+                contestants[idx].setContestantState(ContestantStates.STANDINPOSITION);
+                playing.add(idx);          }
 
+        }
+        hasContestansready = true;
+        ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
+        repository.updateCoach(((Coach) Thread.currentThread()).getCoachTeam(), ((Coach) Thread.currentThread()).getCoachState());
+        while (playing.size() < SimulationParams.NPLAYERSINCOMPETITION * 2) { //waiting for all players to be playing
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         }
 
 
@@ -100,5 +163,17 @@ public class ContestantsBench {
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
     }
-    public synchronized void reviewNotes(){}
+
+    public synchronized void reviewNotes(){
+        while(!hasTrialEnded){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+        ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
+        repository.updateCoach(((Coach) Thread.currentThread()).getCoachTeam(), ((Coach) Thread.currentThread()).getCoachState());
+        notifyAll(); //notify referee
+    }
 }

@@ -45,11 +45,15 @@ public class Coach extends Thread {
         this.coachState = coachState;
     }
 
+    public int getCoachTeam() {
+        return this.team;
+    }
+
     @Override
     public void run(){
         while(!refereeSite.endOfMatch()){
             bench.callContestants(team);
-            refereeSite.informReferee();
+            playground.informReferee();
             bench.reviewNotes();
         }
     }
