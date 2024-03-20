@@ -11,7 +11,7 @@ public class ContestantData {
     public ContestantData(int id){
         this.id = id;
         this.state = ContestantStates.SEATATBENCH;
-        this.team = 0;
+        this.team = -1;
         this.strength = 0;
     }
 

@@ -1,17 +1,21 @@
 package entities;
+import genclass.GenericIO;
 import main.SimulationParams;
+import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
 
 public class Referee extends Thread {
     private int refereeSate;
+    private final ContestantsBench bench;
     private final RefereeSite refereeSite;
     private final Playground playground;
 
-    public Referee(String threadName, RefereeSite refereeSite, Playground playground){
+    public Referee(String threadName, RefereeSite refereeSite, Playground playground, ContestantsBench bench){
         super(threadName);
         this.playground = playground;
         this.refereeSite = refereeSite;
+        this.bench = bench;
         this.refereeSate = RefereeStates.STARTMATCH;
     }
 
@@ -25,14 +29,22 @@ public class Referee extends Thread {
 
     @Override
     public void run() {
+        waitForGameStart();
         for(int i = 0; i < SimulationParams.GAMES; ++i){
             refereeSite.announceNewGame();
             do {
-                playground.callTrial();
+                playground.callTrial(bench);
                 playground.startTrial();
-            }while(playground.assertTrialDecision());
+            }while(!playground.assertTrialDecision(bench));
             refereeSite.declareGameWinner();
         }
         refereeSite.declareMatchWinner();
+    }
+
+    private void waitForGameStart(){
+        try
+        { sleep ((long) (1 + 50 * Math.random ()));
+        }
+        catch (InterruptedException e) {}
     }
 }

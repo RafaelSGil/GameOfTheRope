@@ -10,6 +10,8 @@ import sharedregions.GeneralRepository;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
 
+import static java.lang.Thread.sleep;
+
 public class GameOfTheRope {
     public static void main(String[] args) {
         Contestant[] contestants = new Contestant[SimulationParams.NCONTESTANTS];       // array of contestants threads
@@ -41,25 +43,24 @@ public class GameOfTheRope {
         ContestantsBench contestantsBench = new ContestantsBench(repository);          // reference to the contestants bench
 
         // referee, coach and contestants initialization
-        Referee referee = new Referee("referee", refereeSite, playground);   // referee thread
+        Referee referee = new Referee("referee", refereeSite, playground, contestantsBench);   // referee thread
         for (int i = 0; i < SimulationParams.NTEAMS; ++i){
-            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 1 : 2), contestantsBench, playground, refereeSite);
+            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 0 : 1), contestantsBench, playground, refereeSite);
         }
         for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
-            contestants[i] = new Contestant("Cont_" + (i+1), i, (i % 2 == 0 ? 1 : 2), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
+            contestants[i] = new Contestant("Cont_" + (i+1), i, (i % 2 == 0 ? 0 : 1), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
         }
 
         // start of the simulation
-        referee.start();
-        for (int i = 0; i < SimulationParams.NTEAMS; ++i){
-            coaches[i].start();
-        }
         for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
             contestants[i].start();
         }
+        for (int i = 0; i < SimulationParams.NTEAMS; ++i){
+            coaches[i].start();
+        }
+        referee.start();
 
         // wait for the end of the simulation
-        GenericIO.writelnString();
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             try{
                 contestants[i].join();
@@ -67,7 +68,6 @@ public class GameOfTheRope {
 
             GenericIO.writelnString("The contestant " + (i+1) + " has terminated");
         }
-        GenericIO.writelnString();
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             try{
                 coaches[i].join();
@@ -75,7 +75,6 @@ public class GameOfTheRope {
 
             GenericIO.writelnString("The coach " + (i+1) + " has terminated");
         }
-        GenericIO.writelnString();
         try{
             referee.join();
         }catch (InterruptedException e){}

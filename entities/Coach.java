@@ -1,5 +1,6 @@
 package entities;
 
+import genclass.GenericIO;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
@@ -14,7 +15,7 @@ public class Coach extends Thread {
     /**
      * Coach Team
      */
-    private int team;
+    private final int team;
 
     /**
      * Contestants Bench
@@ -56,5 +57,12 @@ public class Coach extends Thread {
             playground.informReferee();
             bench.reviewNotes();
         }
+    }
+
+    private void waitForGameStart(){
+        try
+        { sleep ((long) (1 + 30 * Math.random ()));
+        }
+        catch (InterruptedException e) {}
     }
 }

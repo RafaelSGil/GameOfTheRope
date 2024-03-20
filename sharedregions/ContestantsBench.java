@@ -2,9 +2,11 @@ package sharedregions;
 
 
 import entities.*;
+import genclass.GenericIO;
 import main.SimulationParams;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -19,10 +21,6 @@ public class ContestantsBench {
      * Array to store all Contestants
      */
     private final Contestant[] contestants;
-    /**
-     * List to store Benched players
-     */
-    private final List<Integer> bench;
 
     /**
      * List to store Playing players
@@ -47,117 +45,122 @@ public class ContestantsBench {
     /**
      * Checks if trial has ended
      * */
-    private final boolean hasTrialEnded;
+    private boolean hasTrialEnded;
 
-    /**
-     * Checks if contestants are ready
-     * */
-    private boolean hasContestansready;
+    private boolean callTrial;
 
 
 
 
     public ContestantsBench(GeneralRepository repository) {
-        this.bench = new ArrayList<Integer>((SimulationParams.NPLAYERS-SimulationParams.NPLAYERSINCOMPETITION)*2);
         this.playing = new ArrayList<Integer>(SimulationParams.NPLAYERSINCOMPETITION*2);
         this.repository = repository;
         this.numTrials = 0;
         this.numGames = 0;
-        this.hasTrialEnded = true;
-        this.hasContestansready = false;
+        this.hasTrialEnded = false;
+        this.callTrial = false;
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
         }
     }
 
-    public synchronized void callContestants(int team) {
-
-        if (numTrials > 1 || numGames > 1) {
-            while (bench.size() < SimulationParams.NPLAYERS - SimulationParams.NPLAYERSINCOMPETITION * 2)  //waiting for all players to be benched
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    System.out.println("Error: " + e.getMessage());
-                }
-        }
-        while (!hasTrialEnded) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        }
+    public synchronized void unblockContestantBench(){
         notifyAll();
-        //choose the players
-        for(int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION*2; i++) {
-            if(team == 0){
-                int idx = strategy("strength",playing);
-                contestants[idx].setContestantState(ContestantStates.STANDINPOSITION);
-                playing.add(idx);
-
-
-            }
-            else{
-                int idx = strategy("random",playing);
-                contestants[idx].setContestantState(ContestantStates.STANDINPOSITION);
-                playing.add(idx);          }
-
-        }
-        hasContestansready = true;
-        ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachTeam(), ((Coach) Thread.currentThread()).getCoachState());
-        while (playing.size() < SimulationParams.NPLAYERSINCOMPETITION * 2) { //waiting for all players to be playing
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        }
-
-
     }
 
-    private int strategy(String strategy,List<Integer> playing) {
-        if(strategy.equals("strength")) {
-            int max = 0;
-            int index = 0;
-            for(int i = 0; i < SimulationParams.NPLAYERS; i++) {
-                if(contestants[i].getContestantStrength() > max && !playing.contains(i)) {
-                    max = contestants[i].getContestantStrength();
-                    index = i;
-                }
+    public synchronized void refereeCallTrial(){
+        callTrial = true;
+        unblockContestantBench();
+    }
+
+    public void setHasTrialEnded(boolean hasTrialEnded) {
+        this.hasTrialEnded = hasTrialEnded;
+    }
+
+    public synchronized void callContestants(int team) {
+        playing.clear();
+        this.callTrial = false;
+        this.hasTrialEnded = false;
+
+        // wait for the first notify of every iteration
+        // that corresponds to the call trial of the referee
+        while(!callTrial){
+            try {
+                wait();
+            }catch (InterruptedException e){
             }
-            return index;
+        }
+
+
+        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+
+        //choose the players
+        strategy(team == 0 ? "strength" : "random",team);
+
+
+        ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
+        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+
+        // wake up contestants
+        notifyAll();
+    }
+
+    private void strategy(String strategy,int team) {
+        ArrayList<Contestant> aux = new ArrayList<>();
+
+        for(Contestant c : contestants){
+            if (c.getContestantTeam() == team) {
+                aux.add(c);
+            }
+        }
+
+        aux.sort(Comparator.comparingInt(Contestant::getContestantStrength).reversed());
+
+        if(strategy.equals("strength")) {
+            for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION; i++) {
+                playing.add(aux.get(i).getContestantId());
+            }
         }
         else if(strategy.equals("random")) {
-            return (int) (Math.random() * SimulationParams.NPLAYERS);
-        }
-        else {
-            return -1;
+            for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION-1; i++) {
+                playing.add(aux.get(i).getContestantId());
+            }
+            playing.add(aux.get(aux.size() - 1).getContestantId());
         }
     }
 
     public synchronized void followCoachAdvice(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        while(contestants[contestantId].getContestantState() != ContestantStates.STANDINPOSITION){
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
+
+        // wait for coach to choose team
+        while(!playing.contains(contestantId)){
             try{
                 wait();
             }catch (InterruptedException e){
             }
         }
 
+        contestants[contestantId].setContestantState(ContestantStates.STANDINPOSITION);
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-
-        // wake up the coach
-        notifyAll();
     }
     public synchronized void seatDown(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
+
+        while(!hasTrialEnded){
+            try{
+                wait();
+            }catch (InterruptedException e){
+            }
+        }
+
         contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
@@ -172,8 +175,9 @@ public class ContestantsBench {
                 System.out.println("Error: " + e.getMessage());
             }
         }
+
+        GenericIO.writelnString("REVIEW NOTES" + ((Coach) Thread.currentThread()).getCoachTeam());
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachTeam(), ((Coach) Thread.currentThread()).getCoachState());
-        notifyAll(); //notify referee
+        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
     }
 }
