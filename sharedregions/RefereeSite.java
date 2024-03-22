@@ -12,8 +12,15 @@ public class RefereeSite {
         this.matchEnd = false;
     }
 
+    public synchronized void unblockRefereeSite(){
+        notifyAll();
+    }
+
     public synchronized void announceNewGame(){
-        repository.setGame(repository.getGame() + 1);
+        ((Referee) Thread.currentThread()).setGame(((Referee) Thread.currentThread()).getGame() + 1);
+        ((Referee) Thread.currentThread()).setTrial(0);
+        repository.setGame(((Referee) Thread.currentThread()).getGame());
+        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
     }
@@ -22,14 +29,16 @@ public class RefereeSite {
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
 
-        // TODO implement game winner logic
+        // implement game winner logic
+        repository.declareGameWinner();
     }
 
     public synchronized void declareMatchWinner(){
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
 
-        // TODO implement match end logic
+        // implement match end logic
+        repository.declareMatchWinner();
 
         this.matchEnd = true;
     }

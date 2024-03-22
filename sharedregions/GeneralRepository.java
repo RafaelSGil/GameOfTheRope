@@ -1,4 +1,6 @@
 package sharedregions;
+import entities.Contestant;
+import entities.RefereeStates;
 import entities.data.*;
 import genclass.GenericIO;
 import genclass.TextFile;
@@ -19,6 +21,8 @@ public class GeneralRepository {
     private int ropePosition;
     private String fileName;
 
+    private int[][] gameRecord;
+
     public GeneralRepository(String fileName){
         if ((fileName == null) || Objects.equals (fileName, ""))
             this.fileName = "logger";
@@ -27,7 +31,7 @@ public class GeneralRepository {
         this.referee = new RefereeData();
         coaches = new CoachData[SimulationParams.NTEAMS];
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            coaches[i] = new CoachData();
+            coaches[i] = new CoachData(i);
         }
 
         contestants = new ContestantData[SimulationParams.NCONTESTANTS];
@@ -39,6 +43,8 @@ public class GeneralRepository {
         this.gameWinMsg = "";
         this.trial = 0;
         this.ropePosition = 0;
+
+        this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
 
         reportInitialStatus();
     }
@@ -77,7 +83,7 @@ public class GeneralRepository {
 
     public synchronized void updateReferee(int refereeState){
         referee.setState(refereeState);
-        //reportStatus();
+        reportStatus();
     }
 
     public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
@@ -100,6 +106,71 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating coach " + coachTeam);
             System.exit(1);
         }
+
+        reportStatus();
+    }
+
+    public void declareGameWinner(){
+        int winnerTeam;
+        int team1TrialsWon = 0;
+
+        for (int i = 0; i < SimulationParams.NTRIALS; i++) {
+            if (gameRecord[game-1][i] == 0){
+                team1TrialsWon++;
+            }
+        }
+
+        if(team1TrialsWon > (SimulationParams.NTRIALS/2)){
+            winnerTeam = 1;
+            gameWinMsg = " was won by team " + winnerTeam + " by knock out in " + team1TrialsWon + " trials.";
+        }
+        if (team1TrialsWon < (SimulationParams.NTRIALS/2)){
+            winnerTeam = 2;
+            gameWinMsg = " was won by team " + winnerTeam + " by knock out in " + (SimulationParams.NTRIALS - team1TrialsWon) + " trials.";
+        }
+        if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
+            gameWinMsg = " was a draw.";
+        }
+
+        reportStatus();
+        gameWinMsg = "";
+    }
+
+    public void declareMatchWinner(){
+        int winnerTeam;
+        int team1TrialsWon = 0;
+
+        for (int i = 0; i < SimulationParams.GAMES; i++) {
+            for (int j = 0; j < SimulationParams.NTRIALS; j++) {
+                if(gameRecord[i][j] == 0){
+                    team1TrialsWon++;
+                }
+            }
+        }
+
+        // TODO complete with score board
+
+        TextFile log = new TextFile();
+
+        if (!log.openForAppending(".", fileName)){
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+
+        if(team1TrialsWon > (SimulationParams.NTRIALS/2)){
+            log.writelnString("Match was won by team " + 1 + " (#-#).");
+        }
+        if (team1TrialsWon < (SimulationParams.NTRIALS/2)){
+            log.writelnString("Match was won by team " + 2 + " (#-#).");
+        }
+        if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
+            log.writelnString("Match was a draw.");
+        }
+
+        if (!log.close ())
+        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
+            System.exit (1);
+        }
     }
 
     private void reportInitialStatus(){
@@ -121,17 +192,18 @@ public class GeneralRepository {
         }
     }
 
-    private void reportStatus(){
-        GenericIO.writelnString("Will write on file");
+    public void reportStatus(){
         TextFile log = new TextFile();
 
-        if (!log.openForWriting(".", fileName)){
+        if (!log.openForAppending(".", fileName)){
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
+
         log.writelnString(printHeader());
         log.writelnString(printValues());
         log.writelnString(printGameInfo());
+
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
             System.exit (1);
@@ -178,18 +250,21 @@ public class GeneralRepository {
     private String printValues(){
         StringBuilder sb = new StringBuilder();
 
-        sb.append(referee.getState()).append("\t");
+        sb.append(translateRefereeStates(referee.getState())).append("\t");
+
+        int aux = 0;
 
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            sb.append(coaches[i].getState()).append("\t\t");
-            for (int j = 0; j < SimulationParams.NPLAYERS; j++) {
-                if (contestants[j].getTeam() == 0){
+            sb.append(translateCoachStates(coaches[i].getState())).append("\t");
+            for (int j = 0; j < SimulationParams.NCONTESTANTS; j++) {
+                if (contestants[j].getTeam() == -1){
                     sb.append("## ##\t");
+                    if(j == SimulationParams.NPLAYERS - 1) break;
                     continue;
                 }
 
                 if(contestants[j].getTeam() == coaches[i].getTeam()){
-                    sb.append(contestants[j].getState()).append(" ")
+                    sb.append(translateContestantStates(contestants[j].getState())).append("\t")
                             .append(contestants[j].getStrength()).append("\t");
                 }
             }
@@ -211,6 +286,51 @@ public class GeneralRepository {
     }
 
     private String printGameInfo(){
-        return "Game " + game + gameWinMsg;
+        return "Game " + game + gameWinMsg + "\n";
+    }
+
+    private String translateRefereeStates(int state){
+        switch (state){
+            case 0:
+                return "SOM";
+            case 1:
+                return "SOG";
+            case 2:
+                return "TRY";
+            case 3:
+                return "WTC";
+            case 4:
+                return "EOG";
+            case 5:
+                return "EOM";
+            default:
+                return "";
+        }
+    }
+
+    private String translateCoachStates(int state){
+        switch (state){
+            case 0:
+                return "WFRC";
+            case 1:
+                return "ASTM";
+            case 2:
+                return "WATL";
+            default:
+                return "";
+        }
+    }
+
+    private String translateContestantStates(int state){
+        switch (state){
+            case 0:
+                return "SAB";
+            case 1:
+                return "SIP";
+            case 2:
+                return "DYB";
+            default:
+                return "";
+        }
     }
 }

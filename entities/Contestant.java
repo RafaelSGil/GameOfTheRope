@@ -1,5 +1,6 @@
 package entities;
 
+import genclass.GenericIO;
 import main.SimulationParams;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;

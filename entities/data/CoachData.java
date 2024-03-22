@@ -6,8 +6,8 @@ public class CoachData {
     private int state;
     private int team;
 
-    public CoachData(){
-        this.state = CoachStates.WATFORREFEREECOMMAND;
+    public CoachData(int team){
+        this.team = team;
     }
 
     public int getState() {
