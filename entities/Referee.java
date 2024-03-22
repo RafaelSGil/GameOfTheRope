@@ -10,6 +10,8 @@ public class Referee extends Thread {
     private final ContestantsBench bench;
     private final RefereeSite refereeSite;
     private final Playground playground;
+    private int game;
+    private int trial;
 
     public Referee(String threadName, RefereeSite refereeSite, Playground playground, ContestantsBench bench){
         super(threadName);
@@ -17,6 +19,8 @@ public class Referee extends Thread {
         this.refereeSite = refereeSite;
         this.bench = bench;
         this.refereeSate = RefereeStates.STARTMATCH;
+        this.game = 0;
+        this.trial = 0;
     }
 
     public int getRefereeSate() {
@@ -25,6 +29,22 @@ public class Referee extends Thread {
 
     public void setRefereeSate(int refereeSate) {
         this.refereeSate = refereeSate;
+    }
+
+    public int getGame() {
+        return game;
+    }
+
+    public void setGame(int game) {
+        this.game = game;
+    }
+
+    public int getTrial() {
+        return trial;
+    }
+
+    public void setTrial(int trial) {
+        this.trial = trial;
     }
 
     @Override

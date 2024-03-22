@@ -35,12 +35,12 @@ public class ContestantsBench {
     /**
      * Number of Trials
      */
-    private final int numTrials;
+    private int numTrials;
 
     /**
      * Number of Games
      */
-    private final int numGames;
+    private int numGames;
 
     /**
      * Checks if trial has ended
@@ -48,7 +48,6 @@ public class ContestantsBench {
     private boolean hasTrialEnded;
 
     private boolean callTrial;
-
 
 
 
@@ -69,8 +68,10 @@ public class ContestantsBench {
         notifyAll();
     }
 
-    public synchronized void refereeCallTrial(){
+    public synchronized void refereeCallTrial(int numTrials, int numGames){
         callTrial = true;
+        this.numTrials = numTrials;
+        this.numGames = numGames;
         unblockContestantBench();
     }
 
@@ -78,10 +79,21 @@ public class ContestantsBench {
         this.hasTrialEnded = hasTrialEnded;
     }
 
+    private boolean isEveryoneSeated(int team){
+        int contSeated = 0;
+        for (Contestant c : contestants){
+            try {
+                if(c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH){
+                    contSeated++;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return contSeated == SimulationParams.NPLAYERS;
+    }
+
     public synchronized void callContestants(int team) {
-        playing.clear();
         this.callTrial = false;
-        this.hasTrialEnded = false;
 
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
@@ -153,7 +165,7 @@ public class ContestantsBench {
     public synchronized void seatDown(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-
+        playing.clear();
         while(!hasTrialEnded){
             try{
                 wait();
@@ -162,12 +174,11 @@ public class ContestantsBench {
         }
 
         contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
     }
 
     public synchronized void reviewNotes(){
+        this.hasTrialEnded = false;
+
         while(!hasTrialEnded){
             try {
                 wait();
@@ -176,7 +187,6 @@ public class ContestantsBench {
             }
         }
 
-        GenericIO.writelnString("REVIEW NOTES" + ((Coach) Thread.currentThread()).getCoachTeam());
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
     }

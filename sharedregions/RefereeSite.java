@@ -17,7 +17,9 @@ public class RefereeSite {
     }
 
     public synchronized void announceNewGame(){
-        repository.setGame(repository.getGame() + 1);
+        ((Referee) Thread.currentThread()).setGame(((Referee) Thread.currentThread()).getGame() + 1);
+        ((Referee) Thread.currentThread()).setTrial(0);
+        repository.setGame(((Referee) Thread.currentThread()).getGame());
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());

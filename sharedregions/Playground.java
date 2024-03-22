@@ -39,14 +39,14 @@ public class Playground {
         this.referee = ((Referee) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        repository.setTrial(repository.getTrial() + 1);
+        referee.setTrial(referee.getTrial() + 1);
+        repository.setTrial(referee.getTrial());
 
         // will wake up the coaches
-        bench.refereeCallTrial();
+        bench.refereeCallTrial(referee.getTrial(), referee.getGame());
     }
 
     private boolean haveCoachesChosenTeams(){
-
         try {
             for (Coach c : coaches){
                 if(c.getCoachState() != CoachStates.WATCHTRIAL){
@@ -61,6 +61,8 @@ public class Playground {
     }
 
     public synchronized void startTrial(){
+        trialStarted = false;
+
         // synchronize, will get waken up by the last coach
         while(!haveCoachesChosenTeams()){
             try{
@@ -79,7 +81,7 @@ public class Playground {
     }
 
     private boolean haveContestantsPulledRope(){
-        return ropesPulled == SimulationParams.NPLAYERSINCOMPETITION;
+        return ropesPulled == SimulationParams.NPLAYERSINCOMPETITION*2;
     }
 
     public synchronized boolean assertTrialDecision(ContestantsBench bench){
@@ -128,8 +130,6 @@ public class Playground {
             }
         }
 
-        GenericIO.writelnString("IM HERE " + coachId);
-
         coaches[coachId].setCoachState(CoachStates.WATCHTRIAL);
         repository.updateCoach(coaches[coachId].getCoachState(), coachId);
 
@@ -161,6 +161,11 @@ public class Playground {
             }catch (InterruptedException e){
             }
         }
+
+        contestants[contestantId].setContestantState(ContestantStates.DOYOURBEST);
+        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+                contestants[contestantId].getContestantState(),
+                contestants[contestantId].getContestantTeam());
     }
 
     public synchronized void amIDone(){
@@ -172,8 +177,8 @@ public class Playground {
         // wake up the referee
         notifyAll();
 
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
+//        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
+//                contestants[contestantId].getContestantState(),
+//                contestants[contestantId].getContestantTeam());
     }
 }

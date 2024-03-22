@@ -83,7 +83,7 @@ public class GeneralRepository {
 
     public synchronized void updateReferee(int refereeState){
         referee.setState(refereeState);
-        //reportStatus();
+        reportStatus();
     }
 
     public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
@@ -96,7 +96,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        //reportStatus();
+        reportStatus();
     }
 
     public void updateCoach( int coachState, int coachTeam){
@@ -152,7 +152,7 @@ public class GeneralRepository {
 
         TextFile log = new TextFile();
 
-        if (!log.openForWriting(".", fileName)){
+        if (!log.openForAppending(".", fileName)){
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
@@ -192,7 +192,7 @@ public class GeneralRepository {
         }
     }
 
-    private void reportStatus(){
+    public void reportStatus(){
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)){
@@ -327,7 +327,7 @@ public class GeneralRepository {
                 return "SAB";
             case 1:
                 return "SIP";
-            case 3:
+            case 2:
                 return "DYB";
             default:
                 return "";
