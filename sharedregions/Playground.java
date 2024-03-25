@@ -15,8 +15,25 @@ public class Playground {
     private int ropesPulled;
     private boolean trialStarted;
 
-    public Playground(GeneralRepository repository){
+    private int team0Power;
+
+    private int team1Power;
+
+    private int ropePosition;
+
+    private int numTrials;
+
+    private int numGames;
+
+    private int team0TrialWins;
+
+    private int team1TrialWins;
+
+    private RefereeSite refereeSite;
+
+    public Playground(GeneralRepository repository, RefereeSite refereeSite){
         this.repository = repository;
+        this.refereeSite = refereeSite;
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
@@ -29,6 +46,13 @@ public class Playground {
         this.coachesSignal = 0;
         this.ropesPulled = 0;
         this.trialStarted = false;
+        this.team0Power = 0;
+        this.team1Power = 0;
+        this.ropePosition = 0;
+        this.numTrials = 0;
+        this.numGames = 0;
+        this.team0TrialWins = 0;
+        this.team1TrialWins = 0;
     }
 
     public synchronized void unblockPlayground(){
@@ -92,14 +116,64 @@ public class Playground {
             }catch (InterruptedException e){
             }
         }
+        numTrials++;
+        int ropeMove = Math.abs(team0Power-team1Power);
+        if(team1Power > team0Power){                      // team 1 wins trial
+            repository.setRopePosition(ropeMove);
+            ropePosition += ropeMove;
 
-        // reset counter
+        }
+        else {           //team 0 wins trial
+            repository.setRopePosition(ropeMove*-1);
+            ropePosition -= ropeMove;
+        }
+
+
+        // reset counters
         this.ropesPulled = 0;
+        this.team0Power = 0;
+        this.team1Power = 0;
 
         bench.setHasTrialEnded(true);
         bench.unblockContestantBench();
 
-        return repository.getTrial() == SimulationParams.NTRIALS;
+        if(numTrials == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3){
+            numTrials = 0;
+            numGames++;
+            if(ropePosition > 0){
+                if(ropePosition > 3){
+                    refereeSite.setGameWinCause("knockout");
+                }
+                team1TrialWins++;
+                refereeSite.updateTrialWins(1);
+                repository.setTrialWinner(1);
+                refereeSite.setGameWinCause("points");
+
+
+            }
+            else if(ropePosition < 0){
+                if(ropePosition < -3){
+                    refereeSite.setGameWinCause("knockout");
+                }
+                team0TrialWins++;
+                refereeSite.updateTrialWins(0);
+                repository.setTrialWinner(0);
+                refereeSite.setGameWinCause("points");
+
+
+            }
+            else{
+                repository.setRopePosition(0);
+                repository.setTrialWinner(2);
+                refereeSite.setGameWinCause("draw");
+            }
+            if(numGames == SimulationParams.GAMES || team0TrialWins > 3 || team1TrialWins > 3){
+                return true;
+            }
+            //TODO The game may end sooner if the produced shift is greater or equal to four length units
+        }
+
+        return false;
     }
 
     // checks if there are 3 contestants of the team in state STANDINPOSITION
@@ -140,6 +214,13 @@ public class Playground {
     public synchronized void getReady(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int team = contestants[contestantId].getContestantTeam();
+        if(team == 0) {
+            team0Power += contestants[contestantId].getContestantStrength();
+        }
+        else{
+            team1Power += contestants[contestantId].getContestantStrength();
+        }
 
 //        GenericIO.writelnString("CONTESTANT " + contestantId);
 //        for (Contestant c : contestants){

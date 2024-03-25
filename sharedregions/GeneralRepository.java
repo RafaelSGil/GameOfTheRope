@@ -23,6 +23,9 @@ public class GeneralRepository {
 
     private int[][] gameRecord;
 
+
+
+
     public GeneralRepository(String fileName){
         if ((fileName == null) || Objects.equals (fileName, ""))
             this.fileName = "logger";
@@ -110,8 +113,8 @@ public class GeneralRepository {
         reportStatus();
     }
 
-    public void declareGameWinner(){
-        int winnerTeam;
+    public void declareGameWinner(int team, String cause){
+        /*int winnerTeam;
         int team1TrialsWon = 0;
 
         for (int i = 0; i < SimulationParams.NTRIALS; i++) {
@@ -130,13 +133,47 @@ public class GeneralRepository {
         }
         if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
             gameWinMsg = " was a draw.";
+        }*/
+        if(cause != "draw"){
+            gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         }
-
+        else{
+            gameWinMsg = " was a draw.";
+        }
         reportStatus();
         gameWinMsg = "";
     }
 
-    public void declareMatchWinner(){
+    public String ropePositionToString() {
+        StringBuilder sb = new StringBuilder("-------"); // Use StringBuilder for efficiency
+        if (this.ropePosition > 0) {
+            if (ropePosition > 3) {
+                sb.replace(6, 7, "."); // Replace the character at index 4 with "."
+            } else {
+                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '.'
+            }
+        } else if (this.ropePosition < 0) {
+            if (ropePosition < -3) {
+                sb.replace(0, 1, "."); // Replace the character at index 0 with "."
+            } else {
+                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '-'
+            }
+        }
+        else {
+            sb.setCharAt(3, '.');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Set the winner of the trial
+     * 0-team 1 1 - team 2 2 - draw
+     * @param winner
+     */
+    public void setTrialWinner(int winner){
+        gameRecord[game-1][trial] = winner;
+    }
+    public void declareMatchWinner(int team){
         int winnerTeam;
         int team1TrialsWon = 0;
 
@@ -270,15 +307,7 @@ public class GeneralRepository {
             }
         }
 
-        for (int i = SimulationParams.NPLAYERSINCOMPETITION; i > 0; i--) {
-            sb.append("-").append(" ");
-        }
-
-        sb.append(". ");
-
-        for (int i = 1; i <= SimulationParams.NPLAYERSINCOMPETITION; i++) {
-            sb.append("-").append(" ");
-        }
+        sb.append(ropePositionToString()).append("\t");
 
         sb.append("\t").append(trial).append("\t").append(ropePosition);
 
@@ -332,5 +361,9 @@ public class GeneralRepository {
             default:
                 return "";
         }
+    }
+
+    public void setMatchWinner(int team) {
+
     }
 }
