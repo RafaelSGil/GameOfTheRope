@@ -65,7 +65,7 @@ public class GameOfTheRope {
                 contestants[i].join();
             }catch (InterruptedException e){}
 
-            GenericIO.writelnString("The contestant " + (i+1) + " has terminated");
+            GenericIO.writelnString("The contestant " + (i) + " has terminated");
         }
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             try{

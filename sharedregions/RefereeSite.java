@@ -2,6 +2,7 @@ package sharedregions;
 
 import entities.Referee;
 import entities.RefereeStates;
+import genclass.GenericIO;
 
 public class RefereeSite {
     private GeneralRepository repository;
@@ -52,10 +53,12 @@ public class RefereeSite {
     public synchronized void announceNewGame(){
         ((Referee) Thread.currentThread()).setGame(((Referee) Thread.currentThread()).getGame() + 1);
         ((Referee) Thread.currentThread()).setTrial(0);
+        repository.setTrial(0);
         repository.setGame(((Referee) Thread.currentThread()).getGame());
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        GenericIO.writelnString("GAME " + ((Referee) Thread.currentThread()).getGame());
     }
 
     public synchronized void declareGameWinner(){
@@ -80,16 +83,13 @@ public class RefereeSite {
     public synchronized void declareMatchWinner(){
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        if(team0GameWins > team1GameWins){
-            repository.declareMatchWinner(0);
-        }else if(team1GameWins > team0GameWins){
-            repository.declareMatchWinner(1);
-        
-        }else{
-            repository.declareMatchWinner(2);
-        }
+
+        repository.declareMatchWinner(((Referee) Thread.currentThread()).finalResults());
         // implement match end logic
 
+        GenericIO.writelnString("REFEREE SIGNALED GAME END");
+        GenericIO.writelnString("MATCH RESULTS");
+        ((Referee) Thread.currentThread()).printMatchResults();
         this.matchEnd = true;
     }
 
@@ -97,7 +97,9 @@ public class RefereeSite {
         return matchEnd;
     }
 
-
+    public synchronized void setMatchEnd(boolean matchEnd){
+        this.matchEnd = matchEnd;
+    }
 
 
 }

@@ -6,6 +6,7 @@ import genclass.GenericIO;
 import genclass.TextFile;
 import main.SimulationParams;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class GeneralRepository {
@@ -21,9 +22,7 @@ public class GeneralRepository {
     private int ropePosition;
     private String fileName;
 
-    private int[][] gameRecord;
-
-
+    //private int[][] gameRecord;
 
 
     public GeneralRepository(String fileName){
@@ -47,13 +46,14 @@ public class GeneralRepository {
         this.trial = 0;
         this.ropePosition = 0;
 
-        this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
+        //this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
 
         reportInitialStatus();
     }
 
     public void setGame(int game) {
         this.game = game;
+        reportGameStatus();
     }
 
     public int getGame() {
@@ -73,7 +73,7 @@ public class GeneralRepository {
     }
 
     public void setTrial(int trial) {
-        this.trial = trial;
+        this.trial = Math.min(trial, SimulationParams.NTRIALS);
     }
 
     public int getRopePosition() {
@@ -134,13 +134,13 @@ public class GeneralRepository {
         if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
             gameWinMsg = " was a draw.";
         }*/
-        if(cause != "draw"){
+        if(!cause.equals("draw")){
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         }
         else{
             gameWinMsg = " was a draw.";
         }
-        reportStatus();
+        reportGameStatus();
         gameWinMsg = "";
     }
 
@@ -162,31 +162,18 @@ public class GeneralRepository {
         else {
             sb.setCharAt(3, '.');
         }
-        return sb.toString();
+        return sb.append("\t").toString();
     }
 
     /**
      * Set the winner of the trial
      * 0-team 1 1 - team 2 2 - draw
-     * @param winner
+     * @param
      */
-    public void setTrialWinner(int winner){
-        gameRecord[game-1][trial] = winner;
-    }
-    public void declareMatchWinner(int team){
-        int winnerTeam;
-        int team1TrialsWon = 0;
-
-        for (int i = 0; i < SimulationParams.GAMES; i++) {
-            for (int j = 0; j < SimulationParams.NTRIALS; j++) {
-                if(gameRecord[i][j] == 0){
-                    team1TrialsWon++;
-                }
-            }
-        }
-
-        // TODO complete with score board
-
+//    public void setTrialWinner(int winner){
+//        gameRecord[game-1][trial-1] = winner;
+//    }
+    public void declareMatchWinner(String msg){
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)){
@@ -194,15 +181,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        if(team1TrialsWon > (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was won by team " + 1 + " (#-#).");
-        }
-        if (team1TrialsWon < (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was won by team " + 2 + " (#-#).");
-        }
-        if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was a draw.");
-        }
+        log.writelnString(msg);
 
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
@@ -221,7 +200,7 @@ public class GeneralRepository {
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
         log.writelnString(printHeader());
         log.writelnString(printValues());
-        log.writelnString(printGameInfo());
+        log.writelnString();
 
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
@@ -239,6 +218,22 @@ public class GeneralRepository {
 
         log.writelnString(printHeader());
         log.writelnString(printValues());
+        log.writelnString();
+
+        if (!log.close ())
+        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
+            System.exit (1);
+        }
+    }
+
+    public void reportGameStatus(){
+        TextFile log = new TextFile();
+
+        if (!log.openForAppending(".", fileName)){
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+
         log.writelnString(printGameInfo());
 
         if (!log.close ())
@@ -307,7 +302,17 @@ public class GeneralRepository {
             }
         }
 
-        sb.append(ropePositionToString()).append("\t");
+        //sb.append(ropePositionToString()).append("\t");
+
+        for (int i = SimulationParams.NPLAYERSINCOMPETITION; i > 0; i--) {
+            sb.append("-").append(" ");
+        }
+
+        sb.append(". ");
+
+        for (int i = 1; i <= SimulationParams.NPLAYERSINCOMPETITION; i++) {
+            sb.append("-").append(" ");
+        }
 
         sb.append("\t").append(trial).append("\t").append(ropePosition);
 
