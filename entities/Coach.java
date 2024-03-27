@@ -38,15 +38,15 @@ public class Coach extends Thread {
         this.playground = playground;
     }
 
-    public int getCoachState(){
+    public synchronized int getCoachState(){
         return this.coachState;
     }
 
-    public void setCoachState(int coachState) {
+    public synchronized void setCoachState(int coachState) {
         this.coachState = coachState;
     }
 
-    public int getCoachTeam() {
+    public synchronized int getCoachTeam() {
         return this.team;
     }
 

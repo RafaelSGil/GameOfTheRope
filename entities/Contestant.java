@@ -35,9 +35,7 @@ public class Contestant extends Thread{
 
     private final RefereeSite refereeSite;
 
-    /**
-     * Create new Coach
-     */
+    private boolean isPlaying;
 
     public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
         super(threadName);
@@ -48,43 +46,54 @@ public class Contestant extends Thread{
         this.contestantId = contestantId;
         this.playground = playground;
         this.refereeSite = refereeSite;
+        this.isPlaying = false;
     }
 
-    public int getContestantState(){
+    public synchronized int getContestantState(){
         return contestantState;
     }
 
-    public void setContestantState(int contestantState) {
+    public synchronized void setContestantState(int contestantState) {
         this.contestantState = contestantState;
     }
 
-    public int getContestantTeam(){
+    public synchronized int getContestantTeam(){
         return contestantTeam;
     }
 
-    public void setContestantTeam(int contestantTeam) {
+    public synchronized void setContestantTeam(int contestantTeam) {
         this.contestantTeam = contestantTeam;
     }
 
-    public int getContestantStrength() {
+    public synchronized int getContestantStrength() {
         return contestantStrength;
     }
 
-    public void setContestantStrength(int contestantStrength) {
+    public synchronized void setContestantStrength(int contestantStrength) {
         this.contestantStrength = contestantStrength;
     }
 
-    public int getContestantId() {
+    public synchronized int getContestantId() {
         return contestantId;
+    }
+
+    public synchronized boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public synchronized void setPlaying(boolean playing) {
+        isPlaying = playing;
     }
 
     @Override
     public void run(){
         while(!refereeSite.endOfMatch()){
             bench.followCoachAdvice();
-            playground.getReady();
-            pullTheRope();
-            playground.amIDone();
+            if (isPlaying) {
+                playground.getReady();
+                pullTheRope();
+                playground.amIDone();
+            }
             bench.seatDown();
         }
     }
@@ -99,4 +108,13 @@ public class Contestant extends Thread{
         }
         catch (InterruptedException e) {}
     }
+
+    public synchronized void manageStrength() {
+        if (isPlaying) {
+            contestantStrength = Math.max(contestantStrength - 1, SimulationParams.MINSTRENGTH);
+        } else {
+            contestantStrength = Math.min(contestantStrength + 1, SimulationParams.MAXSTRENGTH);
+        }
+    }
+
 }

@@ -37,9 +37,8 @@ public class GameOfTheRope {
         } while (!success);
 
         GeneralRepository repository = new GeneralRepository(fileName);
-
-        Playground playground = new Playground(repository);                                       // reference to the playground
         RefereeSite refereeSite = new RefereeSite(repository);                                    // reference to the referee site
+        Playground playground = new Playground(repository,refereeSite);                                       // reference to the playground
         ContestantsBench contestantsBench = new ContestantsBench(repository);          // reference to the contestants bench
 
         // referee, coach and contestants initialization
@@ -66,7 +65,7 @@ public class GameOfTheRope {
                 contestants[i].join();
             }catch (InterruptedException e){}
 
-            GenericIO.writelnString("The contestant " + (i+1) + " has terminated");
+            GenericIO.writelnString("The contestant " + (i) + " has terminated");
         }
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             try{

@@ -15,8 +15,21 @@ public class Playground {
     private int ropesPulled;
     private boolean trialStarted;
 
-    public Playground(GeneralRepository repository){
+    private int team0Power;
+
+    private int team1Power;
+
+    private int ropePosition;
+
+    private int team0TrialWins;
+
+    private int team1TrialWins;
+
+    private RefereeSite refereeSite;
+
+    public Playground(GeneralRepository repository, RefereeSite refereeSite){
         this.repository = repository;
+        this.refereeSite = refereeSite;
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
@@ -29,6 +42,11 @@ public class Playground {
         this.coachesSignal = 0;
         this.ropesPulled = 0;
         this.trialStarted = false;
+        this.team0Power = 0;
+        this.team1Power = 0;
+        this.ropePosition = 0;
+        this.team0TrialWins = 0;
+        this.team1TrialWins = 0;
     }
 
     public synchronized void unblockPlayground(){
@@ -41,6 +59,8 @@ public class Playground {
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
+
+        GenericIO.writelnString("\nTRIAL " + referee.getTrial());
 
         // will wake up the coaches
         bench.refereeCallTrial(referee.getTrial(), referee.getGame());
@@ -66,6 +86,7 @@ public class Playground {
         // synchronize, will get waken up by the last coach
         while(!haveCoachesChosenTeams()){
             try{
+                GenericIO.writelnString("REFEREE BLOCKED START");
                 wait();
             }catch (InterruptedException e){
             }
@@ -85,6 +106,8 @@ public class Playground {
     }
 
     public synchronized boolean assertTrialDecision(ContestantsBench bench){
+        this.referee = ((Referee) Thread.currentThread());
+
         // synchronize, will get waken up by the last contestant
         while(!haveContestantsPulledRope()){
             try{
@@ -93,13 +116,61 @@ public class Playground {
             }
         }
 
-        // reset counter
+
+        int ropeMove = Math.abs(team0Power-team1Power);
+        if(team1Power > team0Power){                      // team 1 wins trial
+            ropePosition += ropeMove;
+        }
+        else {           //team 0 wins trial
+            ropePosition -= ropeMove;
+        }
+
+        repository.setRopePosition(ropePosition);
+
+        // reset counters
         this.ropesPulled = 0;
+        this.team0Power = 0;
+        this.team1Power = 0;
+
+        if(referee.getTrial() == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3){
+            if(ropePosition > 0){
+                team1TrialWins++;
+                refereeSite.updateTrialWins(1);
+                referee.setTrialResult(1);
+                refereeSite.setGameWinCause(ropePosition > 3 ? "knockout" : "points");
+
+
+            }
+            else if(ropePosition < 0){
+                team0TrialWins++;
+                refereeSite.updateTrialWins(0);
+                referee.setTrialResult(-1);
+                refereeSite.setGameWinCause(ropePosition < -3 ? "knockout" : "points");
+
+
+            }
+            else{
+                referee.setTrialResult(0);
+                refereeSite.setGameWinCause("draw");
+            }
+
+            ropePosition = 0;
+            repository.setRopePosition(ropePosition);
+
+            if(referee.getGame() == SimulationParams.GAMES){
+                referee.signalMatchEnded();
+            }
+
+            bench.setHasTrialEnded(true);
+            bench.unblockContestantBench();
+
+            return true;
+        }
 
         bench.setHasTrialEnded(true);
         bench.unblockContestantBench();
 
-        return repository.getTrial() == SimulationParams.NTRIALS;
+        return false;
     }
 
     // checks if there are 3 contestants of the team in state STANDINPOSITION
@@ -125,6 +196,7 @@ public class Playground {
         // waits for the team to be ready
         while(!checkIfTeamIsReady(coaches[coachId].getCoachTeam())){
             try {
+                GenericIO.writelnString("COACH " + coachId + " bloked INFORM");
                 wait();
             }catch (InterruptedException e){
             }
@@ -140,16 +212,13 @@ public class Playground {
     public synchronized void getReady(){
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-
-//        GenericIO.writelnString("CONTESTANT " + contestantId);
-//        for (Contestant c : contestants){
-//            try {
-//                GenericIO.writelnString("CONT " + c.getContestantId() + " STATE " + c.getContestantState() + " TEAM " + c.getContestantTeam());
-//            } catch (Exception e) {
-//                GenericIO.writelnString("Empty slot");
-//            }
-//        }
-//        GenericIO.writelnString();
+        int team = contestants[contestantId].getContestantTeam();
+        if(team == 0) {
+            team0Power += contestants[contestantId].getContestantStrength();
+        }
+        else{
+            team1Power += contestants[contestantId].getContestantStrength();
+        }
 
         // wake up the coach
         notifyAll();

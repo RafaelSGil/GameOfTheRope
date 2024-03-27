@@ -1,11 +1,14 @@
 package sharedregions;
 import entities.Contestant;
+import entities.ContestantStates;
 import entities.RefereeStates;
 import entities.data.*;
 import genclass.GenericIO;
 import genclass.TextFile;
 import main.SimulationParams;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class GeneralRepository {
@@ -21,7 +24,8 @@ public class GeneralRepository {
     private int ropePosition;
     private String fileName;
 
-    private int[][] gameRecord;
+    //private int[][] gameRecord;
+
 
     public GeneralRepository(String fileName){
         if ((fileName == null) || Objects.equals (fileName, ""))
@@ -44,40 +48,41 @@ public class GeneralRepository {
         this.trial = 0;
         this.ropePosition = 0;
 
-        this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
+        //this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
 
         reportInitialStatus();
     }
 
-    public void setGame(int game) {
+    public synchronized void setGame(int game) {
         this.game = game;
+        reportGameStatus();
     }
 
-    public int getGame() {
+    public synchronized int getGame() {
         return game;
     }
 
-    public String getGameWinMsg() {
+    public synchronized String getGameWinMsg() {
         return gameWinMsg;
     }
 
-    public void setGameWinMsg(String gameWinMsg) {
+    public synchronized void setGameWinMsg(String gameWinMsg) {
         this.gameWinMsg = gameWinMsg;
     }
 
-    public int getTrial() {
+    public synchronized int getTrial() {
         return trial;
     }
 
-    public void setTrial(int trial) {
-        this.trial = trial;
+    public synchronized void setTrial(int trial) {
+        this.trial = Math.min(trial, SimulationParams.NTRIALS);
     }
 
-    public int getRopePosition() {
+    public synchronized int getRopePosition() {
         return ropePosition;
     }
 
-    public void setRopePosition(int ropePosition) {
+    public synchronized void setRopePosition(int ropePosition) {
         this.ropePosition = ropePosition;
     }
 
@@ -99,7 +104,7 @@ public class GeneralRepository {
         reportStatus();
     }
 
-    public void updateCoach( int coachState, int coachTeam){
+    public synchronized void updateCoach( int coachState, int coachTeam){
         try{
             coaches[coachTeam].setState(coachState);
         }catch (ArrayIndexOutOfBoundsException e){
@@ -110,8 +115,8 @@ public class GeneralRepository {
         reportStatus();
     }
 
-    public void declareGameWinner(){
-        int winnerTeam;
+    public synchronized void declareGameWinner(int team, String cause){
+        /*int winnerTeam;
         int team1TrialsWon = 0;
 
         for (int i = 0; i < SimulationParams.NTRIALS; i++) {
@@ -130,26 +135,47 @@ public class GeneralRepository {
         }
         if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
             gameWinMsg = " was a draw.";
+        }*/
+        if(!cause.equals("draw")){
+            gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         }
-
-        reportStatus();
+        else{
+            gameWinMsg = " was a draw.";
+        }
+        reportGameStatus();
         gameWinMsg = "";
     }
 
-    public void declareMatchWinner(){
-        int winnerTeam;
-        int team1TrialsWon = 0;
-
-        for (int i = 0; i < SimulationParams.GAMES; i++) {
-            for (int j = 0; j < SimulationParams.NTRIALS; j++) {
-                if(gameRecord[i][j] == 0){
-                    team1TrialsWon++;
-                }
+    public synchronized String ropePositionToString() {
+        StringBuilder sb = new StringBuilder("-------"); // Use StringBuilder for efficiency
+        if (this.ropePosition > 0) {
+            if (ropePosition > 3) {
+                sb.replace(6, 7, "."); // Replace the character at index 4 with "."
+            } else {
+                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '.'
+            }
+        } else if (this.ropePosition < 0) {
+            if (ropePosition < -3) {
+                sb.replace(0, 1, "."); // Replace the character at index 0 with "."
+            } else {
+                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '-'
             }
         }
+        else {
+            sb.setCharAt(3, '.');
+        }
+        return sb.append("\t").toString();
+    }
 
-        // TODO complete with score board
-
+    /**
+     * Set the winner of the trial
+     * 0-team 1 1 - team 2 2 - draw
+     * @param
+     */
+//    public void setTrialWinner(int winner){
+//        gameRecord[game-1][trial-1] = winner;
+//    }
+    public synchronized void declareMatchWinner(String msg){
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)){
@@ -157,15 +183,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        if(team1TrialsWon > (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was won by team " + 1 + " (#-#).");
-        }
-        if (team1TrialsWon < (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was won by team " + 2 + " (#-#).");
-        }
-        if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
-            log.writelnString("Match was a draw.");
-        }
+        log.writelnString(msg);
 
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
@@ -173,7 +191,7 @@ public class GeneralRepository {
         }
     }
 
-    private void reportInitialStatus(){
+    private synchronized void reportInitialStatus(){
         TextFile log = new TextFile();
 
         if (!log.openForWriting(".", fileName)){
@@ -184,7 +202,7 @@ public class GeneralRepository {
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
         log.writelnString(printHeader());
         log.writelnString(printValues());
-        log.writelnString(printGameInfo());
+        log.writelnString();
 
         if (!log.close ())
         { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
@@ -192,7 +210,7 @@ public class GeneralRepository {
         }
     }
 
-    public void reportStatus(){
+    public synchronized void reportStatus(){
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)){
@@ -202,6 +220,22 @@ public class GeneralRepository {
 
         log.writelnString(printHeader());
         log.writelnString(printValues());
+        log.writelnString();
+
+        if (!log.close ())
+        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
+            System.exit (1);
+        }
+    }
+
+    public synchronized void reportGameStatus(){
+        TextFile log = new TextFile();
+
+        if (!log.openForAppending(".", fileName)){
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+
         log.writelnString(printGameInfo());
 
         if (!log.close ())
@@ -210,7 +244,7 @@ public class GeneralRepository {
         }
     }
 
-    private String printHeader(){
+    private synchronized String printHeader(){
         StringBuilder sb = new StringBuilder();
 
         sb.append("Ref\t");
@@ -247,7 +281,9 @@ public class GeneralRepository {
         return sb.toString();
     }
 
-    private String printValues(){
+
+
+    private synchronized String printValues(){
         StringBuilder sb = new StringBuilder();
 
         sb.append(translateRefereeStates(referee.getState())).append("\t");
@@ -270,26 +306,59 @@ public class GeneralRepository {
             }
         }
 
-        for (int i = SimulationParams.NPLAYERSINCOMPETITION; i > 0; i--) {
-            sb.append("-").append(" ");
-        }
-
-        sb.append(". ");
-
-        for (int i = 1; i <= SimulationParams.NPLAYERSINCOMPETITION; i++) {
-            sb.append("-").append(" ");
-        }
+        sb.append(getPos());
 
         sb.append("\t").append(trial).append("\t").append(ropePosition);
 
         return sb.toString();
     }
 
-    private String printGameInfo(){
+    private synchronized String getPos(){
+        ArrayList<Integer> team1 = new ArrayList<>();
+        ArrayList<Integer> team2 = new ArrayList<>();
+
+        StringBuilder sb = new StringBuilder("- - - . - - -");
+
+        for (ContestantData c : contestants){
+            if(c.getTeam() == 0){
+                team1.add(c.getState());
+                continue;
+            }
+            if(c.getTeam() == 1){
+                team2.add(c.getState());
+            }
+        }
+
+        int pos1 = 4;
+        for (int i = 0; i < team1.size(); i++){
+            if (team1.get(i) == ContestantStates.STANDINPOSITION || team1.get(i) == ContestantStates.DOYOURBEST){
+                try {
+                    sb.setCharAt(pos1, (char) ('0' + (i + 1)));
+                    pos1 = pos1-2;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        int pos2 = 8;
+        for (int i = 0; i < team2.size(); i++){
+            if (team2.get(i) == ContestantStates.STANDINPOSITION || team2.get(i) == ContestantStates.DOYOURBEST){
+                try {
+                    sb.setCharAt(pos2, (char) ('0' + (i + 1)));
+                    pos2 = pos2 + 2;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private synchronized String printGameInfo(){
         return "Game " + game + gameWinMsg + "\n";
     }
 
-    private String translateRefereeStates(int state){
+    private synchronized String translateRefereeStates(int state){
         switch (state){
             case 0:
                 return "SOM";
@@ -308,7 +377,7 @@ public class GeneralRepository {
         }
     }
 
-    private String translateCoachStates(int state){
+    private synchronized String translateCoachStates(int state){
         switch (state){
             case 0:
                 return "WFRC";
@@ -321,7 +390,7 @@ public class GeneralRepository {
         }
     }
 
-    private String translateContestantStates(int state){
+    private synchronized String translateContestantStates(int state){
         switch (state){
             case 0:
                 return "SAB";
