@@ -22,9 +22,9 @@ public class SimulationParams {
     /**
      * 😕
      */
-    public static final int MAXSTRENGTH = 6 ;
+    public static final int MAXSTRENGTH = 10 ;
     /**
      * 😕
      */
-    public static final int MINSTRENGTH = 3 ;
+    public static final int MINSTRENGTH = 5 ;
 }

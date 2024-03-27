@@ -108,6 +108,10 @@ public class Referee extends Thread {
         GenericIO.writelnString(Arrays.toString(matchRecords));
     }
 
+    public  synchronized void signalMatchEnded(){
+        refereeSite.setMatchEnd(true);
+    }
+
     @Override
     public void run() {
         waitForGameStart();

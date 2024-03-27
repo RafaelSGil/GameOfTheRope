@@ -81,16 +81,15 @@ public class RefereeSite {
     }
 
     public synchronized void declareMatchWinner(){
+        this.matchEnd = true;
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
 
         repository.declareMatchWinner(((Referee) Thread.currentThread()).finalResults());
-        // implement match end logic
 
-        GenericIO.writelnString("REFEREE SIGNALED GAME END");
+        // TODO DELETE THIS
         GenericIO.writelnString("MATCH RESULTS");
         ((Referee) Thread.currentThread()).printMatchResults();
-        this.matchEnd = true;
     }
 
     public synchronized boolean endOfMatch(){

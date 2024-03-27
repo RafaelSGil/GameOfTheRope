@@ -156,8 +156,14 @@ public class Playground {
 
             ropePosition = 0;
             repository.setRopePosition(ropePosition);
+
+            if(referee.getGame() == SimulationParams.GAMES){
+                referee.signalMatchEnded();
+            }
+
             bench.setHasTrialEnded(true);
             bench.unblockContestantBench();
+
             return true;
         }
 
@@ -190,6 +196,7 @@ public class Playground {
         // waits for the team to be ready
         while(!checkIfTeamIsReady(coaches[coachId].getCoachTeam())){
             try {
+                GenericIO.writelnString("COACH " + coachId + " bloked INFORM");
                 wait();
             }catch (InterruptedException e){
             }
@@ -212,16 +219,6 @@ public class Playground {
         else{
             team1Power += contestants[contestantId].getContestantStrength();
         }
-
-//        GenericIO.writelnString("CONTESTANT " + contestantId);
-//        for (Contestant c : contestants){
-//            try {
-//                GenericIO.writelnString("CONT " + c.getContestantId() + " STATE " + c.getContestantState() + " TEAM " + c.getContestantTeam());
-//            } catch (Exception e) {
-//                GenericIO.writelnString("Empty slot");
-//            }
-//        }
-//        GenericIO.writelnString();
 
         // wake up the coach
         notifyAll();

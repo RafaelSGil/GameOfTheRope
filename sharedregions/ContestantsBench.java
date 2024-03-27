@@ -6,6 +6,7 @@ import genclass.GenericIO;
 import main.SimulationParams;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ContestantsBench {
      * */
     private boolean hasTrialEnded;
 
-    private boolean callTrial;
+    private boolean[] callTrial;
 
 
 
@@ -60,7 +61,7 @@ public class ContestantsBench {
         this.numTrials = 0;
         this.numGames = 0;
         this.hasTrialEnded = false;
-        this.callTrial = false;
+        this.callTrial = new boolean[SimulationParams.NTEAMS];
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
@@ -72,7 +73,7 @@ public class ContestantsBench {
     }
 
     public synchronized void refereeCallTrial(int numTrials, int numGames){
-        callTrial = true;
+        Arrays.fill(callTrial, true);
         this.hasTrialEnded = false;
         this.numTrials = numTrials;
         this.numGames = numGames;
@@ -99,10 +100,10 @@ public class ContestantsBench {
     public synchronized void callContestants(int team) {
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
-        while(!callTrial || !isEveryoneSeated(team)){
+        while(!callTrial[team] || !isEveryoneSeated(team)){
             try {
+                GenericIO.writelnString("Coach " + team + " blocked CALL " + callTrial[team] + " " + isEveryoneSeated(team));
                 wait();
-                GenericIO.writelnString("Coach " + team + " blocked CALL " + callTrial + " " + isEveryoneSeated(team));
             }catch (InterruptedException e){
             }
         }
@@ -163,18 +164,16 @@ public class ContestantsBench {
         // wait for coach to choose team
         while(!playing.contains(contestantId) && !benched.contains(contestantId)){
             try{
+                GenericIO.writelnString("CONT " + contestantId + " blocked FOLLOW");
                 wait();
             }catch (InterruptedException e){
             }
         }
 
-
         if(benched.contains(contestantId)){
-            GenericIO.writelnString("Player " + contestantId + " will NOT play");
             return;
         }
 
-        GenericIO.writelnString("Player " + contestantId + " will play");
         contestants[contestantId].setPlaying(true);
         contestants[contestantId].setContestantState(ContestantStates.STANDINPOSITION);
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
@@ -201,7 +200,7 @@ public class ContestantsBench {
     }
 
     public synchronized void reviewNotes(){
-        this.callTrial = false;
+        callTrial[((Coach) Thread.currentThread()).getCoachTeam()] = false;
         while(!hasTrialEnded){
             try {
                 GenericIO.writelnString("Coach " + ((Coach) Thread.currentThread()).getCoachTeam() + " bloqued REVIEW");
