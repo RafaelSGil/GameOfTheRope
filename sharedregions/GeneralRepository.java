@@ -1,8 +1,10 @@
 package sharedregions;
 import entities.Contestant;
 import entities.ContestantStates;
+import entities.Referee;
 import entities.RefereeStates;
 import entities.data.*;
+import entities.*;
 import genclass.GenericIO;
 import genclass.TextFile;
 import main.SimulationParams;
@@ -11,22 +13,64 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * This class represents a GeneralRepository entity in the game of the rope simulation.
+ * Its purpose is to serve has a centralized data repository,
+ * which will be printing any alterations and updates to the game data to a file,
+ * in order to provide a way to check and debug the unfolding of the game
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
+
 public class GeneralRepository {
+    /**
+     * Reference to the {@link RefereeData} object
+     * which holds the data relative to the {@link Referee} object
+     */
     private RefereeData referee;
+
+    /**
+     * Array to store the references to the {@link CoachData} object
+     * which hold the data relevant to the {@link Coach} objects
+     */
     private CoachData[] coaches;
+
+    /**
+     * Array to store the references to the {@link ContestantData} object
+     * which hold the data relevant to the {@link Contestant} objects
+     */
     private ContestantData[] contestants;
+    /**
+     * Store the current game
+     */
     private int game;
 
+    /**
+     * Store the information about the winning cause of the game
+     */
     private String gameWinMsg;
 
+    /**
+     * Store the current trial
+     */
     private int trial;
 
+    /**
+     * Store the current position of the rope
+     */
     private int ropePosition;
+
+    /**
+     * Store the name of the file to which will write
+     */
     private String fileName;
 
-    //private int[][] gameRecord;
-
-
+    /**
+     * Creates a new GeneralRepository instance
+     *
+     * @param fileName name of the file to write to
+     */
     public GeneralRepository(String fileName){
         if ((fileName == null) || Objects.equals (fileName, ""))
             this.fileName = "logger";
@@ -48,49 +92,100 @@ public class GeneralRepository {
         this.trial = 0;
         this.ropePosition = 0;
 
-        //this.gameRecord = new int[SimulationParams.GAMES][SimulationParams.NTRIALS];
-
         reportInitialStatus();
     }
 
+    /**
+     * Set the new value of the attribute game
+     *
+     * @param game new value
+     */
     public synchronized void setGame(int game) {
         this.game = game;
         reportGameStatus();
     }
 
+    /**
+     * Get the value of the attribute game
+     *
+     * @return value of game
+     */
     public synchronized int getGame() {
         return game;
     }
 
+    /**
+     * Get the value of the attribute gameWinMsg
+     *
+     * @return value of gameWinMsg
+     */
     public synchronized String getGameWinMsg() {
         return gameWinMsg;
     }
 
+    /**
+     * Set the new value of the attribute gameWinMsg
+     *
+     * @param gameWinMsg new value
+     */
     public synchronized void setGameWinMsg(String gameWinMsg) {
         this.gameWinMsg = gameWinMsg;
     }
 
+    /**
+     * Get the value of the attribute trial
+     *
+     * @return value of the attribute trail
+     */
     public synchronized int getTrial() {
         return trial;
     }
 
+    /**
+     * Sets the trial count for the simulation, limiting it to the maximum number of trials defined in SimulationParams.
+     *
+     * @param trial The trial count to set.
+     */
     public synchronized void setTrial(int trial) {
         this.trial = Math.min(trial, SimulationParams.NTRIALS);
     }
 
+    /**
+     * Retrieves the current position of the rope.
+     *
+     * @return The current position of the rope.
+     */
     public synchronized int getRopePosition() {
         return ropePosition;
     }
 
+    /**
+     * Sets the position of the rope.
+     *
+     * @param ropePosition The position to set for the rope.
+     */
     public synchronized void setRopePosition(int ropePosition) {
         this.ropePosition = ropePosition;
     }
 
+    /**
+     * Updates the state of the referee and reports the status.
+     *
+     * @param refereeState The new state of the referee.
+     */
     public synchronized void updateReferee(int refereeState){
         referee.setState(refereeState);
         reportStatus();
     }
 
+    /**
+     * Updates the state, strength, and team of a contestant identified by their ID, and reports the status.
+     *
+     * @param contestantId       The ID of the contestant to update.
+     * @param contestantStrength The strength of the contestant.
+     * @param contestantState    The state of the contestant.
+     * @param contestantTeam     The team of the contestant.
+     */
     public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
         try{
             contestants[contestantId].setState(contestantState);
@@ -104,6 +199,12 @@ public class GeneralRepository {
         reportStatus();
     }
 
+    /**
+     * Updates the state of a coach and reports the status.
+     *
+     * @param coachState The new state of the coach.
+     * @param coachTeam  The team of the coach.
+     */
     public synchronized void updateCoach( int coachState, int coachTeam){
         try{
             coaches[coachTeam].setState(coachState);
@@ -115,27 +216,13 @@ public class GeneralRepository {
         reportStatus();
     }
 
+    /**
+     * Declares the winner of the game.
+     *
+     * @param team  The winning team.
+     * @param cause The cause of the win.
+     */
     public synchronized void declareGameWinner(int team, String cause){
-        /*int winnerTeam;
-        int team1TrialsWon = 0;
-
-        for (int i = 0; i < SimulationParams.NTRIALS; i++) {
-            if (gameRecord[game-1][i] == 0){
-                team1TrialsWon++;
-            }
-        }
-
-        if(team1TrialsWon > (SimulationParams.NTRIALS/2)){
-            winnerTeam = 1;
-            gameWinMsg = " was won by team " + winnerTeam + " by knock out in " + team1TrialsWon + " trials.";
-        }
-        if (team1TrialsWon < (SimulationParams.NTRIALS/2)){
-            winnerTeam = 2;
-            gameWinMsg = " was won by team " + winnerTeam + " by knock out in " + (SimulationParams.NTRIALS - team1TrialsWon) + " trials.";
-        }
-        if (team1TrialsWon == (SimulationParams.NTRIALS/2)){
-            gameWinMsg = " was a draw.";
-        }*/
         if(!cause.equals("draw")){
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         }
@@ -146,35 +233,11 @@ public class GeneralRepository {
         gameWinMsg = "";
     }
 
-    public synchronized String ropePositionToString() {
-        StringBuilder sb = new StringBuilder("-------"); // Use StringBuilder for efficiency
-        if (this.ropePosition > 0) {
-            if (ropePosition > 3) {
-                sb.replace(6, 7, "."); // Replace the character at index 4 with "."
-            } else {
-                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '.'
-            }
-        } else if (this.ropePosition < 0) {
-            if (ropePosition < -3) {
-                sb.replace(0, 1, "."); // Replace the character at index 0 with "."
-            } else {
-                sb.setCharAt(ropePosition + 3, '.'); // Set the character at adjusted position to '-'
-            }
-        }
-        else {
-            sb.setCharAt(3, '.');
-        }
-        return sb.append("\t").toString();
-    }
-
     /**
-     * Set the winner of the trial
-     * 0-team 1 1 - team 2 2 - draw
-     * @param
+     * Declares the winner of the match.
+     *
+     * @param msg The message declaring the match winner.
      */
-//    public void setTrialWinner(int winner){
-//        gameRecord[game-1][trial-1] = winner;
-//    }
     public synchronized void declareMatchWinner(String msg){
         TextFile log = new TextFile();
 
@@ -191,6 +254,9 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Reports the initial status of the game.
+     */
     private synchronized void reportInitialStatus(){
         TextFile log = new TextFile();
 
@@ -210,6 +276,9 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Reports the current status of the game.
+     */
     public synchronized void reportStatus(){
         TextFile log = new TextFile();
 
@@ -228,6 +297,9 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Reports the status of the game after its completion.
+     */
     public synchronized void reportGameStatus(){
         TextFile log = new TextFile();
 
@@ -244,6 +316,11 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Generates and returns the header for the status report.
+     *
+     * @return The header string for the status report.
+     */
     private synchronized String printHeader(){
         StringBuilder sb = new StringBuilder();
 
@@ -281,14 +358,15 @@ public class GeneralRepository {
         return sb.toString();
     }
 
-
-
+    /**
+     * Generates and returns the values for the status report.
+     *
+     * @return The values string for the status report.
+     */
     private synchronized String printValues(){
         StringBuilder sb = new StringBuilder();
 
         sb.append(translateRefereeStates(referee.getState())).append("\t");
-
-        int aux = 0;
 
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             sb.append(translateCoachStates(coaches[i].getState())).append("\t");
@@ -313,6 +391,11 @@ public class GeneralRepository {
         return sb.toString();
     }
 
+    /**
+     * Generates and returns the positions of the teams on the rope.
+     *
+     * @return The positions of the teams on the rope.
+     */
     private synchronized String getPos(){
         ArrayList<Integer> team1 = new ArrayList<>();
         ArrayList<Integer> team2 = new ArrayList<>();
@@ -354,10 +437,21 @@ public class GeneralRepository {
         return sb.toString();
     }
 
+    /**
+     * Generates and returns the game information for reporting.
+     *
+     * @return The game information string.
+     */
     private synchronized String printGameInfo(){
         return "Game " + game + gameWinMsg + "\n";
     }
 
+    /**
+     * Translates referee states to their corresponding strings.
+     *
+     * @param state The state of the referee.
+     * @return The string representation of the referee state.
+     */
     private synchronized String translateRefereeStates(int state){
         switch (state){
             case 0:
@@ -377,6 +471,12 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Translates coach states to their corresponding strings.
+     *
+     * @param state The state of the coach.
+     * @return The string representation of the coach state.
+     */
     private synchronized String translateCoachStates(int state){
         switch (state){
             case 0:
@@ -390,6 +490,12 @@ public class GeneralRepository {
         }
     }
 
+    /**
+     * Translates contestant states to their corresponding strings.
+     *
+     * @param state The state of the contestant.
+     * @return The string representation of the contestant state.
+     */
     private synchronized String translateContestantStates(int state){
         switch (state){
             case 0:

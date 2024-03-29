@@ -9,9 +9,16 @@ import sharedregions.ContestantsBench;
 import sharedregions.GeneralRepository;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
+import utils.Strategy;
 
-import static java.lang.Thread.sleep;
-
+/**
+ * This class represents the main program for the Game of the Rope simulation.
+ * It's responsible for the creation and initialization of the entities threads and the shared regions,fot th
+ * for the simulation execution and waiting for all threads to finish execution.
+ *
+ *  @author [Miguel Cabral]
+ *  @author [Rafael Gil]
+ */
 public class GameOfTheRope {
     public static void main(String[] args) {
         Contestant[] contestants = new Contestant[SimulationParams.NCONTESTANTS];       // array of contestants threads
@@ -38,13 +45,13 @@ public class GameOfTheRope {
 
         GeneralRepository repository = new GeneralRepository(fileName);
         RefereeSite refereeSite = new RefereeSite(repository);                                    // reference to the referee site
-        Playground playground = new Playground(repository,refereeSite);                                       // reference to the playground
+        Playground playground = new Playground(repository);                                       // reference to the playground
         ContestantsBench contestantsBench = new ContestantsBench(repository);          // reference to the contestants bench
 
         // referee, coach and contestants initialization
         Referee referee = new Referee("referee", refereeSite, playground, contestantsBench);   // referee thread
         for (int i = 0; i < SimulationParams.NTEAMS; ++i){
-            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 0 : 1), contestantsBench, playground, refereeSite);
+            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 0 : 1), (i % 2 == 0 ? Strategy.STRENGTH : Strategy.MODERATE),contestantsBench, playground, refereeSite);
         }
         for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
             contestants[i] = new Contestant("Cont_" + (i+1), i, (i % 2 == 0 ? 0 : 1), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
