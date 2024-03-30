@@ -6,7 +6,7 @@ package entities;
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-public class ContestantStates{
+public class ContestantStates {
     /**
      * The contestant is seated on the bench, waiting for instructions.
      */
@@ -24,6 +24,7 @@ public class ContestantStates{
     /**
      * Private constructor to prevent instantiation of this class.
      */
-    private ContestantStates(){}
+    private ContestantStates() {
+    }
 
 }

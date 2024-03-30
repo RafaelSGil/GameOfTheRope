@@ -4,8 +4,8 @@ import entities.Contestant;
 import main.SimulationParams;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * The Strategy class provides methods to determine the strategy for selecting players in the game.
@@ -20,7 +20,9 @@ public class Strategy {
      * Strategy based on having a moderation of strength on the team
      */
     public static final int MODERATE = 1;
-    private Strategy(){}
+
+    private Strategy() {
+    }
 
     /**
      * Determines and applies the specified strategy for player selection.
@@ -31,8 +33,8 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    public static void useStrategy(int strategy, int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched){
-        switch (strategy){
+    public static void useStrategy(int strategy, int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
+        switch (strategy) {
             case 0:
                 useStrength(team, contestants, playing, benched);
                 break;
@@ -50,10 +52,10 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    private static void useStrength(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched){
+    private static void useStrength(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
         ArrayList<Contestant> aux = new ArrayList<>();
 
-        for(Contestant c : contestants){
+        for (Contestant c : contestants) {
             if (c.getContestantTeam() == team) {
                 aux.add(c);
             }
@@ -77,10 +79,10 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    private static void useModerate(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched){
+    private static void useModerate(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
         ArrayList<Contestant> aux = new ArrayList<>();
 
-        for(Contestant c : contestants){
+        for (Contestant c : contestants) {
             if (c.getContestantTeam() == team) {
                 aux.add(c);
             }
@@ -88,12 +90,12 @@ public class Strategy {
 
         aux.sort(Comparator.comparingInt(Contestant::getContestantStrength).reversed());
 
-        for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION-1; i++) {
+        for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION - 1; i++) {
             playing.add(aux.get(i).getContestantId());
         }
         // Get last contestant
         playing.add(aux.get(aux.size() - 1).getContestantId());
-        for (int i = SimulationParams.NPLAYERSINCOMPETITION-1; i < SimulationParams.NPLAYERS-1; i++) {
+        for (int i = SimulationParams.NPLAYERSINCOMPETITION - 1; i < SimulationParams.NPLAYERS - 1; i++) {
             benched.add(aux.get(i).getContestantId());
         }
     }

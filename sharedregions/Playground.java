@@ -15,11 +15,11 @@ public class Playground {
     /**
      * Array of instances of the {@link Contestant} objects
      */
-    private Contestant[] contestants;
+    private final Contestant[] contestants;
     /**
      * Array of instances of the {@link Coach} objects
      */
-    private Coach[] coaches;
+    private final Coach[] coaches;
 
     /**
      * Instance of the {@link GeneralRepository} object
@@ -55,9 +55,10 @@ public class Playground {
 
     /**
      * Creates a new Playground instance with a reference to the repository
+     *
      * @param repository The {@link GeneralRepository} object representing the repository.
      */
-    public Playground(GeneralRepository repository){
+    public Playground(GeneralRepository repository) {
         this.repository = repository;
         this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
@@ -80,7 +81,7 @@ public class Playground {
      *
      * @param bench The ContestantsBench instance.
      */
-    public synchronized void callTrial(ContestantsBench bench){
+    public synchronized void callTrial(ContestantsBench bench) {
         this.referee = ((Referee) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
@@ -93,12 +94,13 @@ public class Playground {
 
     /**
      * check if the coach have already chosen their team
+     *
      * @return true if both coaches  have chosen teams, false otherwise
      */
-    private boolean haveCoachesChosenTeams(){
+    private boolean haveCoachesChosenTeams() {
         try {
-            for (Coach c : coaches){
-                if(c.getCoachState() != CoachStates.WATCHTRIAL){
+            for (Coach c : coaches) {
+                if (c.getCoachState() != CoachStates.WATCHTRIAL) {
                     return false;
                 }
             }
@@ -113,14 +115,15 @@ public class Playground {
      * Referee wait for the last coach to signal it's ready to
      * Wake up the contestants
      */
-    public synchronized void startTrial(){
+    public synchronized void startTrial() {
         trialStarted = false;
 
         // synchronize, will get waken up by the last coach
-        while(!haveCoachesChosenTeams()){
-            try{
+        while (!haveCoachesChosenTeams()) {
+            try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
@@ -135,10 +138,11 @@ public class Playground {
 
     /**
      * Check if ever playing contestant has pulled the rope
+     *
      * @return false if every contestant has pulled the rope, false otherwise
      */
-    private boolean haveContestantsPulledRope(){
-        return ropesPulled == SimulationParams.NPLAYERSINCOMPETITION*2;
+    private boolean haveContestantsPulledRope() {
+        return ropesPulled == SimulationParams.NPLAYERSINCOMPETITION * 2;
     }
 
     /**
@@ -147,23 +151,23 @@ public class Playground {
      * @param bench The ContestantsBench instance.
      * @return True if this trial has concluded the game, false otherwise.
      */
-    public synchronized boolean assertTrialDecision(ContestantsBench bench){
+    public synchronized boolean assertTrialDecision(ContestantsBench bench) {
         this.referee = ((Referee) Thread.currentThread());
 
         // synchronize, will get waken up by the last contestant
-        while(!haveContestantsPulledRope()){
-            try{
+        while (!haveContestantsPulledRope()) {
+            try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
 
-        int ropeMove = Math.abs(team0Power-team1Power);
-        if(team1Power > team0Power){                      // team 1 wins trial
+        int ropeMove = Math.abs(team0Power - team1Power);
+        if (team1Power > team0Power) {                      // team 1 wins trial
             ropePosition += ropeMove;
-        }
-        else {           //team 0 wins trial
+        } else {           //team 0 wins trial
             ropePosition -= ropeMove;
         }
 
@@ -174,20 +178,18 @@ public class Playground {
         this.team0Power = 0;
         this.team1Power = 0;
 
-        if(referee.getTrial() == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3){
-            if(ropePosition > 0){
+        if (referee.getTrial() == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3) {
+            if (ropePosition > 0) {
                 referee.setGameResult(1);
                 referee.setWinCause(ropePosition > 3 ? "knockout" : "points");
 
 
-            }
-            else if(ropePosition < 0){
+            } else if (ropePosition < 0) {
                 referee.setGameResult(-1);
                 referee.setWinCause(ropePosition < -3 ? "knockout" : "points");
 
 
-            }
-            else{
+            } else {
                 referee.setGameResult(0);
                 referee.setWinCause("draw");
             }
@@ -195,7 +197,7 @@ public class Playground {
             ropePosition = 0;
             repository.setRopePosition(ropePosition);
 
-            if(referee.getGame() == SimulationParams.GAMES){
+            if (referee.getGame() == SimulationParams.GAMES) {
                 referee.signalMatchEnded();
             }
 
@@ -213,10 +215,11 @@ public class Playground {
 
     /**
      * checks if there are 3 contestants of the team in state STANDINPOSITION
+     *
      * @param team to which team the contestants belong
      * @return true if the contestants are ready, false otherwise
      */
-    private boolean checkIfTeamIsReady(int team){
+    private boolean checkIfTeamIsReady(int team) {
         int numReadyContestants = 0;
 
         for (Contestant contestant : contestants) {
@@ -224,8 +227,7 @@ public class Playground {
                 if (contestant.getContestantState() == ContestantStates.STANDINPOSITION && contestant.getContestantTeam() == team) {
                     numReadyContestants++;
                 }
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
 
         return numReadyContestants == SimulationParams.NPLAYERSINCOMPETITION;
@@ -235,15 +237,16 @@ public class Playground {
      * Coach waits for every contestant of its team to be ready and
      * informs the referee that the team is ready.
      */
-    public synchronized void informReferee(){
+    public synchronized void informReferee() {
         int coachId = ((Coach) Thread.currentThread()).getCoachTeam();
         coaches[coachId] = ((Coach) Thread.currentThread());
 
         // waits for the team to be ready
-        while(!checkIfTeamIsReady(coaches[coachId].getCoachTeam())){
+        while (!checkIfTeamIsReady(coaches[coachId].getCoachTeam())) {
             try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
@@ -258,14 +261,13 @@ public class Playground {
      * Contestant signals it's ready for the trial,
      * calculates team power, and waits for the referee to signal the trial start.
      */
-    public synchronized void getReady(){
+    public synchronized void getReady() {
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
         int team = contestants[contestantId].getContestantTeam();
-        if(team == 0) {
+        if (team == 0) {
             team0Power += contestants[contestantId].getContestantStrength();
-        }
-        else{
+        } else {
             team1Power += contestants[contestantId].getContestantStrength();
         }
 
@@ -273,10 +275,11 @@ public class Playground {
         notifyAll();
 
         // wait for referee sign
-        while(!trialStarted){
-            try{
+        while (!trialStarted) {
+            try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
@@ -289,7 +292,7 @@ public class Playground {
     /**
      * Contestant signals that it's done pulling the rope
      */
-    public synchronized void amIDone(){
+    public synchronized void amIDone() {
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
 

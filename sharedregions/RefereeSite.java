@@ -16,7 +16,7 @@ public class RefereeSite {
     /**
      * Reference to the GeneralRepository object.
      */
-    private GeneralRepository repository;
+    private final GeneralRepository repository;
 
     /**
      * Flag that indicates the end of the match

@@ -31,7 +31,7 @@ public class ContestantData {
      *
      * @param id The unique identifier for the Contestant.
      */
-    public ContestantData(int id){
+    public ContestantData(int id) {
         this.id = id;
         this.state = ContestantStates.SEATATBENCH;
         this.team = -1;

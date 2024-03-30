@@ -1,16 +1,17 @@
 package sharedregions;
+
+import entities.Coach;
 import entities.Contestant;
 import entities.ContestantStates;
 import entities.Referee;
-import entities.RefereeStates;
-import entities.data.*;
-import entities.*;
+import entities.data.CoachData;
+import entities.data.ContestantData;
+import entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
 import main.SimulationParams;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -28,19 +29,19 @@ public class GeneralRepository {
      * Reference to the {@link RefereeData} object
      * which holds the data relative to the {@link Referee} object
      */
-    private RefereeData referee;
+    private final RefereeData referee;
 
     /**
      * Array to store the references to the {@link CoachData} object
      * which hold the data relevant to the {@link Coach} objects
      */
-    private CoachData[] coaches;
+    private final CoachData[] coaches;
 
     /**
      * Array to store the references to the {@link ContestantData} object
      * which hold the data relevant to the {@link Contestant} objects
      */
-    private ContestantData[] contestants;
+    private final ContestantData[] contestants;
     /**
      * Store the current game
      */
@@ -64,15 +65,15 @@ public class GeneralRepository {
     /**
      * Store the name of the file to which will write
      */
-    private String fileName;
+    private final String fileName;
 
     /**
      * Creates a new GeneralRepository instance
      *
      * @param fileName name of the file to write to
      */
-    public GeneralRepository(String fileName){
-        if ((fileName == null) || Objects.equals (fileName, ""))
+    public GeneralRepository(String fileName) {
+        if ((fileName == null) || Objects.equals(fileName, ""))
             this.fileName = "logger";
         else this.fileName = fileName;
 
@@ -173,7 +174,7 @@ public class GeneralRepository {
      *
      * @param refereeState The new state of the referee.
      */
-    public synchronized void updateReferee(int refereeState){
+    public synchronized void updateReferee(int refereeState) {
         referee.setState(refereeState);
         reportStatus();
     }
@@ -186,12 +187,12 @@ public class GeneralRepository {
      * @param contestantState    The state of the contestant.
      * @param contestantTeam     The team of the contestant.
      */
-    public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam){
-        try{
+    public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam) {
+        try {
             contestants[contestantId].setState(contestantState);
             contestants[contestantId].setStrength(contestantStrength);
             contestants[contestantId].setTeam(contestantTeam);
-        }catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             GenericIO.writelnString("Error while updating contestant " + contestantId);
             System.exit(1);
         }
@@ -205,14 +206,13 @@ public class GeneralRepository {
      * @param coachState The new state of the coach.
      * @param coachTeam  The team of the coach.
      */
-    public synchronized void updateCoach( int coachState, int coachTeam){
-        try{
+    public synchronized void updateCoach(int coachState, int coachTeam) {
+        try {
             coaches[coachTeam].setState(coachState);
-        }catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             GenericIO.writelnString("Error while updating coach " + coachTeam);
             System.exit(1);
         }
-
         reportStatus();
     }
 
@@ -222,11 +222,10 @@ public class GeneralRepository {
      * @param team  The winning team.
      * @param cause The cause of the win.
      */
-    public synchronized void declareGameWinner(int team, String cause){
-        if(!cause.equals("draw")){
+    public synchronized void declareGameWinner(int team, String cause) {
+        if (!cause.equals("draw")) {
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
-        }
-        else{
+        } else {
             gameWinMsg = " was a draw.";
         }
         reportGameStatus();
@@ -238,29 +237,29 @@ public class GeneralRepository {
      *
      * @param msg The message declaring the match winner.
      */
-    public synchronized void declareMatchWinner(String msg){
+    public synchronized void declareMatchWinner(String msg) {
         TextFile log = new TextFile();
 
-        if (!log.openForAppending(".", fileName)){
+        if (!log.openForAppending(".", fileName)) {
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
 
         log.writelnString(msg);
 
-        if (!log.close ())
-        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
-            System.exit (1);
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
         }
     }
 
     /**
      * Reports the initial status of the game.
      */
-    private synchronized void reportInitialStatus(){
+    private synchronized void reportInitialStatus() {
         TextFile log = new TextFile();
 
-        if (!log.openForWriting(".", fileName)){
+        if (!log.openForWriting(".", fileName)) {
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
@@ -270,19 +269,19 @@ public class GeneralRepository {
         log.writelnString(printValues());
         log.writelnString();
 
-        if (!log.close ())
-        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
-            System.exit (1);
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
         }
     }
 
     /**
      * Reports the current status of the game.
      */
-    public synchronized void reportStatus(){
+    public synchronized void reportStatus() {
         TextFile log = new TextFile();
 
-        if (!log.openForAppending(".", fileName)){
+        if (!log.openForAppending(".", fileName)) {
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
@@ -291,28 +290,28 @@ public class GeneralRepository {
         log.writelnString(printValues());
         log.writelnString();
 
-        if (!log.close ())
-        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
-            System.exit (1);
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
         }
     }
 
     /**
      * Reports the status of the game after its completion.
      */
-    public synchronized void reportGameStatus(){
+    public synchronized void reportGameStatus() {
         TextFile log = new TextFile();
 
-        if (!log.openForAppending(".", fileName)){
+        if (!log.openForAppending(".", fileName)) {
             GenericIO.writelnString("Failed creating " + fileName + " file.");
             System.exit(1);
         }
 
         log.writelnString(printGameInfo());
 
-        if (!log.close ())
-        { GenericIO.writelnString ("The operation of closing the file " + fileName + " failed!");
-            System.exit (1);
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
         }
     }
 
@@ -321,7 +320,7 @@ public class GeneralRepository {
      *
      * @return The header string for the status report.
      */
-    private synchronized String printHeader(){
+    private synchronized String printHeader() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Ref\t");
@@ -329,7 +328,7 @@ public class GeneralRepository {
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             sb.append("Coa ").append(i + 1).append("\t");
             for (int j = 0; j < SimulationParams.NPLAYERS; j++) {
-                sb.append("Cont ").append(j+1).append("\t");
+                sb.append("Cont ").append(j + 1).append("\t");
             }
         }
 
@@ -363,7 +362,7 @@ public class GeneralRepository {
      *
      * @return The values string for the status report.
      */
-    private synchronized String printValues(){
+    private synchronized String printValues() {
         StringBuilder sb = new StringBuilder();
 
         sb.append(translateRefereeStates(referee.getState())).append("\t");
@@ -371,13 +370,13 @@ public class GeneralRepository {
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             sb.append(translateCoachStates(coaches[i].getState())).append("\t");
             for (int j = 0; j < SimulationParams.NCONTESTANTS; j++) {
-                if (contestants[j].getTeam() == -1){
+                if (contestants[j].getTeam() == -1) {
                     sb.append("## ##\t");
-                    if(j == SimulationParams.NPLAYERS - 1) break;
+                    if (j == SimulationParams.NPLAYERS - 1) break;
                     continue;
                 }
 
-                if(contestants[j].getTeam() == coaches[i].getTeam()){
+                if (contestants[j].getTeam() == coaches[i].getTeam()) {
                     sb.append(translateContestantStates(contestants[j].getState())).append("\t")
                             .append(contestants[j].getStrength()).append("\t");
                 }
@@ -396,36 +395,36 @@ public class GeneralRepository {
      *
      * @return The positions of the teams on the rope.
      */
-    private synchronized String getPos(){
+    private synchronized String getPos() {
         ArrayList<Integer> team1 = new ArrayList<>();
         ArrayList<Integer> team2 = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder("- - - . - - -");
 
-        for (ContestantData c : contestants){
-            if(c.getTeam() == 0){
+        for (ContestantData c : contestants) {
+            if (c.getTeam() == 0) {
                 team1.add(c.getState());
                 continue;
             }
-            if(c.getTeam() == 1){
+            if (c.getTeam() == 1) {
                 team2.add(c.getState());
             }
         }
 
         int pos1 = 4;
-        for (int i = 0; i < team1.size(); i++){
-            if (team1.get(i) == ContestantStates.STANDINPOSITION || team1.get(i) == ContestantStates.DOYOURBEST){
+        for (int i = 0; i < team1.size(); i++) {
+            if (team1.get(i) == ContestantStates.STANDINPOSITION || team1.get(i) == ContestantStates.DOYOURBEST) {
                 try {
                     sb.setCharAt(pos1, (char) ('0' + (i + 1)));
-                    pos1 = pos1-2;
+                    pos1 = pos1 - 2;
                 } catch (Exception ignored) {
                 }
             }
         }
 
         int pos2 = 8;
-        for (int i = 0; i < team2.size(); i++){
-            if (team2.get(i) == ContestantStates.STANDINPOSITION || team2.get(i) == ContestantStates.DOYOURBEST){
+        for (int i = 0; i < team2.size(); i++) {
+            if (team2.get(i) == ContestantStates.STANDINPOSITION || team2.get(i) == ContestantStates.DOYOURBEST) {
                 try {
                     sb.setCharAt(pos2, (char) ('0' + (i + 1)));
                     pos2 = pos2 + 2;
@@ -442,7 +441,7 @@ public class GeneralRepository {
      *
      * @return The game information string.
      */
-    private synchronized String printGameInfo(){
+    private synchronized String printGameInfo() {
         return "Game " + game + gameWinMsg + "\n";
     }
 
@@ -452,8 +451,8 @@ public class GeneralRepository {
      * @param state The state of the referee.
      * @return The string representation of the referee state.
      */
-    private synchronized String translateRefereeStates(int state){
-        switch (state){
+    private synchronized String translateRefereeStates(int state) {
+        switch (state) {
             case 0:
                 return "SOM";
             case 1:
@@ -477,8 +476,8 @@ public class GeneralRepository {
      * @param state The state of the coach.
      * @return The string representation of the coach state.
      */
-    private synchronized String translateCoachStates(int state){
-        switch (state){
+    private synchronized String translateCoachStates(int state) {
+        switch (state) {
             case 0:
                 return "WFRC";
             case 1:
@@ -496,8 +495,8 @@ public class GeneralRepository {
      * @param state The state of the contestant.
      * @return The string representation of the contestant state.
      */
-    private synchronized String translateContestantStates(int state){
-        switch (state){
+    private synchronized String translateContestantStates(int state) {
+        switch (state) {
             case 0:
                 return "SAB";
             case 1:

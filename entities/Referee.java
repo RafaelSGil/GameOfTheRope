@@ -1,9 +1,9 @@
 package entities;
+
 import main.SimulationParams;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
-import java.util.Arrays;
 
 
 /**
@@ -55,22 +55,21 @@ public class Referee extends Thread {
      * Stores the results for each trial of each game
      * 3 rows --> 3 games
      * 6 columns --> 6 trials
-     *
      * -1 --> team 1 won
      * 0 --> draw
      * 1 --> team 2 won
      */
-    private int[] matchRecords;
+    private final int[] matchRecords;
 
     /**
      * Creates a new Referee instance
      *
-     * @param threadName The name to be assigned to the referee thread.
+     * @param threadName  The name to be assigned to the referee thread.
      * @param refereeSite The {@link RefereeSite} object
-     * @param playground The {@link Playground} object
-     * @param bench The {@link ContestantsBench} object
+     * @param playground  The {@link Playground} object
+     * @param bench       The {@link ContestantsBench} object
      */
-    public Referee(String threadName, RefereeSite refereeSite, Playground playground, ContestantsBench bench){
+    public Referee(String threadName, RefereeSite refereeSite, Playground playground, ContestantsBench bench) {
         super(threadName);
         this.playground = playground;
         this.refereeSite = refereeSite;
@@ -140,15 +139,15 @@ public class Referee extends Thread {
      *
      * @param result The result of the trial.
      */
-    public synchronized void setGameResult(int result){
-        this.matchRecords[game-1] = result;
+    public synchronized void setGameResult(int result) {
+        this.matchRecords[game - 1] = result;
     }
 
     /**
      * Gets the reason provided for a team's victory in the current game.
      *
      * @return The reason provided for a team's victory in the current game.
-    */
+     */
 
     public String getWinCause() {
         return winCause;
@@ -170,7 +169,7 @@ public class Referee extends Thread {
      * @return The result of the specified game.
      */
 
-    public synchronized int getGameResult(int game){
+    public synchronized int getGameResult(int game) {
         return matchRecords[game];
     }
 
@@ -179,12 +178,12 @@ public class Referee extends Thread {
      *
      * @return A string describing the final match results.
      */
-    public synchronized String finalResults(){
+    public synchronized String finalResults() {
         int team1 = 0;
         int team2 = 0;
 
         for (int i = 0; i < SimulationParams.GAMES; i++) {
-            switch (getGameResult(i)){
+            switch (getGameResult(i)) {
                 case -1:
                     team1++;
                     break;
@@ -198,11 +197,11 @@ public class Referee extends Thread {
 
         StringBuilder sb = new StringBuilder();
 
-        if(team1 == team2){
+        if (team1 == team2) {
             return "Match was a draw";
-        }else if(team1 > team2){
+        } else if (team1 > team2) {
             sb.append("Match was won by team " + 1);
-        }else {
+        } else {
             sb.append("Match was won by team " + 2);
         }
 
@@ -214,34 +213,35 @@ public class Referee extends Thread {
     /**
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
-    public  synchronized void signalMatchEnded(){
+    public synchronized void signalMatchEnded() {
         refereeSite.setMatchEnd(true);
     }
 
     /**
-     *  The main execution loop of the Referee thread.
+     * The main execution loop of the Referee thread.
      */
     @Override
     public void run() {
         waitForGameStart();
-        for(int i = 0; i < SimulationParams.GAMES; ++i){
+        for (int i = 0; i < SimulationParams.GAMES; ++i) {
             refereeSite.announceNewGame();
             do {
                 playground.callTrial(bench);
                 playground.startTrial();
-            }while(!playground.assertTrialDecision(bench));
+            } while (!playground.assertTrialDecision(bench));
             refereeSite.declareGameWinner();
         }
         refereeSite.declareMatchWinner();
     }
 
     /**
-    * Introduces a simulated delay before the match begins.
-    */
-    private void waitForGameStart(){
-        try
-        { sleep ((long) (1 + 50 * Math.random ()));
+     * Introduces a simulated delay before the match begins.
+     */
+    private void waitForGameStart() {
+        try {
+            sleep((long) (1 + 50 * Math.random()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        catch (InterruptedException e) {}
     }
 }

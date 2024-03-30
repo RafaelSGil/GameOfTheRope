@@ -3,8 +3,8 @@ package main;
 /**
  * This class defines constants representing various parameters used in the Game of the Rope simulation.
  *
- *  @author [Miguel Cabral]
- *  @author [Rafael Gil]
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class SimulationParams {
 
@@ -26,12 +26,12 @@ public class SimulationParams {
     /**
      * The number of players per team
      */
-    public static final int NPLAYERS = NCONTESTANTS/2;
+    public static final int NPLAYERS = NCONTESTANTS / 2;
 
     /**
      * The number of players actively pulling the rope in each trial.
      */
-    public static final int NPLAYERSINCOMPETITION = (NPLAYERS/2) +1;
+    public static final int NPLAYERSINCOMPETITION = (NPLAYERS / 2) + 1;
 
     /**
      * The number of games played in the entire match.
@@ -41,10 +41,10 @@ public class SimulationParams {
     /**
      * The maximum possible strength value for a contestant.
      */
-    public static final int MAXSTRENGTH = 10 ;
+    public static final int MAXSTRENGTH = 10;
 
     /**
      * The minimum possible strength value for a contestant.
      */
-    public static final int MINSTRENGTH = 5 ;
+    public static final int MINSTRENGTH = 5;
 }

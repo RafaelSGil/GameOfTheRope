@@ -1,7 +1,10 @@
 package sharedregions;
 
 
-import entities.*;
+import entities.Coach;
+import entities.CoachStates;
+import entities.Contestant;
+import entities.ContestantStates;
 import main.SimulationParams;
 import utils.Strategy;
 
@@ -41,17 +44,18 @@ public class ContestantsBench {
 
     /**
      * Checks if trial has ended
-     * */
+     */
     private boolean hasTrialEnded;
 
     /**
      * conditional flags for coaches
      */
-    private boolean[] callTrial;
+    private final boolean[] callTrial;
 
 
     /**
      * Creates a new ContestantsBench instance with a reference to the repository
+     *
      * @param repository The {@link GeneralRepository} object representing the repository.
      */
     public ContestantsBench(GeneralRepository repository) {
@@ -67,9 +71,9 @@ public class ContestantsBench {
     }
 
     /**
-     *  Signal the coaches and contestants to wake up
+     * Signal the coaches and contestants to wake up
      */
-    public synchronized void unblockContestantBench(){
+    public synchronized void unblockContestantBench() {
         notifyAll();
     }
 
@@ -77,7 +81,7 @@ public class ContestantsBench {
      * start of new trial iteration
      * wake up the coaches
      */
-    public synchronized void refereeCallTrial(){
+    public synchronized void refereeCallTrial() {
         Arrays.fill(callTrial, true);
         this.hasTrialEnded = false;
         unblockContestantBench();
@@ -85,6 +89,7 @@ public class ContestantsBench {
 
     /**
      * Sets the value of attribute hasTrialEnded
+     *
      * @param hasTrialEnded new value for the attribute
      */
     public synchronized void setHasTrialEnded(boolean hasTrialEnded) {
@@ -97,14 +102,15 @@ public class ContestantsBench {
      * @param team team to which the contestants belong
      * @return true if every contestant of the team is ready to be picked
      */
-    private boolean isEveryoneSeated(int team){
+    private boolean isEveryoneSeated(int team) {
         int contSeated = 0;
-        for (Contestant c : contestants){
+        for (Contestant c : contestants) {
             try {
-                if(c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH){
+                if (c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH) {
                     contSeated++;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return contSeated == SimulationParams.NPLAYERS;
@@ -120,10 +126,11 @@ public class ContestantsBench {
     public synchronized void callContestants(int team) {
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
-        while(!callTrial[team] || !isEveryoneSeated(team)){
+        while (!callTrial[team] || !isEveryoneSeated(team)) {
             try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
@@ -147,7 +154,7 @@ public class ContestantsBench {
      * checking whether they were chosen to play or not,
      * acting accordingly
      */
-    public synchronized void followCoachAdvice(){
+    public synchronized void followCoachAdvice() {
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
@@ -155,14 +162,15 @@ public class ContestantsBench {
                 contestants[contestantId].getContestantTeam());
 
         // wait for coach to choose team
-        while(!playing.contains(contestantId) && !benched.contains(contestantId)){
-            try{
+        while (!playing.contains(contestantId) && !benched.contains(contestantId)) {
+            try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
-        if(benched.contains(contestantId)){
+        if (benched.contains(contestantId)) {
             return;
         }
 
@@ -176,13 +184,14 @@ public class ContestantsBench {
     /**
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
-    public synchronized void seatDown(){
+    public synchronized void seatDown() {
         int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((Contestant) Thread.currentThread());
-        while(!hasTrialEnded){
-            try{
+        while (!hasTrialEnded) {
+            try {
                 wait();
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
@@ -197,9 +206,9 @@ public class ContestantsBench {
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
-    public synchronized void reviewNotes(){
+    public synchronized void reviewNotes() {
         callTrial[((Coach) Thread.currentThread()).getCoachTeam()] = false;
-        while(!hasTrialEnded){
+        while (!hasTrialEnded) {
             try {
                 wait();
             } catch (InterruptedException e) {

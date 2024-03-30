@@ -4,6 +4,7 @@ import main.SimulationParams;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
+
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
  * Each contestant belongs to a team and has a specific strength level.
@@ -13,7 +14,7 @@ import sharedregions.RefereeSite;
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-public class Contestant extends Thread{
+public class Contestant extends Thread {
     /**
      * Internal state of the contestant
      * Possible states are defined in {@link ContestantStates}
@@ -59,15 +60,15 @@ public class Contestant extends Thread{
     /**
      * Creates a new Contestant instance
      *
-     * @param threadName The name to be assigned to the contestant thread.
+     * @param threadName   The name to be assigned to the contestant thread.
      * @param contestantId The unique identifier for the contestant.
-     * @param team The team that the contestant belongs to (0 or 1).
-     * @param strength The initial strength level of the contestant.
-     * @param bench The {@link ContestantsBench} object representing the team's bench.
-     * @param playground The {@link Playground} object representing the playground area.
-     * @param refereeSite The {@link RefereeSite} object representing the referee's post.
+     * @param team         The team that the contestant belongs to (0 or 1).
+     * @param strength     The initial strength level of the contestant.
+     * @param bench        The {@link ContestantsBench} object representing the team's bench.
+     * @param playground   The {@link Playground} object representing the playground area.
+     * @param refereeSite  The {@link RefereeSite} object representing the referee's post.
      */
-    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite) {
         super(threadName);
         this.bench = bench;
         this.contestantState = ContestantStates.SEATATBENCH;
@@ -78,14 +79,16 @@ public class Contestant extends Thread{
         this.refereeSite = refereeSite;
         this.isPlaying = false;
     }
+
     /**
      * Gets the current state of the contestant.
      *
      * @return The current contestant state as defined in {@link ContestantStates}.
      */
-    public synchronized int getContestantState(){
+    public synchronized int getContestantState() {
         return contestantState;
     }
+
     /**
      * Sets the internal state of the contestant.
      *
@@ -94,14 +97,16 @@ public class Contestant extends Thread{
     public synchronized void setContestantState(int contestantState) {
         this.contestantState = contestantState;
     }
+
     /**
      * Gets the team that the contestant belongs to.
      *
      * @return The team number (0 or 1).
      */
-    public synchronized int getContestantTeam(){
+    public synchronized int getContestantTeam() {
         return contestantTeam;
     }
+
     /**
      * Sets the team that the contestant belongs to.
      *
@@ -162,8 +167,8 @@ public class Contestant extends Thread{
      * The contestant keeps iterating until the end of the match is signaled by the referee.
      */
     @Override
-    public void run(){
-        while(!refereeSite.endOfMatch()){
+    public void run() {
+        while (!refereeSite.endOfMatch()) {
             bench.followCoachAdvice();
             if (isPlaying) {
                 playground.getReady();
@@ -180,19 +185,21 @@ public class Contestant extends Thread{
      *
      * @return The randomly generated strength level.
      */
-    public static int GenerateRandomStrength(){
+    public static int GenerateRandomStrength() {
         return (int) (SimulationParams.MINSTRENGTH + Math.random() * (SimulationParams.MAXSTRENGTH - SimulationParams.MINSTRENGTH));
     }
 
     /**
      * Simulates the contestant pulling the rope for a random time between 1 and 100 milliseconds.
      */
-    private void pullTheRope(){
-        try
-        { sleep ((long) (1 + 100 * Math.random ()));
+    private void pullTheRope() {
+        try {
+            sleep((long) (1 + 100 * Math.random()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        catch (InterruptedException e) {}
     }
+
     /**
      * Adjusts the contestant's strength based on their playing state.
      * If playing, strength decreases by 1 (up to a minimum of {@link SimulationParams#MINSTRENGTH}).

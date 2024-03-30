@@ -24,5 +24,6 @@ public class CoachStates {
     /**
      * Private constructor to prevent instantiation of this class.
      */
-    private CoachStates(){}
+    private CoachStates() {
+    }
 }

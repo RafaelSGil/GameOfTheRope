@@ -3,6 +3,7 @@ package entities;
 import sharedregions.ContestantsBench;
 import sharedregions.Playground;
 import sharedregions.RefereeSite;
+
 /**
  * This class represents a Coach entity in the game of the rope simulation.
  * Each coach is associated with a specific team and is responsible for
@@ -48,13 +49,13 @@ public class Coach extends Thread {
     /**
      * Creates a new Coach instance with the specified name, team, and references to shared regions.
      *
-     * @param threadName The name to be assigned to the coach thread.
-     * @param team The team that the coach belongs to (0 or 1).
-     * @param bench The {@link ContestantsBench} object representing the team's bench.
-     * @param playground The {@link Playground} object representing the playground area.
+     * @param threadName  The name to be assigned to the coach thread.
+     * @param team        The team that the coach belongs to (0 or 1).
+     * @param bench       The {@link ContestantsBench} object representing the team's bench.
+     * @param playground  The {@link Playground} object representing the playground area.
      * @param refereeSite The {@link RefereeSite} object representing the referee's post.
      */
-    public Coach(String threadName, int team, int strategy, ContestantsBench bench, Playground playground, RefereeSite refereeSite){
+    public Coach(String threadName, int team, int strategy, ContestantsBench bench, Playground playground, RefereeSite refereeSite) {
         super(threadName);
         this.coachState = CoachStates.WATFORREFEREECOMMAND;
         this.team = team;
@@ -69,7 +70,7 @@ public class Coach extends Thread {
      *
      * @return The current coach state as defined in {@link CoachStates}.
      */
-    public synchronized int getCoachState(){
+    public synchronized int getCoachState() {
         return this.coachState;
     }
 
@@ -82,6 +83,7 @@ public class Coach extends Thread {
     public synchronized void setCoachState(int coachState) {
         this.coachState = coachState;
     }
+
     /**
      * Gets the team that the coach belongs to.
      *
@@ -93,6 +95,7 @@ public class Coach extends Thread {
 
     /**
      * Get the strategy
+     *
      * @return strategy value
      */
     public int getStrategy() {
@@ -101,6 +104,7 @@ public class Coach extends Thread {
 
     /**
      * Set the new strategy
+     *
      * @param strategy the new strategy
      */
     public void setStrategy(int strategy) {
@@ -113,10 +117,9 @@ public class Coach extends Thread {
      */
 
 
-
     @Override
-    public void run(){
-        while(!refereeSite.endOfMatch()){
+    public void run() {
+        while (!refereeSite.endOfMatch()) {
             bench.callContestants(team);
             playground.informReferee();
             bench.reviewNotes();

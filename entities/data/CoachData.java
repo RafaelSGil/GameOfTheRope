@@ -24,7 +24,7 @@ public class CoachData {
      *
      * @param team The team number for the Coach.
      */
-    public CoachData(int team){
+    public CoachData(int team) {
         this.team = team;
     }
 

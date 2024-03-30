@@ -19,7 +19,7 @@ public class RefereeData {
     /**
      * Creates a new RefereeData instance.
      */
-    public RefereeData(){
+    public RefereeData() {
         this.state = RefereeStates.STARTMATCH;
     }
 

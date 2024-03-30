@@ -16,8 +16,8 @@ import utils.Strategy;
  * It's responsible for the creation and initialization of the entities threads and the shared regions,fot th
  * for the simulation execution and waiting for all threads to finish execution.
  *
- *  @author [Miguel Cabral]
- *  @author [Rafael Gil]
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class GameOfTheRope {
     public static void main(String[] args) {
@@ -30,17 +30,16 @@ public class GameOfTheRope {
         // problem initialization
 
         System.out.println("\tGame of the Rope");
-        do
-        { GenericIO.writeString ("Logging file name? ");
-            fileName = GenericIO.readlnString ();
-            if (FileOp.exists (".", fileName))
-            { do
-            { GenericIO.writeString ("There is already a file with this name. Delete it (y - yes; n - no)? ");
-                opt = GenericIO.readlnChar ();
-            } while ((opt != 'y') && (opt != 'n'));
+        do {
+            GenericIO.writeString("Logging file name? ");
+            fileName = GenericIO.readlnString();
+            if (FileOp.exists(".", fileName)) {
+                do {
+                    GenericIO.writeString("There is already a file with this name. Delete it (y - yes; n - no)? ");
+                    opt = GenericIO.readlnChar();
+                } while ((opt != 'y') && (opt != 'n'));
                 success = opt == 'y';
-            }
-            else success = true;
+            } else success = true;
         } while (!success);
 
         GeneralRepository repository = new GeneralRepository(fileName);
@@ -50,40 +49,50 @@ public class GameOfTheRope {
 
         // referee, coach and contestants initialization
         Referee referee = new Referee("referee", refereeSite, playground, contestantsBench);   // referee thread
-        for (int i = 0; i < SimulationParams.NTEAMS; ++i){
-            coaches[i] = new Coach("Coa" + (i+1), (i % 2 == 0 ? 0 : 1), (i % 2 == 0 ? Strategy.STRENGTH : Strategy.MODERATE),contestantsBench, playground, refereeSite);
+        for (int i = 0; i < SimulationParams.NTEAMS; ++i) {
+            coaches[i] = new Coach("Coa" + (i + 1), (i % 2 == 0 ? 0 : 1), (i % 2 == 0 ? Strategy.STRENGTH : Strategy.MODERATE), contestantsBench, playground, refereeSite);
         }
-        for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
-            contestants[i] = new Contestant("Cont_" + (i+1), i, (i % 2 == 0 ? 0 : 1), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i) {
+            contestants[i] = new Contestant("Cont_" + (i + 1), i, (i % 2 == 0 ? 0 : 1), Contestant.GenerateRandomStrength(), contestantsBench, playground, refereeSite);
         }
 
         // start of the simulation
-        for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i){
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i) {
+            GenericIO.writelnString("The contestant " + (i) + " has started");
+
             contestants[i].start();
         }
-        for (int i = 0; i < SimulationParams.NTEAMS; ++i){
+        for (int i = 0; i < SimulationParams.NTEAMS; ++i) {
+            GenericIO.writelnString("The coach " + (i + 1) + " has started");
             coaches[i].start();
         }
         referee.start();
+        GenericIO.writelnString("The referee has started");
 
         // wait for the end of the simulation
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
-            try{
+            try {
                 contestants[i].join();
-            }catch (InterruptedException e){}
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             GenericIO.writelnString("The contestant " + (i) + " has terminated");
         }
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            try{
+            try {
                 coaches[i].join();
-            }catch (InterruptedException e){}
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            GenericIO.writelnString("The coach " + (i+1) + " has terminated");
+            GenericIO.writelnString("The coach " + (i + 1) + " has terminated");
         }
-        try{
+        try {
             referee.join();
-        }catch (InterruptedException e){}
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         GenericIO.writelnString("The referee has terminated");
         GenericIO.writelnString("The program will terminate...");
     }
