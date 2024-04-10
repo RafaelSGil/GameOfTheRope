@@ -1,6 +1,6 @@
-package entities.data;
+package assignment1.entities.data;
 
-import entities.RefereeStates;
+import assignment1.entities.RefereeStates;
 
 /**
  * This class encapsulates data related to the Referee entity in the Game of the Rope simulation.

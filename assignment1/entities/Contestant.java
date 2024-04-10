@@ -1,9 +1,9 @@
-package entities;
+package assignment1.entities;
 
-import main.SimulationParams;
-import sharedregions.ContestantsBench;
-import sharedregions.Playground;
-import sharedregions.RefereeSite;
+import assignment1.main.SimulationParams;
+import assignment1.sharedregions.ContestantsBench;
+import assignment1.sharedregions.Playground;
+import assignment1.sharedregions.RefereeSite;
 
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
@@ -207,9 +207,9 @@ public class Contestant extends Thread {
      */
     public synchronized void manageStrength() {
         if (isPlaying) {
-            contestantStrength = Math.max(contestantStrength - 1, SimulationParams.MINSTRENGTH);
+            contestantStrength = contestantStrength - 1;
         } else {
-            contestantStrength = Math.min(contestantStrength + 1, SimulationParams.MAXSTRENGTH);
+            contestantStrength = contestantStrength + 1;
         }
     }
 

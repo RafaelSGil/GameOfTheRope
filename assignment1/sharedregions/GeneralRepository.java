@@ -1,15 +1,15 @@
-package sharedregions;
+package assignment1.sharedregions;
 
-import entities.Coach;
-import entities.Contestant;
-import entities.ContestantStates;
-import entities.Referee;
-import entities.data.CoachData;
-import entities.data.ContestantData;
-import entities.data.RefereeData;
+import assignment1.entities.Coach;
+import assignment1.entities.Contestant;
+import assignment1.entities.ContestantStates;
+import assignment1.entities.Referee;
+import assignment1.entities.data.CoachData;
+import assignment1.entities.data.ContestantData;
+import assignment1.entities.data.RefereeData;
+import assignment1.main.SimulationParams;
 import genclass.GenericIO;
 import genclass.TextFile;
-import main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -103,7 +103,6 @@ public class GeneralRepository {
      */
     public synchronized void setGame(int game) {
         this.game = game;
-        reportGameStatus();
     }
 
     /**
@@ -176,7 +175,6 @@ public class GeneralRepository {
      */
     public synchronized void updateReferee(int refereeState) {
         referee.setState(refereeState);
-        reportStatus();
     }
 
     /**
@@ -196,8 +194,6 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating contestant " + contestantId);
             System.exit(1);
         }
-
-        reportStatus();
     }
 
     /**
@@ -213,7 +209,6 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating coach " + coachTeam);
             System.exit(1);
         }
-        reportStatus();
     }
 
     /**
@@ -228,8 +223,6 @@ public class GeneralRepository {
         } else {
             gameWinMsg = " was a draw.";
         }
-        reportGameStatus();
-        gameWinMsg = "";
     }
 
     /**
@@ -265,8 +258,6 @@ public class GeneralRepository {
         }
 
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
-        log.writelnString(printHeader());
-        log.writelnString(printValues());
         log.writelnString();
 
         if (!log.close()) {
@@ -288,7 +279,6 @@ public class GeneralRepository {
 
         log.writelnString(printHeader());
         log.writelnString(printValues());
-        log.writelnString();
 
         if (!log.close()) {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
@@ -313,6 +303,8 @@ public class GeneralRepository {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
             System.exit(1);
         }
+
+        gameWinMsg = "";
     }
 
     /**
@@ -442,7 +434,7 @@ public class GeneralRepository {
      * @return The game information string.
      */
     private synchronized String printGameInfo() {
-        return "Game " + game + gameWinMsg + "\n";
+        return "Game " + game + gameWinMsg;
     }
 
     /**

@@ -1,7 +1,7 @@
-package sharedregions;
+package assignment1.sharedregions;
 
-import entities.*;
-import main.SimulationParams;
+import assignment1.entities.*;
+import assignment1.main.SimulationParams;
 
 
 /**
@@ -82,11 +82,14 @@ public class Playground {
      * @param bench The ContestantsBench instance.
      */
     public synchronized void callTrial(ContestantsBench bench) {
+
         this.referee = ((Referee) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        repository.reportStatus();
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
+        repository.reportStatus();
 
         // will wake up the coaches
         bench.refereeCallTrial();
@@ -129,7 +132,7 @@ public class Playground {
 
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        repository.setRopePosition(ropePosition);
+        repository.reportStatus();
 
         trialStarted = true;
         // wake up contestants
@@ -172,6 +175,7 @@ public class Playground {
         }
 
         repository.setRopePosition(ropePosition);
+        repository.reportStatus();
 
         // reset counters
         this.ropesPulled = 0;
@@ -195,7 +199,6 @@ public class Playground {
             }
 
             ropePosition = 0;
-            repository.setRopePosition(ropePosition);
 
             if (referee.getGame() == SimulationParams.GAMES) {
                 referee.signalMatchEnded();
@@ -252,6 +255,7 @@ public class Playground {
 
         coaches[coachId].setCoachState(CoachStates.WATCHTRIAL);
         repository.updateCoach(coaches[coachId].getCoachState(), coachId);
+        repository.reportStatus();
 
         // alerts the referee that its team is ready
         notifyAll();
@@ -287,6 +291,7 @@ public class Playground {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
+        repository.reportStatus();
     }
 
     /**

@@ -1,7 +1,7 @@
-package utils;
+package assignment1.utils;
 
-import entities.Contestant;
-import main.SimulationParams;
+import assignment1.entities.Contestant;
+import assignment1.main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Comparator;

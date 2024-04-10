@@ -1,7 +1,7 @@
-package sharedregions;
+package assignment1.sharedregions;
 
-import entities.Referee;
-import entities.RefereeStates;
+import assignment1.entities.Referee;
+import assignment1.entities.RefereeStates;
 
 /**
  * This class represents the RefereeSite shared region in the Game of the Rope simulation.
@@ -42,9 +42,13 @@ public class RefereeSite {
         ((Referee) Thread.currentThread()).setTrial(0);
         repository.setTrial(0);
         repository.setGame(((Referee) Thread.currentThread()).getGame());
+
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+
+        repository.reportStatus();
+        repository.reportGameStatus();
     }
 
     /**
@@ -66,6 +70,9 @@ public class RefereeSite {
                 repository.declareGameWinner(2, ((Referee) Thread.currentThread()).getWinCause());
                 break;
         }
+
+        repository.reportGameStatus();
+        repository.setRopePosition(0);
     }
 
     /**

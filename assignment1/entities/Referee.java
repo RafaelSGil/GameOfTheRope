@@ -1,9 +1,9 @@
-package entities;
+package assignment1.entities;
 
-import main.SimulationParams;
-import sharedregions.ContestantsBench;
-import sharedregions.Playground;
-import sharedregions.RefereeSite;
+import assignment1.main.SimulationParams;
+import assignment1.sharedregions.ContestantsBench;
+import assignment1.sharedregions.Playground;
+import assignment1.sharedregions.RefereeSite;
 
 
 /**
@@ -229,6 +229,7 @@ public class Referee extends Thread {
                 playground.callTrial(bench);
                 playground.startTrial();
             } while (!playground.assertTrialDecision(bench));
+            waitForGameStart();
             refereeSite.declareGameWinner();
         }
         refereeSite.declareMatchWinner();
