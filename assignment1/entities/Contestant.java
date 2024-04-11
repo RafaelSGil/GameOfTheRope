@@ -1,9 +1,9 @@
-package assignment1.entities;
+package entities;
 
-import assignment1.main.SimulationParams;
-import assignment1.sharedregions.ContestantsBench;
-import assignment1.sharedregions.Playground;
-import assignment1.sharedregions.RefereeSite;
+import main.SimulationParams;
+import sharedregions.ContestantsBench;
+import sharedregions.Playground;
+import sharedregions.RefereeSite;
 
 /**
  * This class represents a Contestant entity in the game of the rope simulation.

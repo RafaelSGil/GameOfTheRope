@@ -1,13 +1,8 @@
-package assignment1.sharedregions;
+package sharedregions;
 
-import assignment1.entities.Coach;
-import assignment1.entities.Contestant;
-import assignment1.entities.ContestantStates;
-import assignment1.entities.Referee;
-import assignment1.entities.data.CoachData;
-import assignment1.entities.data.ContestantData;
-import assignment1.entities.data.RefereeData;
-import assignment1.main.SimulationParams;
+import entities.*;
+import entities.data.*;
+import main.SimulationParams;
 import genclass.GenericIO;
 import genclass.TextFile;
 
@@ -259,6 +254,8 @@ public class GeneralRepository {
 
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
         log.writelnString();
+        log.writelnString(printHeader());
+        log.writelnString(printValues());
 
         if (!log.close()) {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
@@ -269,7 +266,7 @@ public class GeneralRepository {
     /**
      * Reports the current status of the game.
      */
-    public synchronized void reportStatus() {
+    public synchronized void reportStatus(boolean header) {
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)) {
@@ -277,7 +274,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        log.writelnString(printHeader());
+        if (header) log.writelnString(printHeader());
         log.writelnString(printValues());
 
         if (!log.close()) {
@@ -298,6 +295,27 @@ public class GeneralRepository {
         }
 
         log.writelnString(printGameInfo());
+
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
+        }
+
+        gameWinMsg = "";
+    }
+
+    /**
+     * Reports the status of the game start.
+     */
+    public synchronized void reportGameStart() {
+        TextFile log = new TextFile();
+
+        if (!log.openForAppending(".", fileName)) {
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+
+        log.writelnString("Game " + game);
 
         if (!log.close()) {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
@@ -377,7 +395,8 @@ public class GeneralRepository {
 
         sb.append(getPos());
 
-        sb.append("\t").append(trial).append("\t").append(ropePosition);
+        sb.append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : trial)
+                .append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : ropePosition);
 
         return sb.toString();
     }

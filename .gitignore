@@ -32,3 +32,6 @@ out
 
 #idea directory
 .idea
+
+#iml
+GameOfTheRope.iml

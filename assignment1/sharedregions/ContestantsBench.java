@@ -1,12 +1,9 @@
-package assignment1.sharedregions;
+package sharedregions;
 
 
-import assignment1.entities.Coach;
-import assignment1.entities.CoachStates;
-import assignment1.entities.Contestant;
-import assignment1.entities.ContestantStates;
-import assignment1.main.SimulationParams;
-import assignment1.utils.Strategy;
+import entities.*;
+import main.SimulationParams;
+import utils.Strategy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,7 +139,7 @@ public class ContestantsBench {
 
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
-        repository.reportStatus();
+        repository.reportStatus(false);
         // wake up contestants
         notifyAll();
     }
@@ -179,7 +176,7 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-        repository.reportStatus();
+        repository.reportStatus(false);
     }
 
     /**
@@ -205,7 +202,7 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-        repository.reportStatus();
+        repository.reportStatus(false);
     }
 
     /**
@@ -223,6 +220,6 @@ public class ContestantsBench {
 
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
-        repository.reportStatus();
+        repository.reportStatus(false);
     }
 }

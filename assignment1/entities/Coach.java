@@ -1,8 +1,8 @@
-package assignment1.entities;
+package entities;
 
-import assignment1.sharedregions.ContestantsBench;
-import assignment1.sharedregions.Playground;
-import assignment1.sharedregions.RefereeSite;
+import sharedregions.ContestantsBench;
+import sharedregions.Playground;
+import sharedregions.RefereeSite;
 
 /**
  * This class represents a Coach entity in the game of the rope simulation.

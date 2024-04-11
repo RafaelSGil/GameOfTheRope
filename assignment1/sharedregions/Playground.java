@@ -1,7 +1,7 @@
-package assignment1.sharedregions;
+package sharedregions;
 
-import assignment1.entities.*;
-import assignment1.main.SimulationParams;
+import entities.*;
+import main.SimulationParams;
 
 
 /**
@@ -86,10 +86,9 @@ public class Playground {
         this.referee = ((Referee) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        repository.reportStatus();
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
-        repository.reportStatus();
+        repository.reportStatus(false);
 
         // will wake up the coaches
         bench.refereeCallTrial();
@@ -132,7 +131,7 @@ public class Playground {
 
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        repository.reportStatus();
+        repository.reportStatus(false);
 
         trialStarted = true;
         // wake up contestants
@@ -175,7 +174,7 @@ public class Playground {
         }
 
         repository.setRopePosition(ropePosition);
-        repository.reportStatus();
+        repository.reportStatus(false);
 
         // reset counters
         this.ropesPulled = 0;
@@ -255,7 +254,7 @@ public class Playground {
 
         coaches[coachId].setCoachState(CoachStates.WATCHTRIAL);
         repository.updateCoach(coaches[coachId].getCoachState(), coachId);
-        repository.reportStatus();
+        repository.reportStatus(false);
 
         // alerts the referee that its team is ready
         notifyAll();
@@ -291,7 +290,7 @@ public class Playground {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-        repository.reportStatus();
+        repository.reportStatus(false);
     }
 
     /**

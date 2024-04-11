@@ -1,15 +1,10 @@
-package assignment1.main;
+package main;
 
-import assignment1.entities.Coach;
-import assignment1.entities.Contestant;
-import assignment1.entities.Referee;
+import entities.*;
 import genclass.FileOp;
 import genclass.GenericIO;
-import assignment1.sharedregions.ContestantsBench;
-import assignment1.sharedregions.GeneralRepository;
-import assignment1.sharedregions.Playground;
-import assignment1.sharedregions.RefereeSite;
-import assignment1.utils.Strategy;
+import sharedregions.*;
+import utils.Strategy;
 
 /**
  * This class represents the main program for the Game of the Rope simulation.

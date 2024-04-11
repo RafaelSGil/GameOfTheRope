@@ -1,6 +1,6 @@
-package assignment1.entities.data;
+package entities.data;
 
-import assignment1.entities.ContestantStates;
+import entities.ContestantStates;
 
 /**
  * This class encapsulates data related to a Contestant entity in the Game of the Rope simulation.

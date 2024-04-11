@@ -1,4 +1,4 @@
-package assignment1.entities;
+package entities;
 
 /**
  * This class defines the possible states that a {@link Coach} can be in during the game of the rope simulation.
