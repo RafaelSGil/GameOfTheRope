@@ -1,10 +1,15 @@
-package sharedregions;
+package serverSide.sharedRegions;
 
-import entities.*;
-import entities.data.*;
-import main.SimulationParams;
+import entities.Coach;
+import entities.Contestant;
+import entities.ContestantStates;
+import entities.Referee;
+import entities.data.CoachData;
+import entities.data.ContestantData;
+import entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
+import main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -98,6 +103,7 @@ public class GeneralRepository {
      */
     public synchronized void setGame(int game) {
         this.game = game;
+        reportGameStatus();
     }
 
     /**
@@ -170,6 +176,7 @@ public class GeneralRepository {
      */
     public synchronized void updateReferee(int refereeState) {
         referee.setState(refereeState);
+        reportStatus();
     }
 
     /**
@@ -189,6 +196,8 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating contestant " + contestantId);
             System.exit(1);
         }
+
+        reportStatus();
     }
 
     /**
@@ -204,6 +213,7 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating coach " + coachTeam);
             System.exit(1);
         }
+        reportStatus();
     }
 
     /**
@@ -218,6 +228,8 @@ public class GeneralRepository {
         } else {
             gameWinMsg = " was a draw.";
         }
+        reportGameStatus();
+        gameWinMsg = "";
     }
 
     /**
@@ -253,9 +265,9 @@ public class GeneralRepository {
         }
 
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
-        log.writelnString();
         log.writelnString(printHeader());
         log.writelnString(printValues());
+        log.writelnString();
 
         if (!log.close()) {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
@@ -266,7 +278,7 @@ public class GeneralRepository {
     /**
      * Reports the current status of the game.
      */
-    public synchronized void reportStatus(boolean header) {
+    public synchronized void reportStatus() {
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)) {
@@ -274,7 +286,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        if (header) log.writelnString(printHeader());
+        log.writelnString(printHeader());
         log.writelnString(printValues());
 
         if (!log.close()) {
@@ -300,29 +312,6 @@ public class GeneralRepository {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
             System.exit(1);
         }
-
-        gameWinMsg = "";
-    }
-
-    /**
-     * Reports the status of the game start.
-     */
-    public synchronized void reportGameStart() {
-        TextFile log = new TextFile();
-
-        if (!log.openForAppending(".", fileName)) {
-            GenericIO.writelnString("Failed creating " + fileName + " file.");
-            System.exit(1);
-        }
-
-        log.writelnString("Game " + game);
-
-        if (!log.close()) {
-            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
-            System.exit(1);
-        }
-
-        gameWinMsg = "";
     }
 
     /**
@@ -395,8 +384,7 @@ public class GeneralRepository {
 
         sb.append(getPos());
 
-        sb.append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : trial)
-                .append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : ropePosition);
+        sb.append("\t").append(trial).append("\t").append(ropePosition);
 
         return sb.toString();
     }
@@ -452,13 +440,8 @@ public class GeneralRepository {
      *
      * @return The game information string.
      */
-<<<<<<< Updated upstream:assignment1/sharedregions/GeneralRepository.java
-    private synchronized String printGameInfo() {
-        return "Game " + game + gameWinMsg;
-=======
     private String printGameInfo() {
         return "Game " + game + gameWinMsg ;
->>>>>>> Stashed changes:sharedregions/GeneralRepository.java
     }
 
     /**

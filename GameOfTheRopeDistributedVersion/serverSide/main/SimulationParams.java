@@ -1,4 +1,4 @@
-package main;
+package serverSide.main;
 
 /**
  * This class defines constants representing various parameters used in the Game of the Rope simulation.

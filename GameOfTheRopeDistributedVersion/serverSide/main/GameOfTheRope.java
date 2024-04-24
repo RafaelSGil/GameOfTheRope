@@ -1,9 +1,14 @@
-package main;
+package serverSide.main;
 
-import entities.*;
+import entities.Coach;
+import entities.Contestant;
+import entities.Referee;
 import genclass.FileOp;
 import genclass.GenericIO;
-import sharedregions.*;
+import sharedregions.ContestantsBench;
+import sharedregions.GeneralRepository;
+import sharedregions.Playground;
+import sharedregions.RefereeSite;
 import utils.Strategy;
 
 /**

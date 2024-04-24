@@ -1,10 +1,9 @@
-package entities;
+package clientSide.entities;
 
-import main.SimulationParams;
-import sharedregions.ContestantsBench;
-import sharedregions.Playground;
-import sharedregions.RefereeSite;
-
+import clientSide.stubs.ContestantsBenchStub;
+import clientSide.stubs.PlaygroundStub;
+import clientSide.stubs.RefereeSiteStub;
+import
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
  * Each contestant belongs to a team and has a specific strength level.
@@ -38,20 +37,20 @@ public class Contestant extends Thread {
     private final int contestantId;
 
     /**
-     * Reference to the {@link ContestantsBench} object representing the bench where the contestant sits.
+     * Reference to the {@link ContestantsBenchStub} object representing the bench where the contestant sits.
      */
-    private final ContestantsBench bench;
+    private final ContestantsBenchStub bench;
 
     /**
-     * Reference to the {@link Playground} object representing the playground area.
+     * Reference to the {@link PlaygroundStub} object representing the playground area.
      */
-    private final Playground playground;
+    private final PlaygroundStub playground;
 
     /**
-     * Reference to the {@link RefereeSite} object representing the referee's post.
+     * Reference to the {@link RefereeSiteStub} object representing the referee's post.
      * The contestant receives instructions and signals the referee through the referee site.
      */
-    private final RefereeSite refereeSite;
+    private final RefereeSiteStub refereeSite;
     /**
      * Indicates whether the contestant is currently participating in a trial.
      */
@@ -64,11 +63,11 @@ public class Contestant extends Thread {
      * @param contestantId The unique identifier for the contestant.
      * @param team         The team that the contestant belongs to (0 or 1).
      * @param strength     The initial strength level of the contestant.
-     * @param bench        The {@link ContestantsBench} object representing the team's bench.
-     * @param playground   The {@link Playground} object representing the playground area.
-     * @param refereeSite  The {@link RefereeSite} object representing the referee's post.
+     * @param bench        The {@link ContestantsBenchStub} object representing the team's bench.
+     * @param playground   The {@link PlaygroundStub} object representing the playground area.
+     * @param refereeSite  The {@link RefereeSiteStub} object representing the referee's post.
      */
-    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBench bench, Playground playground, RefereeSite refereeSite) {
+    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBenchStub bench, PlaygroundStub playground, RefereeSiteStub refereeSite) {
         super(threadName);
         this.bench = bench;
         this.contestantState = ContestantStates.SEATATBENCH;
@@ -119,7 +118,7 @@ public class Contestant extends Thread {
     /**
      * Gets the current strength level of the contestant.
      *
-     * @return The contestant's strength as an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
+     * @return The contestant's strength as an integer between {@link serverSide.main.SimulationParams#MINSTRENGTH} and {@link serverSide.main.SimulationParams#MAXSTRENGTH}.
      */
 
     public synchronized int getContestantStrength() {
@@ -129,7 +128,7 @@ public class Contestant extends Thread {
     /**
      * Sets the strength level of the contestant.
      *
-     * @param contestantStrength The contestant's strength as an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
+     * @param contestantStrength The contestant's strength as an integer between {@link serverSide.main.SimulationParams#MINSTRENGTH} and {@link serverSide.main.SimulationParams#MAXSTRENGTH}.
      */
     public synchronized void setContestantStrength(int contestantStrength) {
         this.contestantStrength = contestantStrength;
@@ -180,7 +179,7 @@ public class Contestant extends Thread {
     }
 
     /**
-     * Generates a random integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}
+     * Generates a random integer between {@link serverSide.main.SimulationParams#MINSTRENGTH} and {@link serverSide.main.SimulationParams#MAXSTRENGTH}
      * to represent the initial strength of a contestant.
      *
      * @return The randomly generated strength level.
@@ -202,19 +201,13 @@ public class Contestant extends Thread {
 
     /**
      * Adjusts the contestant's strength based on their playing state.
-     * If playing, strength decreases by 1 (up to a minimum of {@link SimulationParams#MINSTRENGTH}).
-     * If not playing, strength increases by 1 (up to a maximum of {@link SimulationParams#MAXSTRENGTH}).
+     * If playing, strength decreases by 1 (up to a minimum of {@link serverSide.main.SimulationParams#MINSTRENGTH}).
+     * If not playing, strength increases by 1 (up to a maximum of {@link serverSide.main.SimulationParams#MAXSTRENGTH}).
      */
     public synchronized void manageStrength() {
-<<<<<<< Updated upstream:assignment1/entities/Contestant.java
-        if (isPlaying) {
-            contestantStrength = contestantStrength - 1;
-        } else {
-=======
         if (isPlaying && contestantStrength > 0) {
             contestantStrength = contestantStrength - 1;
         } else if(!isPlaying && contestantStrength >0){
->>>>>>> Stashed changes:entities/Contestant.java
             contestantStrength = contestantStrength + 1;
         }
     }

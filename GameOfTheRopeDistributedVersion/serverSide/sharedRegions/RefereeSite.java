@@ -1,4 +1,4 @@
-package sharedregions;
+package serverSide.sharedRegions;
 
 import entities.Referee;
 import entities.RefereeStates;
@@ -33,6 +33,8 @@ public class RefereeSite {
         this.matchEnd = false;
     }
 
+
+
     /**
      * Announces the start of a new game to all entities.
      * Updates the game number, trial number, and referee state in the repository.
@@ -42,13 +44,9 @@ public class RefereeSite {
         ((Referee) Thread.currentThread()).setTrial(0);
         repository.setTrial(0);
         repository.setGame(((Referee) Thread.currentThread()).getGame());
-
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-
-        repository.reportGameStart();
-        repository.reportStatus(true);
     }
 
     /**
@@ -70,10 +68,6 @@ public class RefereeSite {
                 repository.declareGameWinner(2, ((Referee) Thread.currentThread()).getWinCause());
                 break;
         }
-
-        repository.reportStatus(false);
-        repository.reportGameStatus();
-        repository.setRopePosition(0);
     }
 
     /**
@@ -84,11 +78,6 @@ public class RefereeSite {
         this.matchEnd = true;
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-<<<<<<< Updated upstream:assignment1/sharedregions/RefereeSite.java
-
-        repository.reportStatus(false);
-=======
->>>>>>> Stashed changes:sharedregions/RefereeSite.java
         repository.declareMatchWinner(((Referee) Thread.currentThread()).finalResults());
     }
 

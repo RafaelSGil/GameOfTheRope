@@ -1,9 +1,13 @@
-package sharedregions;
+package serverSide.sharedRegions;
 
 
-import entities.*;
+import entities.Coach;
+import entities.CoachStates;
+import entities.Contestant;
+import entities.ContestantStates;
 import main.SimulationParams;
 import utils.Strategy;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -138,7 +142,7 @@ public class ContestantsBench {
 
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
-        repository.reportStatus(false);
+
         // wake up contestants
         notifyAll();
     }
@@ -155,7 +159,6 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-
 
         // wait for coach to choose team
         while (!playing.contains(contestantId) && !benched.contains(contestantId)) {
@@ -175,7 +178,6 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-        repository.reportStatus(false);
     }
 
     /**
@@ -201,10 +203,6 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-<<<<<<< Updated upstream:assignment1/sharedregions/ContestantsBench.java
-        repository.reportStatus(false);
-=======
->>>>>>> Stashed changes:sharedregions/ContestantsBench.java
     }
 
     /**
@@ -222,6 +220,5 @@ public class ContestantsBench {
 
         ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
-        repository.reportStatus(false);
     }
 }
