@@ -1,9 +1,8 @@
-package clientSide.entities;
+package GameOfTheRopeDistributedVersion.clientSide.entities;
 
 import clientSide.stubs.ContestantsBenchStub;
 import clientSide.stubs.PlaygroundStub;
 import clientSide.stubs.RefereeSiteStub;
-import
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
  * Each contestant belongs to a team and has a specific strength level.

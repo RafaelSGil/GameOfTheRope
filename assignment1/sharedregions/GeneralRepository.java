@@ -452,13 +452,8 @@ public class GeneralRepository {
      *
      * @return The game information string.
      */
-<<<<<<< Updated upstream:assignment1/sharedregions/GeneralRepository.java
     private synchronized String printGameInfo() {
         return "Game " + game + gameWinMsg;
-=======
-    private String printGameInfo() {
-        return "Game " + game + gameWinMsg ;
->>>>>>> Stashed changes:sharedregions/GeneralRepository.java
     }
 
     /**

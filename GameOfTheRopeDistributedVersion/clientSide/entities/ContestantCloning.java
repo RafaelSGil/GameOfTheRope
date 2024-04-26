@@ -1,4 +1,4 @@
-package clientSide.entities;
+package GameOfTheRopeDistributedVersion.clientSide.entities;
 
 public interface ContestantCloning {
     /**
@@ -20,9 +20,7 @@ public interface ContestantCloning {
      *
      * @return The team number (0 or 1).
      */
-    public int getContestantTeam() {
-        return contestantTeam;
-    }
+    public int getContestantTeam();
 
     /**
      * Sets the team that the contestant belongs to.

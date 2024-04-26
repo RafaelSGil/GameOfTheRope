@@ -1,4 +1,4 @@
-package clientSide.entities;
+package GameOfTheRopeDistributedVersion.clientSide.entities;
 
 import clientSide.stubs.ContestantsBenchStub;
 import clientSide.stubs.PlaygroundStub;

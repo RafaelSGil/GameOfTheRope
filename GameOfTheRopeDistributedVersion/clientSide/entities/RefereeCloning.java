@@ -1,4 +1,4 @@
-package clientSide.entities;
+package GameOfTheRopeDistributedVersion.clientSide.entities;
 
 public interface RefereeCloning {
 

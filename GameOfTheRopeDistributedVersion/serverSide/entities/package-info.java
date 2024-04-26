@@ -1,1 +1,1 @@
-package serverSide.entities;
+package GameOfTheRopeDistributedVersion.serverSide.entities;
