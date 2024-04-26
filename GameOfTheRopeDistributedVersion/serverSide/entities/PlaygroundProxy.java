@@ -2,8 +2,10 @@ package serverSide.entities;
 
 
 import clientSide.entities.*;
+import commInfra.ServerCom;
 import genclass.GenericIO;
 import serverSide.main.SimulationParams;
+import serverSide.sharedRegions.PlaygroundInterface;
 import serverSide.sharedRegions.RefereeSite;
 
 
@@ -20,6 +22,18 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      *
      *     @return instantiation identifier
      */
+
+    /**
+     *  Communication channel.
+     */
+
+    private ServerCom sconi;
+
+    /**
+     * Interface for the playground
+     *
+     */
+    private PlaygroundInterface playgroundInterface;
 
     private static int getProxyId ()
     {
@@ -39,6 +53,12 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
             nProxy += 1;
         }
         return proxyId;
+    }
+
+    public PlaygroundProxy(ServerCom sconi, PlaygroundInterface playgroundInterface){
+        super("PlaygroundProxy_" + PlaygroundProxy.getProxyId());
+        this.sconi = sconi;
+        this.playgroundInterface = playgroundInterface;
     }
 
     @Override

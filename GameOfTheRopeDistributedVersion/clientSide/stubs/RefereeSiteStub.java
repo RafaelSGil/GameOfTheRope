@@ -19,16 +19,16 @@ public class RefereeSiteStub {
      *  Name of the platform where is located the barber shop server.
      */
 
-    private String serverHostName;
+    private final String serverHostName;
 
     /**
      *  Port number for listening to service requests.
      */
 
-    private int serverPortNumb;
+    private final int serverPortNumb;
 
     /**
-     *   Instantiation of a stub to the barber shop.
+     *   Instantiation of a stub to the referee site.
      *
      *     @param serverHostName name of the platform where is located the barber shop server
      *     @param serverPortNumb port number for listening to service requests
@@ -72,7 +72,7 @@ public class RefereeSiteStub {
             System.exit (1);
         }
         if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
-            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid customer state!");
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid referee state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }

@@ -24,7 +24,34 @@ public class RefereeSiteProxy extends Thread implements CoachCloning, Contestant
      */
     private RefereeSiteInterface refereeSiteInterface;
 
+    /**
+     *  Number of instantiated threads.
+     */
+
+    private static int nProxy = 0;
+
+    private static int getProxyId ()
+    {
+        Class<?> cl = null;                                            // representation of the BarberShopClientProxy object in JVM
+        int proxyId;                                                   // instantiation identifier
+
+        try
+        { cl = Class.forName ("serverSide.entities.BarberShopClientProxy");
+        }
+        catch (ClassNotFoundException e)
+        { GenericIO.writelnString ("Data type BarberShopClientProxy was not found!");
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        synchronized (cl)
+        { proxyId = nProxy;
+            nProxy += 1;
+        }
+        return proxyId;
+    }
+
     public RefereeSiteProxy(ServerCom sconi, RefereeSiteInterface refereeSiteInterface) {
+        super("PlaygroundProxy_" + RefereeSiteProxy.getProxyId());
         this.sconi = sconi;
         this.refereeSiteInterface = refereeSiteInterface;
     }
