@@ -1,6 +1,6 @@
-package entities.data;
+package clientSide.entities.data;
 
-import entities.ContestantStates;
+import clientSide.entities.ContestantStates;
 
 /**
  * This class encapsulates data related to a Contestant entity in the Game of the Rope simulation.

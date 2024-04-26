@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.serverSide.sharedRegions;
+package serverSide.sharedRegions;
 
 public class ContestantBenchInterface {
 }

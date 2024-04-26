@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.commInfra;
+package commInfra;
 
 import genclass.GenericIO;
 import java.io.*;

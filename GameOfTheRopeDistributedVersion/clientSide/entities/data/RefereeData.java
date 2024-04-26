@@ -1,6 +1,6 @@
-package entities.data;
+package clientSide.entities.data;
 
-import entities.RefereeStates;
+import clientSide.entities.RefereeStates;
 
 /**
  * This class encapsulates data related to the Referee entity in the Game of the Rope simulation.

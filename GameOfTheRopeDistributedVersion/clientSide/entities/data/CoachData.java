@@ -1,4 +1,4 @@
-package entities.data;
+package clientSide.entities.data;
 
 /**
  * This class encapsulates data related to a Coach entity in the Game of the Rope simulation.

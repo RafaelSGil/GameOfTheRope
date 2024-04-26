@@ -1,9 +1,11 @@
-package GameOfTheRopeDistributedVersion.serverSide.sharedRegions;
+package serverSide.sharedRegions;
 
-import GameOfTheRopeDistributedVersion.commInfra.Message;
-import GameOfTheRopeDistributedVersion.commInfra.MessageException;
-import GameOfTheRopeDistributedVersion.commInfra.MessageType;
-import sharedregions.RefereeSite;
+
+import clientSide.entities.RefereeStates;
+import commInfra.Message;
+import commInfra.MessageException;
+import commInfra.MessageType;
+import serverSide.entities.RefereeSiteProxy;
 
 public class RefereeSiteInterface {
     /**
@@ -35,10 +37,39 @@ public class RefereeSiteInterface {
         /* validation of the incoming message */
         switch (inMessage.getMsgType ()){
             case MessageType.SETANG:
+                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) || (inMessage.getRefereeState() != RefereeStates.ENDGAME)){
+                    throw new MessageException("Invalid referee state!", inMessage);
+                }
                 break;
             case MessageType.SETDGW:
+                if(inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION){
+                    throw new MessageException("Invalid referee state!", inMessage);
+                }
                 break;
             case MessageType.SETDMW:
+                if(inMessage.getRefereeState() != RefereeStates.ENDGAME){
+                    throw new MessageException("Invalid referee state!", inMessage);
+                }
+                break;
+        }
+
+        /* processing */
+
+        switch (inMessage.getMsgType ()){
+            case MessageType.SETANG:
+                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                refereeSite.announceNewGame();
+                outMessage = new Message(MessageType.ANGDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                break;
+            case MessageType.SETDGW:
+                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                refereeSite.declareGameWinner();
+                outMessage = new Message(MessageType.DGWDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                break;
+            case MessageType.SETDMW:
+                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                refereeSite.declareMatchWinner();
+                outMessage = new Message(MessageType.DMWDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
                 break;
         }
 

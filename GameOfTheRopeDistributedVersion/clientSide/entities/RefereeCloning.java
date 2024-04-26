@@ -1,4 +1,7 @@
-package GameOfTheRopeDistributedVersion.clientSide.entities;
+package clientSide.entities;
+
+import serverSide.main.SimulationParams;
+import serverSide.sharedRegions.RefereeSite;
 
 public interface RefereeCloning {
 

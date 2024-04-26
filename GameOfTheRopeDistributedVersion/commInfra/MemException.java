@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.commInfra;
+package commInfra;
 
 /**
  *    Memory exception.

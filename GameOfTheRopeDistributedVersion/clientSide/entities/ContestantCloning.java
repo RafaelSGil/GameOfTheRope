@@ -1,4 +1,6 @@
-package GameOfTheRopeDistributedVersion.clientSide.entities;
+package clientSide.entities;
+
+import serverSide.main.SimulationParams;
 
 public interface ContestantCloning {
     /**

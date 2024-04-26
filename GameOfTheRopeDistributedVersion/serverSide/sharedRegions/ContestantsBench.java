@@ -1,12 +1,13 @@
 package serverSide.sharedRegions;
 
 
-import entities.Coach;
-import entities.CoachStates;
-import entities.Contestant;
-import entities.ContestantStates;
-import main.SimulationParams;
-import utils.Strategy;
+
+
+import clientSide.entities.CoachStates;
+import clientSide.entities.ContestantStates;
+import serverSide.entities.ContestantBenchProxy;
+import serverSide.main.SimulationParams;
+import serverSide.utils.Strategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,7 @@ public class ContestantsBench {
     /**
      * Array to store all Contestants
      */
-    private final Contestant[] contestants;
+    private final ContestantBenchProxy[] contestants;
 
     /**
      * List to store Playing players
@@ -64,7 +65,7 @@ public class ContestantsBench {
         this.repository = repository;
         this.hasTrialEnded = false;
         this.callTrial = new boolean[SimulationParams.NTEAMS];
-        this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
+        this.contestants = new ContestantBenchProxy[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
         }
@@ -104,7 +105,7 @@ public class ContestantsBench {
      */
     private boolean isEveryoneSeated(int team) {
         int contSeated = 0;
-        for (Contestant c : contestants) {
+        for (ContestantBenchProxy c : contestants) {
             try {
                 if (c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH) {
                     contSeated++;
@@ -134,14 +135,14 @@ public class ContestantsBench {
             }
         }
 
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        repository.updateCoach(((ContestantBenchProxy) Thread.currentThread()).getCoachState(), ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam());
 
         //choose the players
-        Strategy.useStrategy(((Coach) Thread.currentThread()).getStrategy(), ((Coach) Thread.currentThread()).getCoachTeam(), contestants, playing, benched);
+        Strategy.useStrategy(((ContestantBenchProxy) Thread.currentThread()).getStrategy(), ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam(), contestants, playing, benched);
 
 
-        ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        ((ContestantBenchProxy) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
+        repository.updateCoach(((ContestantBenchProxy) Thread.currentThread()).getCoachState(), ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam());
 
         // wake up contestants
         notifyAll();
@@ -154,8 +155,8 @@ public class ContestantsBench {
      * acting accordingly
      */
     public synchronized void followCoachAdvice() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
@@ -184,8 +185,8 @@ public class ContestantsBench {
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
     public synchronized void seatDown() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
         while (!hasTrialEnded) {
             try {
                 wait();
@@ -209,7 +210,7 @@ public class ContestantsBench {
      * Coaches will wait until the referee signals the end of the trial
      */
     public synchronized void reviewNotes() {
-        callTrial[((Coach) Thread.currentThread()).getCoachTeam()] = false;
+        callTrial[((ContestantBenchProxy) Thread.currentThread()).getCoachTeam()] = false;
         while (!hasTrialEnded) {
             try {
                 wait();
@@ -218,7 +219,7 @@ public class ContestantsBench {
             }
         }
 
-        ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        ((ContestantBenchProxy) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
+        repository.updateCoach(((ContestantBenchProxy) Thread.currentThread()).getCoachState(), ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam());
     }
 }

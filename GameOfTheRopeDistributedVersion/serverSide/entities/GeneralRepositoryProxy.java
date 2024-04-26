@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.serverSide.entities;
+package serverSide.entities;
 
 public class GeneralRepositoryProxy {
 }

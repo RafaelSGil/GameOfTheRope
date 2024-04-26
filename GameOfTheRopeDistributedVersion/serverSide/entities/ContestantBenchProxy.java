@@ -1,6 +1,6 @@
-package GameOfTheRopeDistributedVersion.serverSide.entities;
+package serverSide.entities;
 
-import GameOfTheRopeDistributedVersion.clientSide.entities.*;
+import clientSide.entities.*;
 public class ContestantBenchProxy extends Thread implements CoachCloning, ContestantCloning {
     @Override
     public int getCoachState() {

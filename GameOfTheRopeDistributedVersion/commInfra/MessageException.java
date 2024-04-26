@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.commInfra;
+package commInfra;
 
 /**
  *    Message exception.

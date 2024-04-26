@@ -1,15 +1,7 @@
 package serverSide.sharedRegions;
 
-import entities.Coach;
-import entities.Contestant;
-import entities.ContestantStates;
-import entities.Referee;
-import entities.data.CoachData;
-import entities.data.ContestantData;
-import entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
-import main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Objects;

@@ -1,7 +1,9 @@
 package serverSide.sharedRegions;
 
-import entities.Referee;
-import entities.RefereeStates;
+
+import clientSide.entities.RefereeStates;
+import clientSide.stubs.GeneralRepositoryStub;
+import serverSide.entities.RefereeSiteProxy;
 
 /**
  * This class represents the RefereeSite shared region in the Game of the Rope simulation.
@@ -16,7 +18,7 @@ public class RefereeSite {
     /**
      * Reference to the GeneralRepository object.
      */
-    private final GeneralRepository repository;
+    private final GeneralRepositoryStub repository;
 
     /**
      * Flag that indicates the end of the match
@@ -28,7 +30,7 @@ public class RefereeSite {
      *
      * @param repository The reference to the GeneralRepository object.
      */
-    public RefereeSite(GeneralRepository repository){
+    public RefereeSite(GeneralRepositoryStub repository){
         this.repository = repository;
         this.matchEnd = false;
     }
@@ -40,13 +42,13 @@ public class RefereeSite {
      * Updates the game number, trial number, and referee state in the repository.
      */
     public synchronized void announceNewGame(){
-        ((Referee) Thread.currentThread()).setGame(((Referee) Thread.currentThread()).getGame() + 1);
-        ((Referee) Thread.currentThread()).setTrial(0);
+        ((RefereeSiteProxy) Thread.currentThread()).setGame(((RefereeSiteProxy) Thread.currentThread()).getGame() + 1);
+        ((RefereeSiteProxy) Thread.currentThread()).setTrial(0);
         repository.setTrial(0);
-        repository.setGame(((Referee) Thread.currentThread()).getGame());
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        repository.setGame(((RefereeSiteProxy) Thread.currentThread()).getGame());
+        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
+        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
     }
 
     /**
@@ -54,18 +56,18 @@ public class RefereeSite {
      * Updates the referee state.
      */
     public synchronized void declareGameWinner(){
-        ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
+        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
 
-        switch (((Referee) Thread.currentThread()).getGameResult(((Referee) Thread.currentThread()).getGame() - 1)){
+        switch (((RefereeSiteProxy) Thread.currentThread()).getGameResult(((RefereeSiteProxy) Thread.currentThread()).getGame() - 1)){
             case -1:
-                repository.declareGameWinner(0, ((Referee) Thread.currentThread()).getWinCause());
+                repository.declareGameWinner(0, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
                 break;
             case 1:
-                repository.declareGameWinner(1, ((Referee) Thread.currentThread()).getWinCause());
+                repository.declareGameWinner(1, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
                 break;
             case 0:
-                repository.declareGameWinner(2, ((Referee) Thread.currentThread()).getWinCause());
+                repository.declareGameWinner(2, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
                 break;
         }
     }
@@ -76,9 +78,9 @@ public class RefereeSite {
      */
     public synchronized void declareMatchWinner(){
         this.matchEnd = true;
-        ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-        repository.declareMatchWinner(((Referee) Thread.currentThread()).finalResults());
+        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
+        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+        repository.declareMatchWinner(((RefereeSiteProxy) Thread.currentThread()).finalResults());
     }
 
     /**

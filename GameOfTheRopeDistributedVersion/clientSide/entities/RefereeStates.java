@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.clientSide.entities;
+package clientSide.entities;
 
 /**
  * This class defines the possible states that the {@link Referee} can be in during the game of the rope simulation

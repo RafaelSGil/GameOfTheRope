@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.commInfra;
+package commInfra;
 
 import java.io.*;
 import genclass.GenericIO;
@@ -25,31 +25,36 @@ public class Message implements Serializable
     private int msgType = -1;
 
     /**
-     *  Barber identification.
+     * Referee state
      */
-
-    private int barbId = -1;
+    private int refereeState = -1;
 
     /**
-     *  Barber state.
+     *  Coach identification.
      */
 
-    private int barbState = -1;
+    private int coachId = -1;
 
     /**
-     *  Customer identification.
+     *  Coach state.
      */
 
-    private int custId = -1;
+    private int coachState = -1;
 
     /**
-     *  Customer state.
+     *  Contestant identification.
      */
 
-    private int custState = -1;
+    private int contestantId = -1;
 
     /**
-     *  End of operations (barber).
+     *  Contestant state.
+     */
+
+    private int contestantState = -1;
+
+    /**
+     *  End of operations (referee).
      */
 
     private boolean endOp = false;
@@ -59,12 +64,6 @@ public class Message implements Serializable
      */
 
     private String fName = null;
-
-    /**
-     *  Number of iterations of the customer life cycle.
-     */
-
-    private int nIter = -1;
 
     /**
      *  Message instantiation (form 1).
@@ -81,21 +80,25 @@ public class Message implements Serializable
      *  Message instantiation (form 2).
      *
      *     @param type message type
-     *     @param id barber / customer identification
-     *     @param state barber / customer state
+     *     @param id coach / contestant identification
+     *     @param state coach / contestant state
      */
 
     public Message (int type, int id, int state)
     {
         msgType = type;
-        if ((msgType == MessageType.STBST) || (msgType == MessageType.CALLCUST) || (msgType == MessageType.RPAYDONE))
-        { barbId= id;
-            barbState = state;
+        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.SETRN)){
+            coachId= id;
+            coachState = state;
         }
-        else if ((msgType == MessageType.STCST) || (msgType == MessageType.REQCUTH) || (msgType == MessageType.CUTHDONE) ||
-                (msgType == MessageType.BSHOPF))
-        { custId= id;
-            custState = state;
+        else if ((msgType == MessageType.SETFCA) || (msgType == MessageType.FCADONE) || (msgType == MessageType.SETGR) ||
+                (msgType == MessageType.SETAID) || (msgType == MessageType.SETSD)){
+            contestantId= id;
+            contestantState = state;
+        }
+        else if((msgType == MessageType.SETANG) || (msgType == MessageType.SETCT) || (msgType == MessageType.SETST)
+                || (msgType == MessageType.SETATD)){
+            refereeState = state;
         }
         else { GenericIO.writelnString ("Message type = " + msgType + ": non-implemented instantiation!");
             System.exit (1);
@@ -106,27 +109,25 @@ public class Message implements Serializable
      *  Message instantiation (form 3).
      *
      *     @param type message type
-     *     @param id barber identification
+     *     @param id coach identification
      */
 
     public Message (int type, int id)
     {
         msgType = type;
-        barbId= id;
+        coachId= id;
     }
 
     /**
      *  Message instantiation (form 4).
      *
      *     @param type message type
-     *     @param id barber identification
-     *     @param endOP end of operations flag
+     *     @param endOp end of operations flag
      */
 
-    public Message (int type, int id, boolean endOp)
+    public Message (int type, boolean endOp)
     {
         msgType = type;
-        barbId= id;
         this.endOp = endOp;
     }
 
@@ -134,36 +135,40 @@ public class Message implements Serializable
      *  Message instantiation (form 5).
      *
      *     @param type message type
-     *     @param barbId barber identification
-     *     @param barbState barber state
-     *     @param custId customer identification
+     *     @param coachId coach identification
+     *     @param coachState barber state
+     *     @param contestantId customer identification
+     *     @param refereeState referee state
      */
 
-    public Message (int type, int barbId, int barbState, int custId)
+    public Message (int type, int coachId, int coachState, int contestantId, int refereeState)
     {
         msgType = type;
-        this.barbId= barbId;
-        this.barbState = barbState;
-        this.custId= custId;
+        this.coachId= coachId;
+        this.coachState = coachState;
+        this.contestantId= contestantId;
+        this.refereeState = refereeState;
     }
 
     /**
      *  Message instantiation (form 6).
      *
      *     @param type message type
-     *     @param barbId barber identification
-     *     @param barbState barber state
-     *     @param custId customer identification
-     *     @param custState customer state
+     *     @param coachId coach identification
+     *     @param coachState coach state
+     *     @param contestantId customer identification
+     *     @param contestantState customer state
+     *     @param refereeState referee state
      */
 
-    public Message (int type, int barbId, int barbState, int custId, int custState)
+    public Message (int type, int coachId, int coachState, int contestantId, int contestantState, int refereeState)
     {
         msgType = type;
-        this.barbId= barbId;
-        this.barbState = barbState;
-        this.custId= custId;
-        this.custState = custState;
+        this.coachId= coachId;
+        this.coachState = coachState;
+        this.contestantId= contestantId;
+        this.contestantState = contestantState;
+        this.refereeState = refereeState;
     }
 
     /**
@@ -171,14 +176,12 @@ public class Message implements Serializable
      *
      *     @param type message type
      *     @param name name of the logging file
-     *     @param nIter number of iterations of the customer life cycle
      */
 
-    public Message (int type, String name, int nIter)
+    public Message (int type, String name)
     {
         msgType = type;
         fName= name;
-        this.nIter = nIter;
     }
 
     /**
@@ -186,65 +189,72 @@ public class Message implements Serializable
      *
      *     @return message type
      */
-
     public int getMsgType ()
     {
         return (msgType);
     }
 
     /**
-     *  Getting barber identification.
+     *  Getting coach identification.
      *
-     *     @return barber identification
+     *     @return coach identification
      */
 
-    public int getBarbId ()
+    public int getCoachId ()
     {
-        return (barbId);
+        return (coachId);
     }
 
     /**
-     *  Getting barber state.
+     *  Getting coach state.
      *
-     *     @return barber state
+     *     @return coach state
      */
 
-    public int getBarbState ()
+    public int getCoachState ()
     {
-        return (barbState);
+        return (coachState);
     }
 
     /**
-     *  Getting customer identification.
+     *  Getting contestant identification.
      *
-     *     @return customer identification
+     *     @return contestant identification
      */
 
-    public int getCustId ()
+    public int getContestantId ()
     {
-        return (custId);
+        return (contestantId);
     }
 
     /**
-     *  Getting customer state.
+     *  Getting contestant state.
      *
-     *     @return customer state
+     *     @return contestant state
      */
 
-    public int getCustState ()
+    public int getContestantState ()
     {
-        return (custState);
+        return (contestantState);
     }
 
     /**
-     *  Getting end of operations flag (barber).
+     *  Getting end of operations flag (referee).
      *
      *     @return end of operations flag
      */
-
     public boolean getEndOp ()
     {
         return (endOp);
+    }
+
+    /**
+     * Getting referee state
+     *
+     * @return referee state
+     */
+    public int getRefereeState(){
+        return refereeState;
     }
 
     /**
@@ -258,16 +268,6 @@ public class Message implements Serializable
         return (fName);
     }
 
-    /**
-     *  Getting the number of iterations of the customer life cycle.
-     *
-     *     @return number of iterations of the customer life cycle
-     */
-
-    public int getNIter ()
-    {
-        return (nIter);
-    }
 
     /**
      *  Printing the values of the internal fields.
@@ -281,12 +281,12 @@ public class Message implements Serializable
     public String toString ()
     {
         return ("Message type = " + msgType +
-                "\nBarber Id = " + barbId +
-                "\nBarber State = " + barbState +
-                "\nCustomer Id = " + custId +
-                "\nCustomer State = " + custState +
-                "\nEnd of Operations (barber) = " + endOp +
-                "\nName of logging file = " + fName +
-                "\nNumber of iterations = " + nIter);
+                "\nReferee State = " + refereeState +
+                "\nCoach Id = " + coachId +
+                "\nCoach State = " + coachState +
+                "\nContestant Id = " + contestantId +
+                "\nContestant State = " + contestantState +
+                "\nEnd of Operations (referee) = " + endOp +
+                "\nName of logging file = " + fName);
     }
 }

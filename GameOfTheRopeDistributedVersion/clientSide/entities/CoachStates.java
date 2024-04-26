@@ -1,4 +1,4 @@
-package GameOfTheRopeDistributedVersion.clientSide.entities;
+package clientSide.entities;
 
 
 /**

@@ -1,8 +1,11 @@
 package serverSide.sharedRegions;
 
-import entities.*;
-import main.SimulationParams;
 
+import clientSide.entities.CoachStates;
+import clientSide.entities.ContestantStates;
+import clientSide.entities.RefereeStates;
+import serverSide.entities.PlaygroundProxy;
+import serverSide.main.SimulationParams;
 
 /**
  * This class represents the Playground entity in the game of the rope simulation.
@@ -13,22 +16,22 @@ import main.SimulationParams;
  */
 public class Playground {
     /**
-     * Array of instances of the {@link Contestant} objects
+     * Array of instances of the {@link PlaygroundProxy} objects
      */
-    private final Contestant[] contestants;
+    private final PlaygroundProxy[] contestants;
     /**
-     * Array of instances of the {@link Coach} objects
+     * Array of instances of the {@link PlaygroundProxy} objects
      */
-    private final Coach[] coaches;
+    private final PlaygroundProxy[] coaches;
 
     /**
      * Instance of the {@link GeneralRepository} object
      */
     private final GeneralRepository repository;
     /**
-     * Instance of the {@link Referee} object
+     * Instance of the {@link PlaygroundProxy} object
      */
-    private Referee referee;
+    private PlaygroundProxy referee;
 
     /**
      * Store the amount of times the rope has been pulled in the current trial
@@ -60,11 +63,11 @@ public class Playground {
      */
     public Playground(GeneralRepository repository) {
         this.repository = repository;
-        this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
+        this.contestants = new PlaygroundProxy[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
         }
-        this.coaches = new Coach[SimulationParams.NTEAMS];
+        this.coaches = new PlaygroundProxy[SimulationParams.NTEAMS];
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             coaches[i] = null;
         }
@@ -82,9 +85,9 @@ public class Playground {
      * @param bench The ContestantsBench instance.
      */
     public synchronized void callTrial(ContestantsBench bench) {
-        this.referee = ((Referee) Thread.currentThread());
+        this.referee = ((PlaygroundProxy) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
 
@@ -99,7 +102,7 @@ public class Playground {
      */
     private boolean haveCoachesChosenTeams() {
         try {
-            for (Coach c : coaches) {
+            for (PlaygroundProxy c : coaches) {
                 if (c.getCoachState() != CoachStates.WATCHTRIAL) {
                     return false;
                 }
@@ -127,8 +130,8 @@ public class Playground {
             }
         }
 
-        ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
-        repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
+        ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
+        repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
         repository.setRopePosition(ropePosition);
 
         trialStarted = true;
@@ -152,7 +155,7 @@ public class Playground {
      * @return True if this trial has concluded the game, false otherwise.
      */
     public synchronized boolean assertTrialDecision(ContestantsBench bench) {
-        this.referee = ((Referee) Thread.currentThread());
+        this.referee = ((PlaygroundProxy) Thread.currentThread());
 
         // synchronize, will get waken up by the last contestant
         while (!haveContestantsPulledRope()) {
@@ -222,7 +225,7 @@ public class Playground {
     private boolean checkIfTeamIsReady(int team) {
         int numReadyContestants = 0;
 
-        for (Contestant contestant : contestants) {
+        for (PlaygroundProxy contestant : contestants) {
             try {
                 if (contestant.getContestantState() == ContestantStates.STANDINPOSITION && contestant.getContestantTeam() == team) {
                     numReadyContestants++;
@@ -238,8 +241,8 @@ public class Playground {
      * informs the referee that the team is ready.
      */
     public synchronized void informReferee() {
-        int coachId = ((Coach) Thread.currentThread()).getCoachTeam();
-        coaches[coachId] = ((Coach) Thread.currentThread());
+        int coachId = ((PlaygroundProxy) Thread.currentThread()).getCoachTeam();
+        coaches[coachId] = ((PlaygroundProxy) Thread.currentThread());
 
         // waits for the team to be ready
         while (!checkIfTeamIsReady(coaches[coachId].getCoachTeam())) {
@@ -262,8 +265,8 @@ public class Playground {
      * calculates team power, and waits for the referee to signal the trial start.
      */
     public synchronized void getReady() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
         int team = contestants[contestantId].getContestantTeam();
         if (team == 0) {
             team0Power += contestants[contestantId].getContestantStrength();
@@ -293,8 +296,8 @@ public class Playground {
      * Contestant signals that it's done pulling the rope
      */
     public synchronized void amIDone() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
 
         ropesPulled++;
 
