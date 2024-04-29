@@ -1,7 +1,11 @@
 package serverSide.sharedRegions;
 
+
+import clientSide.entities.*;
+import clientSide.entities.data.*;
 import genclass.GenericIO;
 import genclass.TextFile;
+import serverSide.main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -57,7 +61,7 @@ public class GeneralRepository {
     /**
      * Store the name of the file to which will write
      */
-    private final String fileName;
+    private String fileName;
 
     /**
      * Creates a new GeneralRepository instance
@@ -89,13 +93,28 @@ public class GeneralRepository {
     }
 
     /**
+     *   Operation initialization of simulation.
+     *
+     *   New operation.
+     *
+     *     @param logFileName name of the logging file
+     */
+
+    public synchronized void initSimul (String logFileName)
+    {
+        if (!Objects.equals (logFileName, ""))
+            this.fileName = logFileName;
+
+        reportInitialStatus ();
+    }
+
+    /**
      * Set the new value of the attribute game
      *
      * @param game new value
      */
     public synchronized void setGame(int game) {
         this.game = game;
-        reportGameStatus();
     }
 
     /**
@@ -168,7 +187,6 @@ public class GeneralRepository {
      */
     public synchronized void updateReferee(int refereeState) {
         referee.setState(refereeState);
-        reportStatus();
     }
 
     /**
@@ -188,8 +206,6 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating contestant " + contestantId);
             System.exit(1);
         }
-
-        reportStatus();
     }
 
     /**
@@ -205,7 +221,6 @@ public class GeneralRepository {
             GenericIO.writelnString("Error while updating coach " + coachTeam);
             System.exit(1);
         }
-        reportStatus();
     }
 
     /**
@@ -220,8 +235,6 @@ public class GeneralRepository {
         } else {
             gameWinMsg = " was a draw.";
         }
-        reportGameStatus();
-        gameWinMsg = "";
     }
 
     /**
@@ -248,7 +261,7 @@ public class GeneralRepository {
     /**
      * Reports the initial status of the game.
      */
-    private void reportInitialStatus() {
+    private synchronized void reportInitialStatus() {
         TextFile log = new TextFile();
 
         if (!log.openForWriting(".", fileName)) {
@@ -257,9 +270,9 @@ public class GeneralRepository {
         }
 
         log.writelnString("\t\t\t\t\t\tGame of the Rope - Description of the internal state");
+        log.writelnString();
         log.writelnString(printHeader());
         log.writelnString(printValues());
-        log.writelnString();
 
         if (!log.close()) {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
@@ -270,7 +283,7 @@ public class GeneralRepository {
     /**
      * Reports the current status of the game.
      */
-    public synchronized void reportStatus() {
+    public synchronized void reportStatus(boolean header) {
         TextFile log = new TextFile();
 
         if (!log.openForAppending(".", fileName)) {
@@ -278,7 +291,7 @@ public class GeneralRepository {
             System.exit(1);
         }
 
-        log.writelnString(printHeader());
+        if (header) log.writelnString(printHeader());
         log.writelnString(printValues());
 
         if (!log.close()) {
@@ -304,6 +317,29 @@ public class GeneralRepository {
             GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
             System.exit(1);
         }
+
+        gameWinMsg = "";
+    }
+
+    /**
+     * Reports the status of the game start.
+     */
+    public synchronized void reportGameStart() {
+        TextFile log = new TextFile();
+
+        if (!log.openForAppending(".", fileName)) {
+            GenericIO.writelnString("Failed creating " + fileName + " file.");
+            System.exit(1);
+        }
+
+        log.writelnString("Game " + game);
+
+        if (!log.close()) {
+            GenericIO.writelnString("The operation of closing the file " + fileName + " failed!");
+            System.exit(1);
+        }
+
+        gameWinMsg = "";
     }
 
     /**
@@ -376,7 +412,8 @@ public class GeneralRepository {
 
         sb.append(getPos());
 
-        sb.append("\t").append(trial).append("\t").append(ropePosition);
+        sb.append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : trial)
+                .append("\t").append(referee.getState() == RefereeStates.STARTGAME || referee.getState() == RefereeStates.STARTMATCH ? "-" : ropePosition);
 
         return sb.toString();
     }
@@ -432,8 +469,8 @@ public class GeneralRepository {
      *
      * @return The game information string.
      */
-    private String printGameInfo() {
-        return "Game " + game + gameWinMsg ;
+    private synchronized String printGameInfo() {
+        return "Game " + game + gameWinMsg;
     }
 
     /**
@@ -442,7 +479,7 @@ public class GeneralRepository {
      * @param state The state of the referee.
      * @return The string representation of the referee state.
      */
-    private String translateRefereeStates(int state) {
+    private synchronized String translateRefereeStates(int state) {
         switch (state) {
             case 0:
                 return "SOM";
@@ -467,7 +504,7 @@ public class GeneralRepository {
      * @param state The state of the coach.
      * @return The string representation of the coach state.
      */
-    private String translateCoachStates(int state) {
+    private synchronized String translateCoachStates(int state) {
         switch (state) {
             case 0:
                 return "WFRC";
@@ -486,7 +523,7 @@ public class GeneralRepository {
      * @param state The state of the contestant.
      * @return The string representation of the contestant state.
      */
-    private String translateContestantStates(int state) {
+    private synchronized String translateContestantStates(int state) {
         switch (state) {
             case 0:
                 return "SAB";

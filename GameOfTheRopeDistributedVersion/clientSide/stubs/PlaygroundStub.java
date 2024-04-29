@@ -144,7 +144,7 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETATD, 0, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate());
         com.writeObject(outMessage);
 
         // receive response

@@ -248,23 +248,23 @@ public class MessageType
     public static final int UPREFDONE = 46;
 
     /**
-     * Update Referee (service request).
+     * Update Coach (service request).
      */
     public static final int UPCOA = 47;
 
     /**
-     * Update Referee (reply).
+     * Update Coach (reply).
      */
 
     public static final int UPCOADONE = 48;
 
     /**
-     * Update Referee (service request).
+     * Update Contestant (service request).
      */
     public static final int UPCONT = 49;
 
     /**
-     * Update Referee (reply).
+     * Update Contestant (reply).
      */
 
     public static final int UPCONTDONE = 50;
@@ -293,5 +293,40 @@ public class MessageType
 
     public static final int MWDONE = 54;
 
+    /**
+     * Report the general state of the game (service request)
+     * Write to logger
+     */
+    public static final int RS = 55;
 
+    /**
+     * Report the general state of the game (reply)
+     * Write to logger
+     */
+    public static final int RSDONE = 56;
+
+
+    /**
+     * Report the game state of the game (service request)
+     * Write to logger
+     */
+    public static final int RGS = 57;
+
+    /**
+     * Report the game state of the game (reply)
+     * Write to logger
+     */
+    public static final int RGSDONE = 68;
+
+    /**
+     * Report the start game state of the game (service request)
+     * Write to logger
+     */
+    public static final int RGSTR = 59;
+
+    /**
+     * Report the start game state of the game (reply)
+     * Write to logger
+     */
+    public static final int RGSTRDONE = 60;
 }

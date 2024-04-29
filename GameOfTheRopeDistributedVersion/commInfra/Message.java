@@ -54,6 +54,16 @@ public class Message implements Serializable
     private int contestantState = -1;
 
     /**
+     * contestant strength
+     */
+    private int contestantStrength = -1;
+
+    /**
+     * contestant team
+     */
+    private int contestantTeam = -1;
+
+    /**
      *  End of operations (referee).
      */
 
@@ -64,6 +74,41 @@ public class Message implements Serializable
      */
 
     private String fName = null;
+
+    /**
+     * Current game
+     */
+    private int game = -1;
+
+    /**
+     * Current trial
+     */
+    private int trial = -1;
+
+    /**
+     * Current position of the rope
+     */
+    private int ropePosition = 0;
+
+    /**
+     * winning tram
+     */
+    private int winningTeam = -1;
+
+    /**
+     * winning cause
+     */
+    private String winningCause = null;
+
+    /**
+     * match end message
+     */
+    private String endMatchMsg = null;
+
+    /**
+     * flag symbolizing whether to print the header or not
+     */
+    private boolean printHeader = false;
 
     /**
      *  Message instantiation (form 1).
@@ -87,7 +132,7 @@ public class Message implements Serializable
     public Message (int type, int id, int state)
     {
         msgType = type;
-        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.SETRN)){
+        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.SETRN) || (msgType == MessageType.UPCOA)){
             coachId= id;
             coachState = state;
         }
@@ -109,26 +154,51 @@ public class Message implements Serializable
      *  Message instantiation (form 3).
      *
      *     @param type message type
-     *     @param id coach identification
+     *     @param value integer value, assigned depending on the type
      */
 
-    public Message (int type, int id)
+    public Message (int type, int value)
     {
         msgType = type;
-        coachId= id;
+
+        switch (type){
+            case MessageType.SETATD:
+                refereeState = value;
+                break;
+            case MessageType.SETG:
+                game = value;
+                break;
+            case MessageType.SETT:
+                trial = value;
+                break;
+            case MessageType.SETRP:
+                ropePosition = value;
+                break;
+            case MessageType.UPREF:
+                refereeState = value;
+                break;
+
+        }
     }
 
     /**
      *  Message instantiation (form 4).
      *
      *     @param type message type
-     *     @param endOp end of operations flag
+     *     @param flag end of operations flag / print header flag
      */
 
-    public Message (int type, boolean endOp)
+    public Message (int type, boolean flag)
     {
         msgType = type;
-        this.endOp = endOp;
+        switch (type){
+            case MessageType.RS:
+                this.printHeader = flag;
+                break;
+            case MessageType.SETEOFC:
+                this.endOp = flag;
+                break;
+        }
     }
 
     /**
@@ -138,16 +208,14 @@ public class Message implements Serializable
      *     @param coachId coach identification
      *     @param coachState barber state
      *     @param contestantId customer identification
-     *     @param refereeState referee state
      */
 
-    public Message (int type, int coachId, int coachState, int contestantId, int refereeState)
+    public Message (int type, int coachId, int coachState, int contestantId)
     {
         msgType = type;
         this.coachId= coachId;
         this.coachState = coachState;
         this.contestantId= contestantId;
-        this.refereeState = refereeState;
     }
 
     /**
@@ -175,13 +243,54 @@ public class Message implements Serializable
      *  Message instantiation (form 7).
      *
      *     @param type message type
-     *     @param name name of the logging file
+     *     @param name name of the logging file / match end message
      */
 
     public Message (int type, String name)
     {
         msgType = type;
-        fName= name;
+        if(type == MessageType.SETNFIC){
+            fName= name;
+        }
+        switch (type){
+            case MessageType.SETNFIC:
+                fName= name;
+                break;
+            case MessageType.SETMW:
+                endMatchMsg = name;
+                break;
+
+        }
+    }
+
+    /**
+     *  Message instantiation (form 8)
+     *
+     *  @param type               message type
+     *  @param contestantId       The ID of the contestant to update.
+     *  @param contestantStrength The strength of the contestant.
+     *  @param contestantState    The state of the contestant.
+     *  @param contestantTeam     The team of the contestant.
+     */
+    public Message(int type, int contestantId, int contestantStrength, int contestantState, int contestantTeam){
+        this.msgType = type;
+        this.contestantId = contestantId;
+        this.contestantState = contestantState;
+        this.contestantStrength = contestantStrength;
+        this.contestantTeam = contestantTeam;
+    }
+
+    /**
+     * Message instantiation (form 9)
+     *
+     * @param type message type
+     * @param winningTeam winning team
+     * @param winningCause winning cause
+     */
+    public Message(int type, int winningTeam, String winningCause){
+        this.msgType = type;
+        this.winningTeam = winningTeam;
+        this.winningCause = winningCause;
     }
 
     /**
@@ -268,6 +377,167 @@ public class Message implements Serializable
         return (fName);
     }
 
+    /**
+     * Gets the strength of the contestant.
+     *
+     * @return The strength of the contestant.
+     */
+    public int getContestantStrength() {
+        return contestantStrength;
+    }
+
+    /**
+     * Sets the strength of the contestant.
+     *
+     * @param contestantStrength The strength of the contestant to set.
+     */
+    public void setContestantStrength(int contestantStrength) {
+        this.contestantStrength = contestantStrength;
+    }
+
+    /**
+     * Gets the team of the contestant.
+     *
+     * @return The team of the contestant.
+     */
+    public int getContestantTeam() {
+        return contestantTeam;
+    }
+
+    /**
+     * Sets the team of the contestant.
+     *
+     * @param contestantTeam The team of the contestant to set.
+     */
+    public void setContestantTeam(int contestantTeam) {
+        this.contestantTeam = contestantTeam;
+    }
+
+    /**
+     * Gets the game ID.
+     *
+     * @return The ID of the game.
+     */
+    public int getGame() {
+        return game;
+    }
+
+    /**
+     * Sets the game ID.
+     *
+     * @param game The ID of the game to set.
+     */
+    public void setGame(int game) {
+        this.game = game;
+    }
+
+    /**
+     * Gets the trial number.
+     *
+     * @return The trial number.
+     */
+    public int getTrial() {
+        return trial;
+    }
+
+    /**
+     * Sets the trial number.
+     *
+     * @param trial The trial number to set.
+     */
+    public void setTrial(int trial) {
+        this.trial = trial;
+    }
+
+    /**
+     * Gets the position of the rope.
+     *
+     * @return The position of the rope.
+     */
+    public int getRopePosition() {
+        return ropePosition;
+    }
+
+    /**
+     * Sets the position of the rope.
+     *
+     * @param ropePosition The position of the rope to set.
+     */
+    public void setRopePosition(int ropePosition) {
+        this.ropePosition = ropePosition;
+    }
+
+    /**
+     * Gets the ID of the winning team.
+     *
+     * @return The ID of the winning team.
+     */
+    public int getWinningTeam() {
+        return winningTeam;
+    }
+
+    /**
+     * Sets the ID of the winning team.
+     *
+     * @param winningTeam The ID of the winning team to set.
+     */
+    public void setWinningTeam(int winningTeam) {
+        this.winningTeam = winningTeam;
+    }
+
+    /**
+     * Gets the cause of winning.
+     *
+     * @return The cause of winning.
+     */
+    public String getWinningCause() {
+        return winningCause;
+    }
+
+    /**
+     * Sets the cause of winning.
+     *
+     * @param winningCause The cause of winning to set.
+     */
+    public void setWinningCause(String winningCause) {
+        this.winningCause = winningCause;
+    }
+
+    /**
+     * Gets the end match message.
+     *
+     * @return The end match message.
+     */
+    public String getEndMatchMsg() {
+        return endMatchMsg;
+    }
+
+    /**
+     * Sets the end match message.
+     *
+     * @param endMatchMsg The end match message to set.
+     */
+    public void setEndMatchMsg(String endMatchMsg) {
+        this.endMatchMsg = endMatchMsg;
+    }
+
+    /**
+     * Checks if the header should be printed.
+     *
+     * @return True if the header should be printed, false otherwise.
+     */
+    public boolean isPrintHeader() {
+        return printHeader;
+    }
+
+    /**
+     * Sets whether the header should be printed.
+     *
+     * @param printHeader True if the header should be printed, false otherwise.
+     */
+    public void setPrintHeader(boolean printHeader) {
+        this.printHeader = printHeader;
+    }
 
     /**
      *  Printing the values of the internal fields.
