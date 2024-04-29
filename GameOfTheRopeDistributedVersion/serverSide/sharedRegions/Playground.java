@@ -81,18 +81,13 @@ public class Playground {
 
     /**
      * Initiates the trial, updating referee state, trial count, and notifying coaches.
-     *
-     * @param bench The ContestantsBench instance.
      */
-    public synchronized void callTrial(ContestantsBench bench) {
+    public synchronized void callTrial() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
         repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
-
-        // will wake up the coaches
-        bench.refereeCallTrial();
     }
 
     /**
@@ -151,10 +146,9 @@ public class Playground {
     /**
      * Assert trial results and updates the game status accordingly.
      *
-     * @param bench The ContestantsBench instance.
      * @return True if this trial has concluded the game, false otherwise.
      */
-    public synchronized boolean assertTrialDecision(ContestantsBench bench) {
+    public synchronized boolean assertTrialDecision() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
 
         // synchronize, will get waken up by the last contestant
@@ -204,14 +198,8 @@ public class Playground {
                 referee.signalMatchEnded();
             }
 
-            bench.setHasTrialEnded(true);
-            bench.unblockContestantBench();
-
             return true;
         }
-
-        bench.setHasTrialEnded(true);
-        bench.unblockContestantBench();
 
         return false;
     }

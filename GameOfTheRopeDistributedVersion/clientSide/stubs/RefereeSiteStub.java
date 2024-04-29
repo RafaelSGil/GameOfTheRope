@@ -211,4 +211,42 @@ public class RefereeSiteStub {
 
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
     }
+
+    /**
+     * operation end of match
+     *
+     * It is called when contestants and coaches want to know if the match is over
+     */
+    public boolean endOfMatch(){
+        ClientCom com;                                                 // communication channel
+        Message outMessage,                                            // outgoing message
+                inMessage;                                             // incoming message
+
+        com = new ClientCom (serverHostName, serverPortNumb);
+        while (!com.open ())                                           // waits for a connection to be established
+        {
+            try{
+                Thread.currentThread ().sleep ((long) (10));
+            }catch (InterruptedException ignored) {}
+        }
+
+        // send message
+        outMessage = new Message(MessageType.END);
+        com.writeObject(outMessage);
+
+        // receive response
+        inMessage = (Message) com.readObject();
+
+        // process response
+        if((inMessage.getMsgType() != MessageType.ENDREPLY)){
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
+
+        // close communication channel
+        com.close ();
+
+        return inMessage.getEndOp();
+    }
 }

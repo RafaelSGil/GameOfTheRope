@@ -36,10 +36,10 @@ public class RefereeSiteProxy extends Thread implements CoachCloning, Contestant
         int proxyId;                                                   // instantiation identifier
 
         try
-        { cl = Class.forName ("serverSide.entities.BarberShopClientProxy");
+        { cl = Class.forName ("serverSide.entities.RefereeSiteProxy");
         }
         catch (ClassNotFoundException e)
-        { GenericIO.writelnString ("Data type BarberShopClientProxy was not found!");
+        { GenericIO.writelnString ("Data type RefereeSiteProxy was not found!");
             e.printStackTrace ();
             System.exit (1);
         }
@@ -51,7 +51,7 @@ public class RefereeSiteProxy extends Thread implements CoachCloning, Contestant
     }
 
     public RefereeSiteProxy(ServerCom sconi, RefereeSiteInterface refereeSiteInterface) {
-        super("PlaygroundProxy_" + RefereeSiteProxy.getProxyId());
+        super("RefereeSiteProxy_" + RefereeSiteProxy.getProxyId());
         this.sconi = sconi;
         this.refereeSiteInterface = refereeSiteInterface;
     }
@@ -192,6 +192,16 @@ public class RefereeSiteProxy extends Thread implements CoachCloning, Contestant
      */
     @Override
     public void setPlaying(boolean playing) {
+
+    }
+
+    /**
+     * Adjusts the contestant's strength based on their playing state.
+     * If playing, strength decreases by 1 (up to a minimum of {@link SimulationParams#MINSTRENGTH}).
+     * If not playing, strength increases by 1 (up to a maximum of {@link SimulationParams#MAXSTRENGTH}).
+     */
+    @Override
+    public void manageStrength() {
 
     }
 

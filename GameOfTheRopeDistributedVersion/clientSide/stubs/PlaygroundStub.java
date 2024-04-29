@@ -44,7 +44,7 @@ public class PlaygroundStub {
      *
      * It is called when the referee signals a trial will start
      */
-    public void callTrial(){
+    public void callTrial(ContestantsBenchStub benchStub){
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
@@ -58,7 +58,7 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETCT, 0, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.SETCT, ((Referee) Thread.currentThread()).getRefereeSate());
         com.writeObject(outMessage);
 
         // receive response
@@ -78,6 +78,8 @@ public class PlaygroundStub {
 
         // close communication channel
         com.close ();
+
+        benchStub.refereeCallTrial();
 
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
     }
@@ -130,7 +132,7 @@ public class PlaygroundStub {
      *
      * It is called when the referee asserts the result of the trial
      */
-    public boolean assertTrialDecision(){
+    public boolean assertTrialDecision(ContestantsBenchStub bench){
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
@@ -164,6 +166,9 @@ public class PlaygroundStub {
 
         // close communication channel
         com.close ();
+
+        bench.setHasTrialEnded(true);
+        bench.unblockContestantBench();
 
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
 

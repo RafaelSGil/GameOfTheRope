@@ -163,6 +163,8 @@ public class Message implements Serializable
 
         switch (type){
             case MessageType.SETATD:
+            case MessageType.SETCT:
+            case MessageType.UPREF:
                 refereeState = value;
                 break;
             case MessageType.SETG:
@@ -173,9 +175,6 @@ public class Message implements Serializable
                 break;
             case MessageType.SETRP:
                 ropePosition = value;
-                break;
-            case MessageType.UPREF:
-                refereeState = value;
                 break;
 
         }
@@ -196,6 +195,8 @@ public class Message implements Serializable
                 this.printHeader = flag;
                 break;
             case MessageType.SETEOFC:
+            case MessageType.SETATD:
+            case MessageType.ENDREPLY:
                 this.endOp = flag;
                 break;
         }

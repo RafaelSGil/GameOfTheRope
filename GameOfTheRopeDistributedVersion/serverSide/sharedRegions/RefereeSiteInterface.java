@@ -51,6 +51,8 @@ public class RefereeSiteInterface {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
+            case MessageType.END:
+                    break;
         }
 
         /* processing */
@@ -70,6 +72,9 @@ public class RefereeSiteInterface {
                 ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
                 refereeSite.declareMatchWinner();
                 outMessage = new Message(MessageType.DMWDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                break;
+            case MessageType.END:
+                outMessage = new Message(MessageType.ENDREPLY, refereeSite.endOfMatch());
                 break;
         }
 

@@ -2,6 +2,8 @@ package serverSide.entities;
 
 
 import clientSide.entities.*;
+import commInfra.Message;
+import commInfra.MessageException;
 import commInfra.ServerCom;
 import genclass.GenericIO;
 import serverSide.main.SimulationParams;
@@ -41,10 +43,10 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
         int proxyId;                                                   // instantiation identifier
 
         try
-        { cl = Class.forName ("serverSide.entities.BarberShopClientProxy");
+        { cl = Class.forName ("serverSide.entities.PlaygroundProxy");
         }
         catch (ClassNotFoundException e)
-        { GenericIO.writelnString ("Data type BarberShopClientProxy was not found!");
+        { GenericIO.writelnString ("Data type PlaygroundProxy was not found!");
             e.printStackTrace ();
             System.exit (1);
         }
@@ -197,6 +199,16 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     }
 
     /**
+     * Adjusts the contestant's strength based on their playing state.
+     * If playing, strength decreases by 1 (up to a minimum of {@link SimulationParams#MINSTRENGTH}).
+     * If not playing, strength increases by 1 (up to a maximum of {@link SimulationParams#MAXSTRENGTH}).
+     */
+    @Override
+    public void manageStrength() {
+
+    }
+
+    /**
      * Gets the current state of the referee.
      *
      * @return The current referee state as defined in {@link RefereeStates}.
@@ -313,5 +325,25 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     @Override
     public void signalMatchEnded() {
 
+    }
+
+    @Override
+    public void run() {
+        Message inMessage = null,                                      // service request
+                outMessage = null;                                     // service reply
+
+        /* service providing */
+
+        inMessage = (Message) sconi.readObject ();                     // get service request
+        try
+        { outMessage = playgroundInterface.processAndReply (inMessage);         // process it
+        }
+        catch (MessageException e)
+        { GenericIO.writelnString ("Thread " + getName () + ": " + e.getMessage () + "!");
+            GenericIO.writelnString (e.getMessageVal ().toString ());
+            System.exit (1);
+        }
+        sconi.writeObject (outMessage);                                // send service reply
+        sconi.close ();                                                // close the communication channel
     }
 }
