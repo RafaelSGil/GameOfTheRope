@@ -4,7 +4,9 @@ package serverSide.sharedRegions;
 import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.entities.RefereeStates;
+import clientSide.stubs.GeneralRepositoryStub;
 import serverSide.entities.PlaygroundProxy;
+import serverSide.main.ServerGameOfTheRopePlayground;
 import serverSide.main.SimulationParams;
 
 /**
@@ -31,7 +33,7 @@ public class Playground {
     /**
      * Instance of the {@link GeneralRepository} object
      */
-    private final GeneralRepository repository;
+    private final GeneralRepositoryStub repository;
     /**
      * Instance of the {@link PlaygroundProxy} object
      */
@@ -65,7 +67,7 @@ public class Playground {
      *
      * @param repository The {@link GeneralRepository} object representing the repository.
      */
-    public Playground(GeneralRepository repository) {
+    public Playground(GeneralRepositoryStub repository) {
         this.repository = repository;
         this.contestants = new PlaygroundProxy[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {

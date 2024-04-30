@@ -93,6 +93,32 @@ public class GeneralRepository {
     }
 
     /**
+     * Creates a new GeneralRepository instance
+     *
+     */
+    public GeneralRepository() {
+        this.fileName = "logger";
+
+        this.referee = new RefereeData();
+        coaches = new CoachData[SimulationParams.NTEAMS];
+        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
+            coaches[i] = new CoachData(i);
+        }
+
+        contestants = new ContestantData[SimulationParams.NCONTESTANTS];
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            contestants[i] = new ContestantData(i);
+        }
+
+        this.game = 0;
+        this.gameWinMsg = "";
+        this.trial = 0;
+        this.ropePosition = 0;
+
+        reportInitialStatus();
+    }
+
+    /**
      *   Operation initialization of simulation.
      *
      *   New operation.

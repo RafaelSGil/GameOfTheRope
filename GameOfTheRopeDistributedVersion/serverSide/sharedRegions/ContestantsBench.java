@@ -5,7 +5,9 @@ package serverSide.sharedRegions;
 
 import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
+import clientSide.stubs.GeneralRepositoryStub;
 import serverSide.entities.ContestantBenchProxy;
+import serverSide.main.ServerGameOfTheRopeContestantsBench;
 import serverSide.main.SimulationParams;
 import serverSide.utils.Strategy;
 
@@ -46,7 +48,7 @@ public class ContestantsBench {
     /**
      * General Repository
      */
-    private final GeneralRepository repository;
+    private final GeneralRepositoryStub repository;
 
     /**
      * Checks if trial has ended
@@ -69,7 +71,7 @@ public class ContestantsBench {
      *
      * @param repository The {@link GeneralRepository} object representing the repository.
      */
-    public ContestantsBench(GeneralRepository repository) {
+    public ContestantsBench(GeneralRepositoryStub repository) {
         this.playing = new ArrayList<>();
         this.benched = new ArrayList<>();
         this.repository = repository;

@@ -28,6 +28,7 @@ public class ClientGameOfTheRopeReferee {
      *        args[5] - port number for listening to service requests
      *        args[6] - name of the platform where is located the playground server
      *        args[7] - port number for listening to service requests
+     *        args[8] - name of the logging file
      */
     public static void main(String[] args){
         String generalRepositoryServerHostName;                 //name of the platform where is located the general repository server
@@ -47,7 +48,7 @@ public class ClientGameOfTheRopeReferee {
         RefereeSiteStub refereeSiteStub;                        //remote reference to the referee site
 
         /* getting problem runtime parameters */
-        if (args.length != 8){
+        if (args.length != 9){
             GenericIO.writelnString ("Wrong number of parameters!");
             System.exit (1);
         }
@@ -105,6 +106,8 @@ public class ClientGameOfTheRopeReferee {
         refereeSiteStub = new RefereeSiteStub(refereeSiteServerHostName, refereeSiteServerPortNumber);
         contestantsBenchStub = new ContestantsBenchStub(contestantBenchServerHostName, contestantBenchServerPortNumber);
         playgroundStub = new PlaygroundStub(playgroundServerHostName, playgroundServerPortNumber);
+
+        generalRepositoryStub.initSimul(args[8]);
 
         referee = new Referee("referee", refereeSiteStub, playgroundStub, contestantsBenchStub);   // referee thread
 
