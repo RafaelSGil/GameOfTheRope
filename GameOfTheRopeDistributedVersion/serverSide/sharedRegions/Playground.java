@@ -95,6 +95,7 @@ public class Playground {
         repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
         referee.setTrial(referee.getTrial() + 1);
         repository.setTrial(referee.getTrial());
+        repository.reportStatus(false);
     }
 
     /**
@@ -135,6 +136,7 @@ public class Playground {
         ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
         repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
         repository.setRopePosition(ropePosition);
+        repository.reportStatus(false);
 
         trialStarted = true;
         // wake up contestants
@@ -176,6 +178,7 @@ public class Playground {
         }
 
         repository.setRopePosition(ropePosition);
+        repository.reportStatus(false);
 
         // reset counters
         this.ropesPulled = 0;
@@ -250,6 +253,7 @@ public class Playground {
 
         coaches[coachId].setCoachState(CoachStates.WATCHTRIAL);
         repository.updateCoach(coaches[coachId].getCoachState(), coachId);
+        repository.reportStatus(false);
 
         // alerts the referee that its team is ready
         notifyAll();
@@ -285,6 +289,7 @@ public class Playground {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
+        repository.reportStatus(false);
     }
 
     /**

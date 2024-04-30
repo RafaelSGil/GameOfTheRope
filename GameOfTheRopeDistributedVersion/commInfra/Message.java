@@ -200,8 +200,9 @@ public class Message implements Serializable
             case MessageType.RS:
                 this.printHeader = flag;
                 break;
-            case MessageType.SETEOFC:
+            case MessageType.EOFCDONE:
             case MessageType.SETATD:
+            case MessageType.ATDDONE:
             case MessageType.ENDREPLY:
                 this.endOp = flag;
                 break;

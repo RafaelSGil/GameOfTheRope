@@ -56,6 +56,9 @@ public class RefereeSite {
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+
+        repository.reportGameStart();
+        repository.reportStatus(true);
     }
 
     /**
@@ -77,6 +80,10 @@ public class RefereeSite {
                 repository.declareGameWinner(2, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
                 break;
         }
+
+        repository.reportStatus(false);
+        repository.reportGameStatus();
+        repository.setRopePosition(0);
     }
 
     /**
@@ -87,6 +94,9 @@ public class RefereeSite {
         this.matchEnd = true;
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+
+        repository.reportStatus(false);
+
         repository.declareMatchWinner(((RefereeSiteProxy) Thread.currentThread()).finalResults());
     }
 

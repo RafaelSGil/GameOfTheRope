@@ -162,6 +162,7 @@ public class ContestantsBench {
 
         coaches[coachId].setCoachState(CoachStates.ASSEMBLETEAM);
         repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
+        repository.reportStatus(false);
 
         // wake up contestants
         notifyAll();
@@ -198,6 +199,7 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
+        repository.reportStatus(false);
     }
 
     /**
@@ -223,6 +225,7 @@ public class ContestantsBench {
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
+        repository.reportStatus(false);
     }
 
     /**
@@ -242,6 +245,7 @@ public class ContestantsBench {
 
         coaches[coachId].setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
+        repository.reportStatus(false);
     }
 
     /**

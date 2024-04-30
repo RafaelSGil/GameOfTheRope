@@ -99,8 +99,7 @@ public class PlaygroundInterface {
                 break;
             case MessageType.SETATD:
                 ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
-                playground.assertTrialDecision();
-                outMessage = new Message(MessageType.ATDDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                outMessage = new Message(MessageType.ATDDONE, playground.assertTrialDecision());
                 break;
             case MessageType.SETIR:
                 ((RefereeSiteProxy) Thread.currentThread()).setCoachState(inMessage.getCoachState());
