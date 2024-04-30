@@ -2,6 +2,7 @@ package commInfra;
 
 import java.io.*;
 import genclass.GenericIO;
+import serverSide.main.SimulationParams;
 
 /**
  *   Internal structure of the exchanged messages.
@@ -109,6 +110,11 @@ public class Message implements Serializable
      * flag symbolizing whether to print the header or not
      */
     private boolean printHeader = false;
+
+    /**
+     * flag to represent which entity asked to end the operations
+     */
+    private String entity = null;
 
     /**
      *  Message instantiation (form 1).
@@ -292,6 +298,40 @@ public class Message implements Serializable
         this.msgType = type;
         this.winningTeam = winningTeam;
         this.winningCause = winningCause;
+    }
+
+    public Message(int type, String entity, int id){
+        msgType = type;
+
+        switch (entity){
+            case SimulationParams.REFEREE:
+                this.entity = entity;
+                break;
+            case SimulationParams.COACH:
+                this.entity = entity;
+                this.coachId = id;
+                break;
+            case SimulationParams.CONTESTANT:
+                this.entity = entity;
+                this.contestantId = id;
+                break;
+        }
+    }
+
+    /**
+     * get entity
+     * @return entity type
+     */
+    public String getEntity() {
+        return entity;
+    }
+
+    /**
+     * Set new entity
+     * @param entity entity type
+     */
+    public void setEntity(String entity) {
+        this.entity = entity;
     }
 
     /**

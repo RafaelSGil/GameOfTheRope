@@ -371,4 +371,65 @@ public class GeneralRepositoryStub {
         com.close ();
     }
 
+    /**
+     *  Operation end of work.
+     *
+     *   New operation.
+     *
+     *      @param id id
+     */
+
+    public void endOperation (int id)
+    {
+        ClientCom com;                                                 // communication channel
+        Message outMessage,                                            // outgoing message
+                inMessage;                                             // incoming message
+
+        com = new ClientCom (serverHostName, serverPortNumb);
+        while (!com.open ())
+        { try
+        { Thread.sleep ((long) (1000));
+        }
+        catch (InterruptedException e) {}
+        }
+        outMessage = new Message (MessageType.SETEOFC, id);
+        com.writeObject (outMessage);
+        inMessage = (Message) com.readObject ();
+        if (inMessage.getMsgType() != MessageType.EOFCDONE)
+        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
+        com.close ();
+    }
+
+    /**
+     *   Operation server shutdown.
+     *
+     *   New operation.
+     */
+
+    public void shutdown ()
+    {
+        ClientCom com;                                                 // communication channel
+        Message outMessage,                                            // outgoing message
+                inMessage;                                             // incoming message
+
+        com = new ClientCom (serverHostName, serverPortNumb);
+        while (!com.open ())
+        { try
+        { Thread.sleep ((long) (1000));
+        }
+        catch (InterruptedException e) {}
+        }
+        outMessage = new Message (MessageType.SHUT);
+        com.writeObject (outMessage);
+        inMessage = (Message) com.readObject ();
+        if (inMessage.getMsgType() != MessageType.SHUTDONE)
+        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
+        com.close ();
+    }
 }

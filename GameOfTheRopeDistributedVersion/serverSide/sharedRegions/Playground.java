@@ -16,6 +16,10 @@ import serverSide.main.SimulationParams;
  */
 public class Playground {
     /**
+     *   Number of entity groups requesting the shutdown.
+     */
+    private int nEntities;
+    /**
      * Array of instances of the {@link PlaygroundProxy} objects
      */
     private final PlaygroundProxy[] contestants;
@@ -77,6 +81,7 @@ public class Playground {
         this.team0Power = 0;
         this.team1Power = 0;
         this.ropePosition = 0;
+        this.nEntities = 0;
     }
 
     /**
@@ -291,5 +296,44 @@ public class Playground {
 
         // wake up the referee
         notifyAll();
+    }
+
+    /**
+     *   Operation server shutdown.
+     *
+     *   New operation.
+     */
+    public synchronized void endOperation (String entity, int id)
+    {
+        while (nEntities == 0)
+        {
+            try
+            { wait ();
+            }
+            catch (InterruptedException e) {}
+        }
+        switch (entity){
+            case SimulationParams.REFEREE:
+                Thread.currentThread().interrupt();
+                break;
+            case SimulationParams.COACH:
+                coaches[id].interrupt();
+                break;
+            case SimulationParams.CONTESTANT:
+                contestants[id].interrupt();
+                break;
+        }
+    }
+
+    /**
+     *Operation shut down
+     */
+    public synchronized void shutdown ()
+    {
+        nEntities += 1;
+        if(nEntities >= SimulationParams.NENTITIES){
+            ServerGameOfTheRopePlayground.waitConnection = false;
+        }
+        notifyAll ();                                        // the barber may now terminate
     }
 }

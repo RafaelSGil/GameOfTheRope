@@ -51,8 +51,12 @@ public class RefereeSiteInterface {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
+            case MessageType.SETEOFC:
+                break;
             case MessageType.END:
                     break;
+            case MessageType.SHUT:
+                break;
         }
 
         /* processing */
@@ -73,8 +77,16 @@ public class RefereeSiteInterface {
                 refereeSite.declareMatchWinner();
                 outMessage = new Message(MessageType.DMWDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
                 break;
+            case MessageType.SETEOFC:
+                outMessage = new Message(MessageType.EOFCDONE, refereeSite.endOfMatch());
+                break;
             case MessageType.END:
-                outMessage = new Message(MessageType.ENDREPLY, refereeSite.endOfMatch());
+                refereeSite.endOperation();
+                outMessage = new Message(MessageType.ENDREPLY);
+                break;
+            case MessageType.SHUT:
+                refereeSite.shutdown();
+                outMessage = new Message(MessageType.SHUTDONE);
                 break;
         }
 

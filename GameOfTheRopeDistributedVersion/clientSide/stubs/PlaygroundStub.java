@@ -303,4 +303,64 @@ public class PlaygroundStub {
 
         ((Contestant) Thread.currentThread()).setContestantState(inMessage.getContestantState());
     }
+
+    /**
+     *  Operation end of work.
+     *
+     *   New operation.
+     */
+
+    public void endOperation (String entity, int id)
+    {
+        ClientCom com;                                                 // communication channel
+        Message outMessage,                                            // outgoing message
+                inMessage;                                             // incoming message
+
+        com = new ClientCom (serverHostName, serverPortNumb);
+        while (!com.open ())
+        { try
+        { Thread.sleep ((long) (1000));
+        }
+        catch (InterruptedException e) {}
+        }
+        outMessage = new Message (MessageType.END, entity, id);
+        com.writeObject (outMessage);
+        inMessage = (Message) com.readObject ();
+        if (inMessage.getMsgType() != MessageType.ENDREPLY)
+        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
+        com.close ();
+    }
+
+    /**
+     *   Operation server shutdown.
+     *
+     *   New operation.
+     */
+
+    public void shutdown ()
+    {
+        ClientCom com;                                                 // communication channel
+        Message outMessage,                                            // outgoing message
+                inMessage;                                             // incoming message
+
+        com = new ClientCom (serverHostName, serverPortNumb);
+        while (!com.open ())
+        { try
+        { Thread.sleep ((long) (1000));
+        }
+        catch (InterruptedException e) {}
+        }
+        outMessage = new Message (MessageType.SHUT);
+        com.writeObject (outMessage);
+        inMessage = (Message) com.readObject ();
+        if (inMessage.getMsgType() != MessageType.SHUTDONE)
+        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
+        com.close ();
+    }
 }

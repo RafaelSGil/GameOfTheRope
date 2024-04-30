@@ -77,6 +77,13 @@ public class ContestantBenchInterface {
                     throw new MessageException("Invalid coach state!", inMessage);
                 }
                 break;
+            case MessageType.END:
+                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) || (!inMessage.getEntity().equals(SimulationParams.COACH)) || (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                    throw new MessageException("Invalid entity!", inMessage);
+                }
+                break;
+            case MessageType.SHUT:
+                break;
         }
 
         /* processing */
@@ -117,6 +124,14 @@ public class ContestantBenchInterface {
                 ((ContestantBenchProxy) Thread.currentThread()).setCoachState(inMessage.getCoachState());
                 contestantsBench.reviewNotes();
                 outMessage = new Message(MessageType.RNDONE);
+                break;
+            case MessageType.END:
+                contestantsBench.endOperation(inMessage.getEntity(), inMessage.getEntity().equals(SimulationParams.CONTESTANT) ? inMessage.getContestantId() :
+                        inMessage.getEntity().equals(SimulationParams.COACH) ? inMessage.getCoachId() : 0);
+                outMessage = new Message(MessageType.ENDREPLY);
+                break;
+            case MessageType.SHUT:
+                outMessage = new Message(MessageType.SHUTDONE);
                 break;
         }
 

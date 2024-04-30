@@ -4,6 +4,7 @@ package serverSide.sharedRegions;
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
 import serverSide.entities.RefereeSiteProxy;
+import serverSide.main.SimulationParams;
 
 /**
  * This class represents the RefereeSite shared region in the Game of the Rope simulation.
@@ -24,6 +25,11 @@ public class RefereeSite {
      * Flag that indicates the end of the match
      */
     private boolean matchEnd;
+
+    /**
+     *   Number of entity groups requesting the shutdown.
+     */
+    private int nEntities;
 
     /**
      * Creates a new RefereeSite instance.
@@ -99,5 +105,26 @@ public class RefereeSite {
         this.matchEnd = matchEnd;
     }
 
+    /**
+     *   Operation server shutdown.
+     *
+     *   New operation.
+     */
+    public synchronized void endOperation ()
+    {
+        Thread.currentThread().interrupt();
+    }
+
+    /**
+     *Operation shut down
+     */
+    public synchronized void shutdown ()
+    {
+        nEntities += 1;
+        if(nEntities >= SimulationParams.NENTITIES){
+            ServerGameOfTheRopeRefereeSite.waitConnection = false;
+        }
+        notifyAll ();                                        // the barber may now terminate
+    }
 
 }

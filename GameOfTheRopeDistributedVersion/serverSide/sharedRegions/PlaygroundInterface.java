@@ -76,6 +76,13 @@ public class PlaygroundInterface {
                     throw new MessageException ("Invalid contestant id!", inMessage);
                 }
                 break;
+            case MessageType.END:
+                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) || (!inMessage.getEntity().equals(SimulationParams.COACH)) || (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                    throw new MessageException("Invalid entity!", inMessage);
+                }
+                break;
+            case MessageType.SHUT:
+                break;
         }
 
         /* processing */
@@ -109,6 +116,15 @@ public class PlaygroundInterface {
                 ((RefereeSiteProxy) Thread.currentThread()).setContestantState(inMessage.getContestantState());
                 playground.amIDone();
                 outMessage = new Message(MessageType.GRDONE, inMessage.getContestantId(), inMessage.getContestantState());
+                break;
+            case MessageType.END:
+                playground.endOperation(inMessage.getEntity(), inMessage.getEntity().equals(SimulationParams.CONTESTANT) ? inMessage.getContestantId() :
+                        inMessage.getEntity().equals(SimulationParams.COACH) ? inMessage.getCoachId() : 0);
+                outMessage = new Message(MessageType.ENDREPLY);
+                break;
+            case MessageType.SHUT:
+                playground.shutdown();
+                outMessage = new Message(MessageType.SHUTDONE);
                 break;
         }
 
