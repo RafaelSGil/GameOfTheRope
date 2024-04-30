@@ -1,6 +1,6 @@
 package serverSide.utils;
 
-import entities.Contestant;
+import serverSide.entities.ContestantBenchProxy;
 import serverSide.main.SimulationParams;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    public static void useStrategy(int strategy, int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
+    public static void useStrategy(int strategy, int team, ContestantBenchProxy[] contestants, List<Integer> playing, List<Integer> benched) {
         switch (strategy) {
             case 0:
                 useStrength(team, contestants, playing, benched);
@@ -52,16 +52,16 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    private static void useStrength(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
-        ArrayList<Contestant> aux = new ArrayList<>();
+    private static void useStrength(int team, ContestantBenchProxy[] contestants, List<Integer> playing, List<Integer> benched) {
+        ArrayList<ContestantBenchProxy> aux = new ArrayList<>();
 
-        for (Contestant c : contestants) {
+        for (ContestantBenchProxy c : contestants) {
             if (c.getContestantTeam() == team) {
                 aux.add(c);
             }
         }
 
-        aux.sort(Comparator.comparingInt(Contestant::getContestantStrength).reversed());
+        aux.sort(Comparator.comparingInt(ContestantBenchProxy::getContestantStrength).reversed());
 
         for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION; i++) {
             playing.add(aux.get(i).getContestantId());
@@ -79,16 +79,16 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    private static void useModerate(int team, Contestant[] contestants, List<Integer> playing, List<Integer> benched) {
-        ArrayList<Contestant> aux = new ArrayList<>();
+    private static void useModerate(int team, ContestantBenchProxy[] contestants, List<Integer> playing, List<Integer> benched) {
+        ArrayList<ContestantBenchProxy> aux = new ArrayList<>();
 
-        for (Contestant c : contestants) {
+        for (ContestantBenchProxy c : contestants) {
             if (c.getContestantTeam() == team) {
                 aux.add(c);
             }
         }
 
-        aux.sort(Comparator.comparingInt(Contestant::getContestantStrength).reversed());
+        aux.sort(Comparator.comparingInt(ContestantBenchProxy::getContestantStrength).reversed());
 
         for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION - 1; i++) {
             playing.add(aux.get(i).getContestantId());

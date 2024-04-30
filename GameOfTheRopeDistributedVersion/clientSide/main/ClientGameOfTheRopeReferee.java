@@ -1,21 +1,21 @@
 package clientSide.main;
 
-import clientSide.entities.Coach;
+import clientSide.entities.Contestant;
+import clientSide.entities.Referee;
 import clientSide.stubs.ContestantsBenchStub;
 import clientSide.stubs.GeneralRepositoryStub;
 import clientSide.stubs.PlaygroundStub;
 import clientSide.stubs.RefereeSiteStub;
 import genclass.GenericIO;
 import serverSide.main.SimulationParams;
-import serverSide.utils.Strategy;
 
 /**
- *    Client side of the Game of the Rope (coaches).
+ *    Client side of the Game of the Rope (referee).
  *
  *    Implementation of a client-server model of type 2 (server replication).
  *    Communication is based on a communication channel under the TCP protocol.
  */
-public class ClientGameOfTheRopeCoach {
+public class ClientGameOfTheRopeReferee {
     /**
      *  Main method.
      *
@@ -28,6 +28,7 @@ public class ClientGameOfTheRopeCoach {
      *        args[5] - port number for listening to service requests
      *        args[6] - name of the platform where is located the playground server
      *        args[7] - port number for listening to service requests
+     *        args[8] - name of the logging file
      */
     public static void main(String[] args){
         String generalRepositoryServerHostName;                 //name of the platform where is located the general repository server
@@ -39,7 +40,7 @@ public class ClientGameOfTheRopeCoach {
         String playgroundServerHostName;                        //name of the platform where is located the playground server
         int playgroundServerPortNumber = -1;                    //port number for listening to service requests
 
-        Coach [] coaches = new Coach[SimulationParams.NTEAMS];  //array of coach threads
+        Referee referee;                                        //referee thread
 
         GeneralRepositoryStub generalRepositoryStub;            //remote reference to the general repository
         ContestantsBenchStub contestantsBenchStub;              //remote reference to the contestant bench
@@ -47,7 +48,7 @@ public class ClientGameOfTheRopeCoach {
         RefereeSiteStub refereeSiteStub;                        //remote reference to the referee site
 
         /* getting problem runtime parameters */
-        if (args.length != 8){
+        if (args.length != 9){
             GenericIO.writelnString ("Wrong number of parameters!");
             System.exit (1);
         }
@@ -106,29 +107,25 @@ public class ClientGameOfTheRopeCoach {
         contestantsBenchStub = new ContestantsBenchStub(contestantBenchServerHostName, contestantBenchServerPortNumber);
         playgroundStub = new PlaygroundStub(playgroundServerHostName, playgroundServerPortNumber);
 
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            coaches[i] = new Coach("Coa" + (i + 1), (i % 2 == 0 ? 0 : 1), (i % 2 == 0 ? Strategy.STRENGTH : Strategy.MODERATE), contestantsBenchStub, playgroundStub, refereeSiteStub);
-        }
+        generalRepositoryStub.initSimul(args[8]);
+
+        referee = new Referee("referee", refereeSiteStub, playgroundStub, contestantsBenchStub);   // referee thread
 
         /* start of the simulation */
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            GenericIO.writelnString("The coach " + (i + 1) + " has started");
-            coaches[i].start();
-        }
+        referee.start();
+        GenericIO.writelnString("The referee has started");
 
         /* waiting for the end of the simulation */
-        GenericIO.writelnString ();
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            while (coaches[i].isAlive()){
-                contestantsBenchStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
-                playgroundStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
-                Thread.yield();
-            }
-            try{
-                coaches[i].join();
-            }catch (InterruptedException e){};
-            GenericIO.writelnString ("The coach " + (i+1) + " has terminated.");
+        while(referee.isAlive()){
+            refereeSiteStub.endOperation();
+            contestantsBenchStub.endOperation(SimulationParams.REFEREE, 0);
+            playgroundStub.endOperation(SimulationParams.REFEREE, 0);
+            Thread.yield();
         }
+        try{
+            referee.join();
+        }catch (InterruptedException e){}
+        GenericIO.writelnString ("The referee has terminated.");
         GenericIO.writelnString();
         refereeSiteStub.shutdown();
         contestantsBenchStub.shutdown();

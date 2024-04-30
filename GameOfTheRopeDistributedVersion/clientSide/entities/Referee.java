@@ -1,9 +1,8 @@
 package clientSide.entities;
 
-import main.SimulationParams;
-import sharedregions.ContestantsBench;
-import sharedregions.Playground;
-import sharedregions.RefereeSite;
+import clientSide.stubs.*;
+import serverSide.sharedRegions.*;
+import serverSide.main.SimulationParams;
 
 
 /**
@@ -24,17 +23,17 @@ public class Referee extends Thread {
     /**
      * Reference to the {@link ContestantsBench} object.
      */
-    private final ContestantsBench bench;
+    private final ContestantsBenchStub bench;
 
     /**
      * Reference to the {@link RefereeSite} object.
      */
-    private final RefereeSite refereeSite;
+    private final RefereeSiteStub refereeSite;
 
     /**
      * Reference to the {@link Playground} object
      */
-    private final Playground playground;
+    private final PlaygroundStub playground;
 
     /**
      * Current game number (1 to {@link SimulationParams#GAMES}
@@ -69,7 +68,7 @@ public class Referee extends Thread {
      * @param playground  The {@link Playground} object
      * @param bench       The {@link ContestantsBench} object
      */
-    public Referee(String threadName, RefereeSite refereeSite, Playground playground, ContestantsBench bench) {
+    public Referee(String threadName, RefereeSiteStub refereeSite, PlaygroundStub playground, ContestantsBenchStub bench) {
         super(threadName);
         this.playground = playground;
         this.refereeSite = refereeSite;
@@ -214,7 +213,7 @@ public class Referee extends Thread {
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
     public synchronized void signalMatchEnded() {
-        refereeSite.setMatchEnd(true);
+        refereeSite.setMatchEnd();
     }
 
     /**

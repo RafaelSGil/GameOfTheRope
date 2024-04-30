@@ -1,9 +1,9 @@
 package clientSide.entities;
 
-import clientSide.stubs.ContestantsBenchStub;
-import clientSide.stubs.PlaygroundStub;
-import clientSide.stubs.RefereeSiteStub;
-import
+import clientSide.stubs.*;
+import serverSide.main.SimulationParams;
+import serverSide.sharedRegions.*;
+
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
  * Each contestant belongs to a team and has a specific strength level.

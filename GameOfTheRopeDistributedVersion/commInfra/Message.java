@@ -2,6 +2,7 @@ package commInfra;
 
 import java.io.*;
 import genclass.GenericIO;
+import serverSide.main.SimulationParams;
 
 /**
  *   Internal structure of the exchanged messages.
@@ -25,31 +26,46 @@ public class Message implements Serializable
     private int msgType = -1;
 
     /**
-     *  Barber identification.
+     * Referee state
      */
-
-    private int barbId = -1;
+    private int refereeState = -1;
 
     /**
-     *  Barber state.
+     *  Coach identification.
      */
 
-    private int barbState = -1;
+    private int coachId = -1;
 
     /**
-     *  Customer identification.
+     *  Coach state.
      */
 
-    private int custId = -1;
+    private int coachState = -1;
 
     /**
-     *  Customer state.
+     *  Contestant identification.
      */
 
-    private int custState = -1;
+    private int contestantId = -1;
 
     /**
-     *  End of operations (barber).
+     *  Contestant state.
+     */
+
+    private int contestantState = -1;
+
+    /**
+     * contestant strength
+     */
+    private int contestantStrength = -1;
+
+    /**
+     * contestant team
+     */
+    private int contestantTeam = -1;
+
+    /**
+     *  End of operations (referee).
      */
 
     private boolean endOp = false;
@@ -61,10 +77,44 @@ public class Message implements Serializable
     private String fName = null;
 
     /**
-     *  Number of iterations of the customer life cycle.
+     * Current game
      */
+    private int game = -1;
 
-    private int nIter = -1;
+    /**
+     * Current trial
+     */
+    private int trial = -1;
+
+    /**
+     * Current position of the rope
+     */
+    private int ropePosition = 0;
+
+    /**
+     * winning tram
+     */
+    private int winningTeam = -1;
+
+    /**
+     * winning cause
+     */
+    private String winningCause = null;
+
+    /**
+     * match end message
+     */
+    private String endMatchMsg = null;
+
+    /**
+     * flag symbolizing whether to print the header or not
+     */
+    private boolean printHeader = false;
+
+    /**
+     * flag to represent which entity asked to end the operations
+     */
+    private String entity = null;
 
     /**
      *  Message instantiation (form 1).
@@ -81,21 +131,25 @@ public class Message implements Serializable
      *  Message instantiation (form 2).
      *
      *     @param type message type
-     *     @param id barber / customer identification
-     *     @param state barber / customer state
+     *     @param id coach / contestant identification
+     *     @param state coach / contestant state
      */
 
     public Message (int type, int id, int state)
     {
         msgType = type;
-        if ((msgType == MessageType.STBST) || (msgType == MessageType.CALLCUST) || (msgType == MessageType.RPAYDONE))
-        { barbId= id;
-            barbState = state;
+        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.SETRN) || (msgType == MessageType.UPCOA)){
+            coachId= id;
+            coachState = state;
         }
-        else if ((msgType == MessageType.STCST) || (msgType == MessageType.REQCUTH) || (msgType == MessageType.CUTHDONE) ||
-                (msgType == MessageType.BSHOPF))
-        { custId= id;
-            custState = state;
+        else if ((msgType == MessageType.SETFCA) || (msgType == MessageType.FCADONE) || (msgType == MessageType.SETGR) ||
+                (msgType == MessageType.SETAID) || (msgType == MessageType.SETSD)){
+            contestantId= id;
+            contestantState = state;
+        }
+        else if((msgType == MessageType.SETANG) || (msgType == MessageType.SETCT) || (msgType == MessageType.SETST)
+                || (msgType == MessageType.SETATD)){
+            refereeState = state;
         }
         else { GenericIO.writelnString ("Message type = " + msgType + ": non-implemented instantiation!");
             System.exit (1);
@@ -106,79 +160,179 @@ public class Message implements Serializable
      *  Message instantiation (form 3).
      *
      *     @param type message type
-     *     @param id barber identification
+     *     @param value integer value, assigned depending on the type
      */
 
-    public Message (int type, int id)
+    public Message (int type, int value)
     {
         msgType = type;
-        barbId= id;
+
+        switch (type){
+            case MessageType.SETATD:
+            case MessageType.SETCT:
+            case MessageType.UPREF:
+                refereeState = value;
+                break;
+            case MessageType.SETG:
+                game = value;
+                break;
+            case MessageType.SETT:
+                trial = value;
+                break;
+            case MessageType.SETRP:
+                ropePosition = value;
+                break;
+
+        }
     }
 
     /**
      *  Message instantiation (form 4).
      *
      *     @param type message type
-     *     @param id barber identification
-     *     @param endOP end of operations flag
+     *     @param flag end of operations flag / print header flag
      */
 
-    public Message (int type, int id, boolean endOp)
+    public Message (int type, boolean flag)
     {
         msgType = type;
-        barbId= id;
-        this.endOp = endOp;
+        switch (type){
+            case MessageType.RS:
+                this.printHeader = flag;
+                break;
+            case MessageType.EOFCDONE:
+            case MessageType.SETATD:
+            case MessageType.ATDDONE:
+            case MessageType.ENDREPLY:
+                this.endOp = flag;
+                break;
+        }
     }
 
     /**
      *  Message instantiation (form 5).
      *
      *     @param type message type
-     *     @param barbId barber identification
-     *     @param barbState barber state
-     *     @param custId customer identification
+     *     @param coachId coach identification
+     *     @param coachState barber state
+     *     @param contestantId customer identification
      */
 
-    public Message (int type, int barbId, int barbState, int custId)
+    public Message (int type, int coachId, int coachState, int contestantId)
     {
         msgType = type;
-        this.barbId= barbId;
-        this.barbState = barbState;
-        this.custId= custId;
+        this.coachId= coachId;
+        this.coachState = coachState;
+        this.contestantId= contestantId;
     }
 
     /**
      *  Message instantiation (form 6).
      *
      *     @param type message type
-     *     @param barbId barber identification
-     *     @param barbState barber state
-     *     @param custId customer identification
-     *     @param custState customer state
+     *     @param coachId coach identification
+     *     @param coachState coach state
+     *     @param contestantId customer identification
+     *     @param contestantState customer state
+     *     @param refereeState referee state
      */
 
-    public Message (int type, int barbId, int barbState, int custId, int custState)
+    public Message (int type, int coachId, int coachState, int contestantId, int contestantState, int refereeState)
     {
         msgType = type;
-        this.barbId= barbId;
-        this.barbState = barbState;
-        this.custId= custId;
-        this.custState = custState;
+        this.coachId= coachId;
+        this.coachState = coachState;
+        this.contestantId= contestantId;
+        this.contestantState = contestantState;
+        this.refereeState = refereeState;
     }
 
     /**
      *  Message instantiation (form 7).
      *
      *     @param type message type
-     *     @param name name of the logging file
-     *     @param nIter number of iterations of the customer life cycle
+     *     @param name name of the logging file / match end message
      */
 
-    public Message (int type, String name, int nIter)
+    public Message (int type, String name)
     {
         msgType = type;
-        fName= name;
-        this.nIter = nIter;
+        if(type == MessageType.SETNFIC){
+            fName= name;
+        }
+        switch (type){
+            case MessageType.SETNFIC:
+                fName= name;
+                break;
+            case MessageType.SETMW:
+                endMatchMsg = name;
+                break;
+
+        }
+    }
+
+    /**
+     *  Message instantiation (form 8)
+     *
+     *  @param type               message type
+     *  @param contestantId       The ID of the contestant to update.
+     *  @param contestantStrength The strength of the contestant.
+     *  @param contestantState    The state of the contestant.
+     *  @param contestantTeam     The team of the contestant.
+     */
+    public Message(int type, int contestantId, int contestantStrength, int contestantState, int contestantTeam){
+        this.msgType = type;
+        this.contestantId = contestantId;
+        this.contestantState = contestantState;
+        this.contestantStrength = contestantStrength;
+        this.contestantTeam = contestantTeam;
+    }
+
+    /**
+     * Message instantiation (form 9)
+     *
+     * @param type message type
+     * @param winningTeam winning team
+     * @param winningCause winning cause
+     */
+    public Message(int type, int winningTeam, String winningCause){
+        this.msgType = type;
+        this.winningTeam = winningTeam;
+        this.winningCause = winningCause;
+    }
+
+    public Message(int type, String entity, int id){
+        msgType = type;
+
+        switch (entity){
+            case SimulationParams.REFEREE:
+                this.entity = entity;
+                break;
+            case SimulationParams.COACH:
+                this.entity = entity;
+                this.coachId = id;
+                break;
+            case SimulationParams.CONTESTANT:
+                this.entity = entity;
+                this.contestantId = id;
+                break;
+        }
+    }
+
+    /**
+     * get entity
+     * @return entity type
+     */
+    public String getEntity() {
+        return entity;
+    }
+
+    /**
+     * Set new entity
+     * @param entity entity type
+     */
+    public void setEntity(String entity) {
+        this.entity = entity;
     }
 
     /**
@@ -186,65 +340,72 @@ public class Message implements Serializable
      *
      *     @return message type
      */
-
     public int getMsgType ()
     {
         return (msgType);
     }
 
     /**
-     *  Getting barber identification.
+     *  Getting coach identification.
      *
-     *     @return barber identification
+     *     @return coach identification
      */
 
-    public int getBarbId ()
+    public int getCoachId ()
     {
-        return (barbId);
+        return (coachId);
     }
 
     /**
-     *  Getting barber state.
+     *  Getting coach state.
      *
-     *     @return barber state
+     *     @return coach state
      */
 
-    public int getBarbState ()
+    public int getCoachState ()
     {
-        return (barbState);
+        return (coachState);
     }
 
     /**
-     *  Getting customer identification.
+     *  Getting contestant identification.
      *
-     *     @return customer identification
+     *     @return contestant identification
      */
 
-    public int getCustId ()
+    public int getContestantId ()
     {
-        return (custId);
+        return (contestantId);
     }
 
     /**
-     *  Getting customer state.
+     *  Getting contestant state.
      *
-     *     @return customer state
+     *     @return contestant state
      */
 
-    public int getCustState ()
+    public int getContestantState ()
     {
-        return (custState);
+        return (contestantState);
     }
 
     /**
-     *  Getting end of operations flag (barber).
+     *  Getting end of operations flag (referee).
      *
      *     @return end of operations flag
      */
-
     public boolean getEndOp ()
     {
         return (endOp);
+    }
+
+    /**
+     * Getting referee state
+     *
+     * @return referee state
+     */
+    public int getRefereeState(){
+        return refereeState;
     }
 
     /**
@@ -259,14 +420,165 @@ public class Message implements Serializable
     }
 
     /**
-     *  Getting the number of iterations of the customer life cycle.
+     * Gets the strength of the contestant.
      *
-     *     @return number of iterations of the customer life cycle
+     * @return The strength of the contestant.
      */
+    public int getContestantStrength() {
+        return contestantStrength;
+    }
 
-    public int getNIter ()
-    {
-        return (nIter);
+    /**
+     * Sets the strength of the contestant.
+     *
+     * @param contestantStrength The strength of the contestant to set.
+     */
+    public void setContestantStrength(int contestantStrength) {
+        this.contestantStrength = contestantStrength;
+    }
+
+    /**
+     * Gets the team of the contestant.
+     *
+     * @return The team of the contestant.
+     */
+    public int getContestantTeam() {
+        return contestantTeam;
+    }
+
+    /**
+     * Sets the team of the contestant.
+     *
+     * @param contestantTeam The team of the contestant to set.
+     */
+    public void setContestantTeam(int contestantTeam) {
+        this.contestantTeam = contestantTeam;
+    }
+
+    /**
+     * Gets the game ID.
+     *
+     * @return The ID of the game.
+     */
+    public int getGame() {
+        return game;
+    }
+
+    /**
+     * Sets the game ID.
+     *
+     * @param game The ID of the game to set.
+     */
+    public void setGame(int game) {
+        this.game = game;
+    }
+
+    /**
+     * Gets the trial number.
+     *
+     * @return The trial number.
+     */
+    public int getTrial() {
+        return trial;
+    }
+
+    /**
+     * Sets the trial number.
+     *
+     * @param trial The trial number to set.
+     */
+    public void setTrial(int trial) {
+        this.trial = trial;
+    }
+
+    /**
+     * Gets the position of the rope.
+     *
+     * @return The position of the rope.
+     */
+    public int getRopePosition() {
+        return ropePosition;
+    }
+
+    /**
+     * Sets the position of the rope.
+     *
+     * @param ropePosition The position of the rope to set.
+     */
+    public void setRopePosition(int ropePosition) {
+        this.ropePosition = ropePosition;
+    }
+
+    /**
+     * Gets the ID of the winning team.
+     *
+     * @return The ID of the winning team.
+     */
+    public int getWinningTeam() {
+        return winningTeam;
+    }
+
+    /**
+     * Sets the ID of the winning team.
+     *
+     * @param winningTeam The ID of the winning team to set.
+     */
+    public void setWinningTeam(int winningTeam) {
+        this.winningTeam = winningTeam;
+    }
+
+    /**
+     * Gets the cause of winning.
+     *
+     * @return The cause of winning.
+     */
+    public String getWinningCause() {
+        return winningCause;
+    }
+
+    /**
+     * Sets the cause of winning.
+     *
+     * @param winningCause The cause of winning to set.
+     */
+    public void setWinningCause(String winningCause) {
+        this.winningCause = winningCause;
+    }
+
+    /**
+     * Gets the end match message.
+     *
+     * @return The end match message.
+     */
+    public String getEndMatchMsg() {
+        return endMatchMsg;
+    }
+
+    /**
+     * Sets the end match message.
+     *
+     * @param endMatchMsg The end match message to set.
+     */
+    public void setEndMatchMsg(String endMatchMsg) {
+        this.endMatchMsg = endMatchMsg;
+    }
+
+    /**
+     * Checks if the header should be printed.
+     *
+     * @return True if the header should be printed, false otherwise.
+     */
+    public boolean isPrintHeader() {
+        return printHeader;
+    }
+
+    /**
+     * Sets whether the header should be printed.
+     *
+     * @param printHeader True if the header should be printed, false otherwise.
+     */
+    public void setPrintHeader(boolean printHeader) {
+        this.printHeader = printHeader;
     }
 
     /**
@@ -281,12 +593,12 @@ public class Message implements Serializable
     public String toString ()
     {
         return ("Message type = " + msgType +
-                "\nBarber Id = " + barbId +
-                "\nBarber State = " + barbState +
-                "\nCustomer Id = " + custId +
-                "\nCustomer State = " + custState +
-                "\nEnd of Operations (barber) = " + endOp +
-                "\nName of logging file = " + fName +
-                "\nNumber of iterations = " + nIter);
+                "\nReferee State = " + refereeState +
+                "\nCoach Id = " + coachId +
+                "\nCoach State = " + coachState +
+                "\nContestant Id = " + contestantId +
+                "\nContestant State = " + contestantState +
+                "\nEnd of Operations (referee) = " + endOp +
+                "\nName of logging file = " + fName);
     }
 }

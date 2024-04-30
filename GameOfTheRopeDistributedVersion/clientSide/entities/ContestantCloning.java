@@ -1,5 +1,7 @@
 package clientSide.entities;
 
+import serverSide.main.SimulationParams;
+
 public interface ContestantCloning {
     /**
      * Gets the current state of the contestant.
@@ -20,9 +22,7 @@ public interface ContestantCloning {
      *
      * @return The team number (0 or 1).
      */
-    public int getContestantTeam() {
-        return contestantTeam;
-    }
+    public int getContestantTeam();
 
     /**
      * Sets the team that the contestant belongs to.
@@ -67,4 +67,11 @@ public interface ContestantCloning {
      * @param playing True if the contestant is now playing, false otherwise.
      */
     public void setPlaying(boolean playing);
+
+    /**
+     * Adjusts the contestant's strength based on their playing state.
+     * If playing, strength decreases by 1 (up to a minimum of {@link serverSide.main.SimulationParams#MINSTRENGTH}).
+     * If not playing, strength increases by 1 (up to a maximum of {@link serverSide.main.SimulationParams#MAXSTRENGTH}).
+     */
+    public  void manageStrength();
 }

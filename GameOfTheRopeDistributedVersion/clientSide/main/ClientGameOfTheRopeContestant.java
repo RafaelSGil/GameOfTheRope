@@ -1,21 +1,21 @@
 package clientSide.main;
 
 import clientSide.entities.Coach;
+import clientSide.entities.Contestant;
 import clientSide.stubs.ContestantsBenchStub;
 import clientSide.stubs.GeneralRepositoryStub;
 import clientSide.stubs.PlaygroundStub;
 import clientSide.stubs.RefereeSiteStub;
 import genclass.GenericIO;
 import serverSide.main.SimulationParams;
-import serverSide.utils.Strategy;
 
 /**
- *    Client side of the Game of the Rope (coaches).
+ *    Client side of the Game of the Rope (contestants).
  *
  *    Implementation of a client-server model of type 2 (server replication).
  *    Communication is based on a communication channel under the TCP protocol.
  */
-public class ClientGameOfTheRopeCoach {
+public class ClientGameOfTheRopeContestant {
     /**
      *  Main method.
      *
@@ -39,7 +39,7 @@ public class ClientGameOfTheRopeCoach {
         String playgroundServerHostName;                        //name of the platform where is located the playground server
         int playgroundServerPortNumber = -1;                    //port number for listening to service requests
 
-        Coach [] coaches = new Coach[SimulationParams.NTEAMS];  //array of coach threads
+        Contestant[] contestants = new Contestant[SimulationParams.NCONTESTANTS];   //array of contestant threads
 
         GeneralRepositoryStub generalRepositoryStub;            //remote reference to the general repository
         ContestantsBenchStub contestantsBenchStub;              //remote reference to the contestant bench
@@ -106,28 +106,28 @@ public class ClientGameOfTheRopeCoach {
         contestantsBenchStub = new ContestantsBenchStub(contestantBenchServerHostName, contestantBenchServerPortNumber);
         playgroundStub = new PlaygroundStub(playgroundServerHostName, playgroundServerPortNumber);
 
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            coaches[i] = new Coach("Coa" + (i + 1), (i % 2 == 0 ? 0 : 1), (i % 2 == 0 ? Strategy.STRENGTH : Strategy.MODERATE), contestantsBenchStub, playgroundStub, refereeSiteStub);
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            contestants[i] = new Contestant("Cont_" + (i + 1), i, (i % 2 == 0 ? 0 : 1), Contestant.GenerateRandomStrength(), contestantsBenchStub, playgroundStub, refereeSiteStub);
         }
 
         /* start of the simulation */
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            GenericIO.writelnString("The coach " + (i + 1) + " has started");
-            coaches[i].start();
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; ++i) {
+            GenericIO.writelnString("The contestant " + (i) + " has started");
+            contestants[i].start();
         }
 
         /* waiting for the end of the simulation */
         GenericIO.writelnString ();
-        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            while (coaches[i].isAlive()){
-                contestantsBenchStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
-                playgroundStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            while (contestants[i].isAlive()){
+                contestantsBenchStub.endOperation(SimulationParams.CONTESTANT, contestants[i].getContestantId());
+                playgroundStub.endOperation(SimulationParams.CONTESTANT, contestants[i].getContestantId());
                 Thread.yield();
             }
             try{
-                coaches[i].join();
+                contestants[i].join();
             }catch (InterruptedException e){};
-            GenericIO.writelnString ("The coach " + (i+1) + " has terminated.");
+            GenericIO.writelnString ("The contestant " + (i+1) + " has terminated.");
         }
         GenericIO.writelnString();
         refereeSiteStub.shutdown();

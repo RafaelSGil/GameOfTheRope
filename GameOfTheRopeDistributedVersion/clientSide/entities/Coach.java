@@ -1,8 +1,8 @@
 package clientSide.entities;
 
-import clientSide.stubs.ContestantsBenchStub;
-import clientSide.stubs.PlaygroundStub;
-import clientSide.stubs.RefereeSiteStub;
+
+import clientSide.stubs.*;
+import serverSide.sharedRegions.*;
 
 /**
  * This class represents a Coach entity in the game of the rope simulation.
@@ -16,7 +16,7 @@ public class Coach extends Thread {
 
     /**
      * Internal Coach State
-     * Possible states are defined in {@link entities.CoachStates}
+     * Possible states are defined in {@link CoachStates}
      */
     private int coachState;
 

@@ -2,7 +2,7 @@ package commInfra;
 
 /**
  *   Type of the exchanged messages.
- *the
+ *
  *   Implementation of a client-server model of type 2 (server replication).
  *   Communication is based on a communication channel under the TCP protocol.
  */
@@ -182,116 +182,164 @@ public class MessageType
      */
     public static final int DMWDONE = 34;
 
+    /**
+     * Unblock the contestant bench (service request)
+     */
+    public static final int UCB = 35;
+
+    /**
+     * Unblock the contestant bench (reply)
+     */
+    public static final int UCBDONE = 36;
+
     //todo ################### GENERAL REPOSITORY ###################
 
     /**
      * Set Game (service request).
      */
-    public static final int SETG = 35;
+    public static final int SETG = 37;
 
     /**
      * Set Game (reply).
      */
-    public static final int GDONE = 36;
+    public static final int GDONE = 38;
 
     /**
      * Get Game (service request).
      */
-
-    public static final int GETG = 37;
+    public static final int GETG = 39;
 
     /**
      * Get Game (reply).
      */
-    public static final int GETGDONE = 38;
+    public static final int GETGDONE = 40;
 
     /**
      * Get Trial (service request).
      */
-    public static final int GETT = 39;
+    public static final int GETT = 41;
 
     /**
      * Get Trial (reply).
      */
-    public static final int GETTDONE = 40;
+    public static final int GETTDONE = 42;
 
     /**
-     *  Set Trial (service request).
+     * Set Trial (service request).
      */
-    public static final int SETT = 41;
+    public static final int SETT = 43;
 
     /**
-     *  Set Trial (reply).
+     * Set Trial (reply).
      */
-
-    public static final int SETTDONE = 42;
+    public static final int SETTDONE = 44;
 
     /**
      * Set Rope Position (service request).
      */
-    public static final int SETRP = 43;
+    public static final int SETRP = 45;
 
     /**
      * Set Rope Position (reply).
      */
-    public static final int RPDONE = 44;
+    public static final int RPDONE = 46;
 
     /**
      * Update Referee (service request).
      */
-    public static final int UPREF = 45;
+    public static final int UPREF = 47;
 
     /**
      * Update Referee (reply).
      */
-
-    public static final int UPREFDONE = 46;
-
-    /**
-     * Update Referee (service request).
-     */
-    public static final int UPCOA = 47;
+    public static final int UPREFDONE = 48;
 
     /**
-     * Update Referee (reply).
+     * Update Coach (service request).
      */
-
-    public static final int UPCOADONE = 48;
+    public static final int UPCOA = 49;
 
     /**
-     * Update Referee (service request).
+     * Update Coach (reply).
      */
-    public static final int UPCONT = 49;
+    public static final int UPCOADONE = 50;
 
     /**
-     * Update Referee (reply).
+     * Update Contestant (service request).
      */
-
-    public static final int UPCONTDONE = 50;
+    public static final int UPCONT = 51;
 
     /**
-     * Set Game Winner in General Repository(service request).
+     * Update Contestant (reply).
      */
-
-    public static final int SETGW = 51;
+    public static final int UPCONTDONE = 52;
 
     /**
-     * Set Game Winner in General Repository(reply).
+     * Set Game Winner in General Repository (service request).
      */
-
-    public static final int GWDONE = 52;
+    public static final int SETGW = 53;
 
     /**
-     * Set Match Winner in General Repository(service request).
+     * Set Game Winner in General Repository (reply).
      */
-
-    public static final int SETMW = 53;
+    public static final int GWDONE = 54;
 
     /**
-     * Set Match Winner in General Repository(reply).
+     * Set Match Winner in General Repository (service request).
      */
+    public static final int SETMW = 55;
 
-    public static final int MWDONE = 54;
+    /**
+     * Set Match Winner in General Repository (reply).
+     */
+    public static final int MWDONE = 56;
 
+    /**
+     * Report the general state of the game (service request)
+     * Write to logger
+     */
+    public static final int RS = 57;
+
+    /**
+     * Report the general state of the game (reply)
+     * Write to logger
+     */
+    public static final int RSDONE = 58;
+
+    /**
+     * Report the game state of the game (service request)
+     * Write to logger
+     */
+    public static final int RGS = 59;
+
+    /**
+     * Report the game state of the game (reply)
+     * Write to logger
+     */
+    public static final int RGSDONE = 60;
+
+    /**
+     * Report the start game state of the game (service request)
+     * Write to logger
+     */
+    public static final int RGSTR = 61;
+
+    /**
+     * Report the start game state of the game (reply)
+     * Write to logger
+     */
+    public static final int RGSTRDONE = 62;
+
+    //todo ===============================
+
+    /**
+     * end of the match flag (service request)
+     */
+    public static final int END = 63;
+
+    /**
+     * end of the match flag (reply)
+     */
+    public static final int ENDREPLY = 64;
 
 }
