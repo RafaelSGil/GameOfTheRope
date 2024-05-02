@@ -92,9 +92,9 @@ public class Playground {
     public synchronized void callTrial() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
-        repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
+        repository.updateReferee(referee.getRefereeSate());
         referee.setTrial(referee.getTrial() + 1);
-        repository.setTrial(referee.getTrial());
+        repository.setTrial(referee.getTrial(), referee.getRefereeSate());
         repository.reportStatus(false);
     }
 
@@ -122,6 +122,7 @@ public class Playground {
      * Wake up the contestants
      */
     public synchronized void startTrial() {
+        this.referee = ((PlaygroundProxy) Thread.currentThread());
         trialStarted = false;
 
         // synchronize, will get waken up by the last coach
@@ -133,8 +134,8 @@ public class Playground {
             }
         }
 
-        ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
-        repository.updateReferee(((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
+        referee.setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
+        repository.updateReferee(referee.getRefereeSate());
         repository.setRopePosition(ropePosition);
         repository.reportStatus(false);
 

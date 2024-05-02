@@ -14,16 +14,88 @@ import serverSide.sharedRegions.RefereeSite;
 public class PlaygroundProxy extends Thread implements CoachCloning, ContestantCloning, RefereeCloning {
 
     /**
-     *  Number of instantiated threads.
+     * Internal Coach State
+     * Possible states are defined in {@link CoachStates}
      */
-
-    private static int nProxy = 0;
+    private int coachState;
 
     /**
-     *  Generation of the instantiation identifier.
-     *
-     *     @return instantiation identifier
+     * Team that the coach belongs to.
      */
+    private int coachTeam;
+
+    /**
+     * Which strategy is going to use to choose the contestants
+     */
+    private int strategy;
+
+    /**
+     * Internal state of the contestant
+     * Possible states are defined in {@link ContestantStates}
+     */
+    private int contestantState;
+
+    /**
+     * Team that the contestant belongs to (0 or 1).
+     */
+    private int contestantTeam;
+
+    /**
+     * Strength level of the contestant.
+     * Strength is an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
+     */
+    private int contestantStrength;
+
+    /**
+     * Unique identifier for the contestant.
+     */
+    private int contestantId;
+
+    /**
+     * Indicates whether the contestant is currently participating in a trial.
+     */
+    private boolean isPlaying;
+
+    /**
+     * Internal state of the referee. Possible states are defined in {@link RefereeStates}.
+     */
+    private int refereeState;
+
+    /**
+     * Current game number (1 to {@link SimulationParams#GAMES}
+     */
+    private int game;
+
+    /**
+     * Current Trial number (1 to {@link SimulationParams#NTRIALS})
+     */
+    private int trial;
+
+    /**
+     * Stores the reason for a team's victory if applicable.
+     */
+    private String winCause;
+
+    /**
+     * Stores the results for each trial of each game
+     * 3 rows --> 3 games
+     * 6 columns --> 6 trials
+     * -1 --> team 1 won
+     * 0 --> draw
+     * 1 --> team 2 won
+     */
+    private final int[] matchRecords;
+
+    /**
+     * flag for Match end
+     */
+    private boolean matchEnd;
+
+    /**
+     *  Number of instantiated threads.
+     */
+    private static int nProxy = 0;
+
 
     /**
      *  Communication channel.
@@ -61,11 +133,13 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
         super("PlaygroundProxy_" + PlaygroundProxy.getProxyId());
         this.sconi = sconi;
         this.playgroundInterface = playgroundInterface;
+        this.matchRecords = new int[SimulationParams.GAMES];
+
     }
 
     @Override
     public int getCoachState() {
-        return 0;
+        return coachState;
     }
 
     /**
@@ -75,7 +149,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setCoachState(int coachState) {
-
+        this.coachState = coachState;
     }
 
     /**
@@ -85,7 +159,15 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getCoachTeam() {
-        return 0;
+        return coachTeam;
+    }
+
+    /**
+     * Sets the team that the coach belongs
+     */
+    @Override
+    public void setCoachTeam(int team) {
+        this.coachTeam = team;
     }
 
     /**
@@ -95,7 +177,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getStrategy() {
-        return 0;
+        return strategy;
     }
 
     /**
@@ -105,7 +187,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setStrategy(int strategy) {
-
+        this.strategy = strategy;
     }
 
     /**
@@ -115,7 +197,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getContestantState() {
-        return 0;
+        return contestantState;
     }
 
     /**
@@ -125,7 +207,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setContestantState(int contestantState) {
-
+        this.contestantState = contestantState;
     }
 
     /**
@@ -135,7 +217,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getContestantTeam() {
-        return 0;
+        return contestantTeam;
     }
 
     /**
@@ -145,7 +227,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setContestantTeam(int contestantTeam) {
-
+        this.contestantTeam = contestantTeam;
     }
 
     /**
@@ -155,7 +237,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getContestantStrength() {
-        return 0;
+        return contestantStrength;
     }
 
     /**
@@ -165,7 +247,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setContestantStrength(int contestantStrength) {
-
+        this.contestantStrength = contestantStrength;
     }
 
     /**
@@ -175,7 +257,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getContestantId() {
-        return 0;
+        return contestantId;
     }
 
     /**
@@ -185,7 +267,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public boolean isPlaying() {
-        return false;
+        return isPlaying;
     }
 
     /**
@@ -195,7 +277,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setPlaying(boolean playing) {
-
+        this.isPlaying = playing;
     }
 
     /**
@@ -205,7 +287,11 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void manageStrength() {
-
+        if (isPlaying && contestantStrength > 0) {
+            contestantStrength = contestantStrength - 1;
+        } else if(!isPlaying && contestantStrength >0){
+            contestantStrength = contestantStrength + 1;
+        }
     }
 
     /**
@@ -215,7 +301,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getRefereeSate() {
-        return 0;
+        return refereeState;
     }
 
     /**
@@ -225,7 +311,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setRefereeSate(int refereeSate) {
-
+        this.refereeState = refereeSate;
     }
 
     /**
@@ -235,7 +321,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getGame() {
-        return 0;
+        return game;
     }
 
     /**
@@ -245,7 +331,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setGame(int game) {
-
+        this.game = game;
     }
 
     /**
@@ -255,7 +341,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getTrial() {
-        return 0;
+        return trial;
     }
 
     /**
@@ -265,7 +351,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setTrial(int trial) {
-
+        this.trial = trial;
     }
 
     /**
@@ -275,7 +361,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setGameResult(int result) {
-
+        this.matchRecords[game - 1] = result;
     }
 
     /**
@@ -285,7 +371,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public String getWinCause() {
-        return null;
+        return winCause;
     }
 
     /**
@@ -295,7 +381,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void setWinCause(String winCause) {
-
+        this.winCause = winCause;
     }
 
     /**
@@ -306,7 +392,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public int getGameResult(int game) {
-        return 0;
+        return matchRecords[game];
     }
 
     /**
@@ -316,7 +402,35 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public String finalResults() {
-        return null;
+        int team1 = 0;
+        int team2 = 0;
+
+        for (int i = 0; i < SimulationParams.GAMES; i++) {
+            switch (getGameResult(i)) {
+                case -1:
+                    team1++;
+                    break;
+                case 1:
+                    team2++;
+                    break;
+                case 0:
+                    break;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (team1 == team2) {
+            return "Match was a draw";
+        } else if (team1 > team2) {
+            sb.append("Match was won by team " + 1);
+        } else {
+            sb.append("Match was won by team " + 2);
+        }
+
+        sb.append(" (").append(team1).append("-").append(team2).append(").");
+
+        return sb.toString();
     }
 
     /**
@@ -324,8 +438,19 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public void signalMatchEnded() {
-
+        matchEnd = true;
     }
+
+    /**
+     * Retrieve the value of the flag
+     *
+     * @return whether the game ended or not
+     */
+    @Override
+    public boolean getMatchEnd() {
+        return matchEnd;
+    }
+
 
     @Override
     public void run() {

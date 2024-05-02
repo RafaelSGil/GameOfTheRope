@@ -4,6 +4,7 @@ import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
+import genclass.GenericIO;
 import serverSide.main.SimulationParams;
 
 /**
@@ -54,12 +55,12 @@ public class GeneralRepositoryInterface {
                 }
                 break;
             case MessageType.SETG:
-                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) || (inMessage.getRefereeState() != RefereeStates.ENDGAME)){
+                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) && (inMessage.getRefereeState() != RefereeStates.ENDGAME)){
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETT:
-                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) || (inMessage.getRefereeState() != RefereeStates.TEAMSREADY)){
+                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) && (inMessage.getRefereeState() != RefereeStates.TEAMSREADY)){
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
