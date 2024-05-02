@@ -3,6 +3,7 @@ package serverSide.sharedRegions;
 
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
+import genclass.GenericIO;
 import serverSide.entities.RefereeSiteProxy;
 import serverSide.main.ServerGameOfTheRopeRefereeSite;
 import serverSide.main.SimulationParams;
@@ -51,8 +52,8 @@ public class RefereeSite {
     public synchronized void announceNewGame(){
         ((RefereeSiteProxy) Thread.currentThread()).setGame(((RefereeSiteProxy) Thread.currentThread()).getGame() + 1);
         ((RefereeSiteProxy) Thread.currentThread()).setTrial(0);
-        repository.setTrial(0);
-        repository.setGame(((RefereeSiteProxy) Thread.currentThread()).getGame());
+        repository.setTrial(0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+        repository.setGame(((RefereeSiteProxy) Thread.currentThread()).getGame(), ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());

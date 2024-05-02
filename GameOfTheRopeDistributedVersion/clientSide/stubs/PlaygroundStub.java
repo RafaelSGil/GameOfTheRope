@@ -3,6 +3,7 @@ package clientSide.stubs;
 import clientSide.entities.Coach;
 import clientSide.entities.Contestant;
 import clientSide.entities.Referee;
+import clientSide.entities.RefereeStates;
 import commInfra.ClientCom;
 import commInfra.Message;
 import commInfra.MessageType;
@@ -58,7 +59,7 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETCT, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.SETCT, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(), ((Referee) Thread.currentThread()).getTrial());
         com.writeObject(outMessage);
 
         // receive response
@@ -70,7 +71,7 @@ public class PlaygroundStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
+        if((inMessage.getRefereeState() != RefereeStates.TEAMSREADY)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid referee state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -82,6 +83,7 @@ public class PlaygroundStub {
         benchStub.refereeCallTrial();
 
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+        ((Referee) Thread.currentThread()).setTrial(inMessage.getTrial());
     }
 
     /**
@@ -115,7 +117,7 @@ public class PlaygroundStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
+        if((inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid referee state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -146,7 +148,7 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(), ((Referee) Thread.currentThread()).getTrial());
         com.writeObject(outMessage);
 
         // receive response
@@ -158,7 +160,7 @@ public class PlaygroundStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
+        if((inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid referee state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -171,6 +173,7 @@ public class PlaygroundStub {
         bench.unblockContestantBench();
 
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+        ((Referee) Thread.currentThread()).setGameResult(inMessage.getGameResult());
 
         return inMessage.getEndOp();
     }

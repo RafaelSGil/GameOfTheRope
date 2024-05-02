@@ -6,7 +6,7 @@ import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
-import serverSide.entities.RefereeSiteProxy;
+import serverSide.entities.PlaygroundProxy;
 import serverSide.main.SimulationParams;
 
 public class PlaygroundInterface {
@@ -38,7 +38,7 @@ public class PlaygroundInterface {
         /* validation of the incoming message */
         switch (inMessage.getMsgType ()){
             case MessageType.SETCT:
-                if((inMessage.getRefereeState() != RefereeStates.STARTGAME) || (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
+                if((inMessage.getRefereeState() != RefereeStates.STARTGAME) && (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
@@ -77,7 +77,7 @@ public class PlaygroundInterface {
                 }
                 break;
             case MessageType.END:
-                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) || (!inMessage.getEntity().equals(SimulationParams.COACH)) || (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
                     throw new MessageException("Invalid entity!", inMessage);
                 }
                 break;
@@ -88,31 +88,34 @@ public class PlaygroundInterface {
         /* processing */
         switch (inMessage.getMsgType ()){
             case MessageType.SETCT:
-                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                ((PlaygroundProxy) Thread.currentThread()).setGame(inMessage.getGame());
+                ((PlaygroundProxy) Thread.currentThread()).setTrial(inMessage.getTrial());
                 playground.callTrial();
-                outMessage = new Message(MessageType.ANGDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                outMessage = new Message(MessageType.CTDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(), ((PlaygroundProxy) Thread.currentThread()).getGame(), ((PlaygroundProxy) Thread.currentThread()).getTrial());
                 break;
             case MessageType.SETST:
-                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
                 playground.startTrial();
-                outMessage = new Message(MessageType.STDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                outMessage = new Message(MessageType.STDONE, 0, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate());
                 break;
             case MessageType.SETATD:
-                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
-                outMessage = new Message(MessageType.ATDDONE, playground.assertTrialDecision());
+                ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                ((PlaygroundProxy) Thread.currentThread()).setGame(inMessage.getGame());
+                ((PlaygroundProxy) Thread.currentThread()).setTrial(inMessage.getTrial());
+                boolean result = playground.assertTrialDecision();
+                outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
+                        ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result);
                 break;
             case MessageType.SETIR:
-                ((RefereeSiteProxy) Thread.currentThread()).setCoachState(inMessage.getCoachState());
                 playground.informReferee();
                 outMessage = new Message(MessageType.IRDONE, inMessage.getCoachId(), inMessage.getCoachState());
                 break;
             case MessageType.SETGR:
-                ((RefereeSiteProxy) Thread.currentThread()).setContestantState(inMessage.getContestantState());
                 playground.getReady();
                 outMessage = new Message(MessageType.GRDONE, inMessage.getContestantId(), inMessage.getContestantState());
                 break;
             case MessageType.SETAID:
-                ((RefereeSiteProxy) Thread.currentThread()).setContestantState(inMessage.getContestantState());
                 playground.amIDone();
                 outMessage = new Message(MessageType.GRDONE, inMessage.getContestantId(), inMessage.getContestantState());
                 break;

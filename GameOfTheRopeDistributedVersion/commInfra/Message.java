@@ -92,7 +92,7 @@ public class Message implements Serializable
     private int ropePosition = 0;
 
     /**
-     * winning tram
+     * winning team
      */
     private int winningTeam = -1;
 
@@ -115,6 +115,16 @@ public class Message implements Serializable
      * flag to represent which entity asked to end the operations
      */
     private String entity = null;
+
+    /**
+     * result of the game
+     */
+    private int gameResult;
+
+    /**
+     * match final result
+     */
+    private String finalResult = null;
 
     /**
      *  Message instantiation (form 1).
@@ -148,10 +158,15 @@ public class Message implements Serializable
             contestantState = state;
         }
         else if((msgType == MessageType.SETANG) || (msgType == MessageType.SETCT) || (msgType == MessageType.SETST)
-                || (msgType == MessageType.SETATD)){
+                || (msgType == MessageType.SETATD) || (msgType == MessageType.STDONE)){
             refereeState = state;
-        }
-        else { GenericIO.writelnString ("Message type = " + msgType + ": non-implemented instantiation!");
+        }else if((msgType == MessageType.SETT)){
+            refereeState = state;
+            trial = id;
+        } else if ((msgType == MessageType.SETG)) {
+            refereeState = state;
+            game = id;
+        } else { GenericIO.writelnString ("Message type = " + msgType + ": non-implemented instantiation!");
             System.exit (1);
         }
     }
@@ -171,6 +186,8 @@ public class Message implements Serializable
             case MessageType.SETATD:
             case MessageType.SETCT:
             case MessageType.UPREF:
+            case MessageType.ANGDONE:
+            case MessageType.DGWDONE:
                 refereeState = value;
                 break;
             case MessageType.SETG:
@@ -213,17 +230,26 @@ public class Message implements Serializable
      *  Message instantiation (form 5).
      *
      *     @param type message type
-     *     @param coachId coach identification
-     *     @param coachState barber state
-     *     @param contestantId customer identification
+     *     @param value1 integer value
+     *     @param value2 integer value
+     *     @param value3 integer value
      */
 
-    public Message (int type, int coachId, int coachState, int contestantId)
+    public Message (int type, int value1, int value2, int value3)
     {
         msgType = type;
-        this.coachId= coachId;
-        this.coachState = coachState;
-        this.contestantId= contestantId;
+
+        switch (type){
+            case MessageType.SETANG:
+            case MessageType.ANGDONE:
+            case MessageType.SETCT:
+            case MessageType.CTDONE:
+            case MessageType.SETATD:
+                this.refereeState = value1;
+                this.game = value2;
+                this.trial = value3;
+                break;
+        }
     }
 
     /**
@@ -292,15 +318,30 @@ public class Message implements Serializable
      * Message instantiation (form 9)
      *
      * @param type message type
-     * @param winningTeam winning team
-     * @param winningCause winning cause
+     * @param value1 integer value
+     * @param value2 string value
      */
-    public Message(int type, int winningTeam, String winningCause){
+    public Message(int type, int value1, String value2){
         this.msgType = type;
-        this.winningTeam = winningTeam;
-        this.winningCause = winningCause;
+
+        switch (type){
+            case MessageType.SETGW:
+                this.winningTeam = value1;
+                this.winningCause = value2;
+                break;
+            case MessageType.SETDMW:
+                this.refereeState = value1;
+                this.finalResult = value2;
+        }
     }
 
+    /**
+     *  Message instantiation (form 10).
+     *
+     *     @param type message type
+     *     @param entity type of entity
+     *     @param id id of the entity
+     */
     public Message(int type, String entity, int id){
         msgType = type;
 
@@ -317,6 +358,52 @@ public class Message implements Serializable
                 this.contestantId = id;
                 break;
         }
+    }
+
+    /**
+     *  Message instantiation (form 11).
+     *
+     *     @param type message type
+     *     @param state state of the referee
+     *     @param flag end of operations flag / print header flag
+     */
+    public Message (int type, int state, boolean flag){
+        msgType = type;
+        refereeState = state;
+        endOp = flag;
+    }
+
+    /**
+     *  Message instantiation (form 12).
+     *
+     *     @param type message type
+     *     @param state state of the referee
+     *     @param gameResult result of the game
+     *     @param flag end of operations flag / print header flag
+     */
+    public Message (int type, int state, int gameResult, boolean flag){
+        msgType = type;
+        refereeState = state;
+        this.gameResult = gameResult;
+        endOp = flag;
+    }
+
+    /**
+     *  Message instantiation (form 13).
+     *
+     *     @param type message type
+     *     @param value1 integer value
+     *     @param value2 integer value
+     *     @param value3 integer value
+     *     @param winCause winning cause
+     */
+
+    public Message (int type, int value1, int value2, int value3, String winCause){
+        msgType = type;
+        refereeState = value1;
+        game = value2;
+        gameResult = value3;
+        winningCause = winCause;
     }
 
     /**
@@ -579,6 +666,38 @@ public class Message implements Serializable
      */
     public void setPrintHeader(boolean printHeader) {
         this.printHeader = printHeader;
+    }
+
+    /**
+     * returns the result of the game
+     * @return game result
+     */
+    public int getGameResult() {
+        return gameResult;
+    }
+
+    /**
+     * Set the result of the game
+     * @param gameResult result of the game
+     */
+    public void setGameResult(int gameResult) {
+        this.gameResult = gameResult;
+    }
+
+    /**
+     *
+     * @return the final result of the match
+     */
+    public String getFinalResult() {
+        return finalResult;
+    }
+
+    /**
+     * Set the final result of the match
+     * @param finalResult string with the result
+     */
+    public void setFinalResult(String finalResult) {
+        this.finalResult = finalResult;
     }
 
     /**
