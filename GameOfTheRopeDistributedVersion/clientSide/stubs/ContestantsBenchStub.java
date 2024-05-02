@@ -52,7 +52,7 @@ public class ContestantsBenchStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.UCB, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.UCB);
         com.writeObject(outMessage);
 
         // receive response
@@ -88,7 +88,7 @@ public class ContestantsBenchStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETCT, ((Referee) Thread.currentThread()).getRefereeSate());
+        outMessage = new Message(MessageType.SETCT);
         com.writeObject(outMessage);
 
         // receive response
@@ -126,7 +126,7 @@ public class ContestantsBenchStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETATD,  ((Referee) Thread.currentThread()).getRefereeSate(), hasTrialEnded);
+        outMessage = new Message(MessageType.SETATD, hasTrialEnded);
         com.writeObject(outMessage);
 
         // receive response

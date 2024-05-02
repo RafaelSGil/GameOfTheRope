@@ -86,20 +86,7 @@ public interface RefereeCloning {
     public String finalResults();
 
     /**
-     * Sets the value of the final result of the match
-     * @param finalResults value to be set
-     */
-    void setFinalResults(String finalResults);
-
-    /**
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
     public void signalMatchEnded();
-
-    /**
-     * Retrieve the value of the flag
-     *
-     * @return whether the game ended or not
-     */
-    public boolean getMatchEnd();
 }

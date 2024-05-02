@@ -1,7 +1,6 @@
 package clientSide.entities;
 
 import clientSide.stubs.*;
-import genclass.GenericIO;
 import serverSide.sharedRegions.*;
 import serverSide.main.SimulationParams;
 
@@ -224,20 +223,13 @@ public class Referee extends Thread {
     public void run() {
         waitForGameStart();
         for (int i = 0; i < SimulationParams.GAMES; ++i) {
-            GenericIO.writelnString("announce game");
             refereeSite.announceNewGame();
             do {
-                GenericIO.writelnString("call trial");
                 playground.callTrial(bench);
-                GenericIO.writelnString("start trial");
                 playground.startTrial();
-                GenericIO.writelnString("assert decision");
             } while (!playground.assertTrialDecision(bench));
-            GenericIO.writelnString("declare game winner");
             refereeSite.declareGameWinner();
         }
-        waitForGameStart();
-        GenericIO.writelnString("declare match winner");
         refereeSite.declareMatchWinner();
     }
 

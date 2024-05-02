@@ -6,7 +6,6 @@ import commInfra.MessageType;
 import genclass.GenericIO;
 import genclass.TextFile;
 import serverSide.main.SimulationParams;
-import serverSide.sharedRegions.RefereeSite;
 
 /**
  *  Stub to the general repository.
@@ -71,7 +70,7 @@ public class GeneralRepositoryStub {
     /**
      * Set the current game
      */
-    public void setGame(int game, int refereeState){
+    public void setGame(int game){
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
@@ -83,7 +82,7 @@ public class GeneralRepositoryStub {
         }
         catch (InterruptedException e) {}
         }
-        outMessage = new Message (MessageType.SETG, game, refereeState);
+        outMessage = new Message (MessageType.SETG, game);
         com.writeObject (outMessage);
         inMessage = (Message) com.readObject ();
         if (inMessage.getMsgType() != MessageType.GDONE)
@@ -99,7 +98,7 @@ public class GeneralRepositoryStub {
      *
      * @param trial The trial count to set.
      */
-    public synchronized void setTrial(int trial, int refereeState) {
+    public synchronized void setTrial(int trial) {
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
@@ -111,7 +110,7 @@ public class GeneralRepositoryStub {
         }
         catch (InterruptedException e) {}
         }
-        outMessage = new Message (MessageType.SETT, trial, refereeState);
+        outMessage = new Message (MessageType.SETT, trial);
         com.writeObject (outMessage);
         inMessage = (Message) com.readObject ();
         if (inMessage.getMsgType() != MessageType.SETTDONE)

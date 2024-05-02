@@ -2,7 +2,6 @@ package clientSide.stubs;
 
 
 import clientSide.entities.Referee;
-import clientSide.entities.RefereeStates;
 import commInfra.ClientCom;
 import commInfra.Message;
 import commInfra.MessageType;
@@ -60,7 +59,7 @@ public class RefereeSiteStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETANG, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(), ((Referee) Thread.currentThread()).getTrial());
+        outMessage = new Message(MessageType.SETANG, 0, ((Referee) Thread.currentThread()).getRefereeSate());
         com.writeObject(outMessage);
 
         // receive response
@@ -72,7 +71,7 @@ public class RefereeSiteStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != RefereeStates.STARTGAME)){
+        if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid referee state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -81,7 +80,6 @@ public class RefereeSiteStub {
         // close communication channel
         com.close ();
 
-        GenericIO.writelnString("Referee state after announce new game: " + inMessage.getRefereeState());
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
     }
 
@@ -104,9 +102,7 @@ public class RefereeSiteStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETDGW, ((Referee) Thread.currentThread()).getRefereeSate(),
-                ((Referee) Thread.currentThread()).getGame(), ((Referee) Thread.currentThread()).getGameResult(((Referee) Thread.currentThread()).getGame() - 1),
-                ((Referee) Thread.currentThread()).getWinCause());
+        outMessage = new Message(MessageType.SETDGW, 0, ((Referee) Thread.currentThread()).getRefereeSate());
         com.writeObject(outMessage);
 
         // receive response
@@ -118,7 +114,7 @@ public class RefereeSiteStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != RefereeStates.ENDGAME)){
+        if((inMessage.getRefereeState() != ((Referee) Thread.currentThread()).getRefereeSate())){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid customer state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -149,7 +145,7 @@ public class RefereeSiteStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETDMW, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).finalResults());
+        outMessage = new Message(MessageType.SETDMW, 0, ((Referee) Thread.currentThread()).getRefereeSate());
         com.writeObject(outMessage);
 
         // receive response
@@ -161,7 +157,7 @@ public class RefereeSiteStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getRefereeState() != RefereeStates.ENDMATCH)){
+        if((inMessage.getRefereeState() != ((Referee)  Thread.currentThread()).getRefereeSate())){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid customer state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);

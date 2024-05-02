@@ -1,5 +1,5 @@
 echo "Compiling source code."
-javac -source 8 -target 8 -cp /home/$USER/2semestre/SD/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar */*.java */*/*.java */*/*/*.java
+javac -source 8 -target 8 -cp /home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar */*.java */*/*.java */*/*/*.java
 echo "Distributing intermediate code to the different execution environments."
 echo "General Repository"
 rm -rf dirGeneralRepos
@@ -36,7 +36,7 @@ cp serverSide/main/ServerGameOfTheRopeRefereeSite.class dirRefereeSite/serverSid
 cp serverSide/entities/*.class dirRefereeSite/serverSide/entities
 cp serverSide/sharedRegions/*.class dirRefereeSite/serverSide/sharedRegions
 cp clientSide/stubs/*.class dirRefereeSite/clientSide/stubs
-cp clientSide/entities/ContestantStates.class clientSide/entities/RefereeStates.class clientSide/entities/CoachStates.class clientSide/entities/CoachCloning.class clientSide/entities/RefereeCloning.class clientSide/entities/ContestantCloning.class dirRefereeSite/clientSide/entities
+cp clientSide/entities/RefereeStates.class clientSide/entities/RefereeCloning.class dirRefereeSite/clientSide/entities
 cp commInfra/*.class dirRefereeSite/commInfra
 echo "Coach"
 rm -rf dirCoach

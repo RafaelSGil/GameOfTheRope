@@ -12,49 +12,6 @@ import serverSide.sharedRegions.GeneralRepositoryInterface;
 public class ContestantBenchProxy extends Thread implements CoachCloning, ContestantCloning {
 
     /**
-     * Internal Coach State
-     * Possible states are defined in {@link CoachStates}
-     */
-    private int coachState;
-
-    /**
-     * Team that the coach belongs to.
-     */
-    private int coachTeam;
-
-    /**
-     * Which strategy is going to use to choose the contestants
-     */
-    private int strategy;
-
-    /**
-     * Internal state of the contestant
-     * Possible states are defined in {@link ContestantStates}
-     */
-    private int contestantState;
-
-    /**
-     * Team that the contestant belongs to (0 or 1).
-     */
-    private int contestantTeam;
-
-    /**
-     * Strength level of the contestant.
-     * Strength is an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
-     */
-    private int contestantStrength;
-
-    /**
-     * Unique identifier for the contestant.
-     */
-    private int contestantId;
-
-    /**
-     * Indicates whether the contestant is currently participating in a trial.
-     */
-    private boolean isPlaying;
-
-    /**
      *  Communication channel.
      */
 
@@ -100,145 +57,72 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
 
     @Override
     public int getCoachState() {
-        return coachState;
+        return 0;
     }
 
-    /**
-     * Sets the internal state of the coach.
-     *
-     * @param coachState The new state for the coach.
-     */
     @Override
     public void setCoachState(int coachState) {
-        this.coachState = coachState;
+
     }
 
-    /**
-     * Gets the team that the coach belongs to.
-     *
-     * @return The team number (0 or 1).
-     */
     @Override
     public int getCoachTeam() {
-        return coachTeam;
+        return 0;
     }
 
-    /**
-     * Sets the team that the coach belongs
-     */
-    @Override
-    public void setCoachTeam(int team) {
-        this.coachTeam = team;
-    }
-
-    /**
-     * Get the strategy
-     *
-     * @return strategy value
-     */
     @Override
     public int getStrategy() {
-        return strategy;
+        return 0;
     }
 
-    /**
-     * Set the new strategy
-     *
-     * @param strategy the new strategy
-     */
     @Override
     public void setStrategy(int strategy) {
-        this.strategy = strategy;
+
     }
 
-    /**
-     * Gets the current state of the contestant.
-     *
-     * @return The current contestant state as defined in {@link ContestantStates}.
-     */
     @Override
     public int getContestantState() {
-        return contestantState;
+        return 0;
     }
 
-    /**
-     * Sets the internal state of the contestant.
-     *
-     * @param contestantState The new state for the contestant.
-     */
     @Override
     public void setContestantState(int contestantState) {
-        this.contestantState = contestantState;
+
     }
 
-    /**
-     * Gets the team that the contestant belongs to.
-     *
-     * @return The team number (0 or 1).
-     */
     @Override
     public int getContestantTeam() {
-        return contestantTeam;
+        return 0;
     }
 
-    /**
-     * Sets the team that the contestant belongs to.
-     *
-     * @param contestantTeam The new team number (0 or 1).
-     */
     @Override
     public void setContestantTeam(int contestantTeam) {
-        this.contestantTeam = contestantTeam;
+
     }
 
-    /**
-     * Gets the current strength level of the contestant.
-     *
-     * @return The contestant's strength as an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
-     */
     @Override
     public int getContestantStrength() {
-        return contestantStrength;
+        return 0;
     }
 
-    /**
-     * Sets the strength level of the contestant.
-     *
-     * @param contestantStrength The contestant's strength as an integer between {@link SimulationParams#MINSTRENGTH} and {@link SimulationParams#MAXSTRENGTH}.
-     */
     @Override
     public void setContestantStrength(int contestantStrength) {
-        this.contestantStrength = contestantStrength;
+
     }
 
-    /**
-     * Gets the unique identifier for the contestant.
-     *
-     * @return The contestant's ID.
-     */
     @Override
     public int getContestantId() {
-        return contestantId;
+        return 0;
     }
 
-    /**
-     * Checks if the contestant is currently participating in a trial.
-     *
-     * @return True if the contestant is playing, false otherwise.
-     */
     @Override
     public boolean isPlaying() {
-        return isPlaying;
+        return false;
     }
 
-    /**
-     * Sets the playing state of the contestant.
-     *
-     * @param playing True if the contestant is now playing, false otherwise.
-     */
     @Override
     public void setPlaying(boolean playing) {
-        this.isPlaying = playing;
+
     }
 
     /**
@@ -248,11 +132,7 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
      */
     @Override
     public void manageStrength() {
-        if (isPlaying && contestantStrength > 0) {
-            contestantStrength = contestantStrength - 1;
-        } else if(!isPlaying && contestantStrength >0){
-            contestantStrength = contestantStrength + 1;
-        }
+
     }
 
     @Override

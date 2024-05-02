@@ -7,6 +7,7 @@ import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
 import serverSide.entities.ContestantBenchProxy;
+import serverSide.entities.RefereeSiteProxy;
 import serverSide.main.SimulationParams;
 
 public class ContestantBenchInterface {
@@ -39,16 +40,10 @@ public class ContestantBenchInterface {
         /* validation of the incoming message */
         switch (inMessage.getMsgType ()){
             case MessageType.UCB:
-                if(inMessage.getRefereeState() != RefereeStates.TEAMSREADY){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.SETCT:
                 break;
             case MessageType.SETATD:
-                if(inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.SETCC:
                 if((inMessage.getCoachId() < 0) || inMessage.getCoachId() > SimulationParams.NTEAMS){
@@ -83,7 +78,7 @@ public class ContestantBenchInterface {
                 }
                 break;
             case MessageType.END:
-                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) || (!inMessage.getEntity().equals(SimulationParams.COACH)) || (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
                     throw new MessageException("Invalid entity!", inMessage);
                 }
                 break;

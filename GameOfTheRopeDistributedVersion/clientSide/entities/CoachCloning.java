@@ -28,12 +28,6 @@ public interface CoachCloning {
     public int getCoachTeam();
 
     /**
-     * Sets the team that the coach belongs
-     * @param team value to set
-     */
-    void setCoachTeam(int team);
-
-    /**
      * Get the strategy
      *
      * @return strategy value
