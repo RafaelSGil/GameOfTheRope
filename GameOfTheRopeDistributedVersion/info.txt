@@ -1,0 +1,15 @@
+
+Global - 22120≤port number<22130
+
+sudo netstat -plten |grep java
+
+______________________________________
+ SharedRegion    |LocalPort|GlobalPort|
+_________________|____________________|
+generalRepository|  22161  |  22121   |
+contestantsBench |  22162  |  22122   |
+playGround       |  22163  |  22123   |
+refereeSite      |  22164  |  22124   |
+_________________|_________|__________|
+
+WARNING: CHANGE GNOME TERMINAL PREFERENCES -> Command -> When command exits -> Hold The Terminal Open

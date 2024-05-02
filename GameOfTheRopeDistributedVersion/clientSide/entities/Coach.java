@@ -2,7 +2,7 @@ package clientSide.entities;
 
 
 import clientSide.stubs.*;
-import serverSide.sharedRegions.*;
+
 
 /**
  * This class represents a Coach entity in the game of the rope simulation.
@@ -26,18 +26,18 @@ public class Coach extends Thread {
     private final int team;
 
     /**
-     * Reference to the {@link ContestantsBench} object representing the bench
+     * Reference to the {@link ContestantsBenchStub} object representing the bench
      * where the coach's team contestants are seated.
      */
     private final ContestantsBenchStub bench;
 
     /**
-     * Reference to the {@link RefereeSite} object representing the referee's post.
+     * Reference to the {@link RefereeSiteStub} object representing the referee's post.
      */
     private final RefereeSiteStub refereeSite;
 
     /**
-     * Reference to the {@link Playground} object representing the playground area.
+     * Reference to the {@link PlaygroundStub} object representing the playground area.
      */
     private final PlaygroundStub playground;
 
