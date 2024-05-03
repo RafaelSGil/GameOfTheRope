@@ -14,7 +14,7 @@ cd /home/$USER/Documents/testGameOfTheRopeDistributedVersion/dirReferee
 gnome-terminal --title="Referee" -- java -cp .:/home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar clientSide.main.ClientGameOfTheRopeReferee 127.0.0.1 22161 127.0.0.1 22162 127.0.0.1 22164 127.0.0.1 22163 log
 
 cd /home/$USER/Documents/testGameOfTheRopeDistributedVersion/dirCoach
-gnome-terminal --wait --title="Coach" -- java -cp .:/home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar clientSide.main.ClientGameOfTheRopeCoach 127.0.0.1 22161 127.0.0.1 22162 127.0.0.1 22164 127.0.0.1 22163
+gnome-terminal --title="Coach" -- java -cp .:/home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar clientSide.main.ClientGameOfTheRopeCoach 127.0.0.1 22161 127.0.0.1 22162 127.0.0.1 22164 127.0.0.1 22163
 
 cd /home/$USER/Documents/testGameOfTheRopeDistributedVersion/dirContestant
 gnome-terminal --title="Contestant" -- java -cp .:/home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar clientSide.main.ClientGameOfTheRopeContestant 127.0.0.1 22161 127.0.0.1 22162 127.0.0.1 22164 127.0.0.1 22163
