@@ -6,6 +6,8 @@ xterm  -T "Playground" -hold -e "sh playgroundDeployAndRun.sh" &
 sleep 1
 xterm  -T "Referee Site" -hold -e "sh refereeSiteDeployAndRun.sh" &
 sleep 1
-xterm  -T "Referee" -hold -e "sh refereeDeployAndRun.sh" &
-xterm  -T "Coach" -hold -e "sh coachDeployAndRun.sh" &
 xterm  -T "Contestants" -hold -e "sh contestantsDeployAndRun.sh" &
+sleep 1
+xterm  -T "Coach" -hold -e "sh coachDeployAndRun.sh" &
+sleep 1
+xterm  -T "Referee" -hold -e "sh refereeDeployAndRun.sh" &

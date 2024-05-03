@@ -5,4 +5,4 @@ sshpass -f password scp dirRefereeSite.zip sd103@l040101-ws06.ua.pt:test/GameOfT
 echo "Decompressing data sent to the Referee Site node."
 sshpass -f password ssh sd103@l040101-ws06.ua.pt 'cd test/GameOfTheRope ; unzip -uq dirRefereeSite.zip'
 echo "Executing program at the Referee Site node."
-sshpass -f password ssh sd103@l040101-ws06.ua.pt 'cd test/GameOfTheRope/dirRefereeSite ; java serverSide.main.ServerGameOfTheRopeRefereeSite 22125 l040101-ws01.ua.pt 22121'
+sshpass -f password ssh sd103@l040101-ws06.ua.pt 'cd test/GameOfTheRope/dirRefereeSite ; java serverSide.main.ServerGameOfTheRopeRefereeSite 22126 l040101-ws01.ua.pt 22121'
