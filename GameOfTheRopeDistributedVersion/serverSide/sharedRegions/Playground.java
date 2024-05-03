@@ -5,7 +5,6 @@ import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
-import genclass.GenericIO;
 import serverSide.entities.PlaygroundProxy;
 import serverSide.main.ServerGameOfTheRopePlayground;
 import serverSide.main.SimulationParams;
@@ -257,7 +256,6 @@ public class Playground {
         while (!checkIfTeamIsReady(coachId)) {
             try {
                 wait();
-                GenericIO.writelnString("Coach "+ coachId + " inform wait " + checkIfTeamIsReady(coachId));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -270,7 +268,6 @@ public class Playground {
 
         // alerts the referee that its team is ready
         notifyAll();
-        GenericIO.writelnString("Coach "+ coachId + " inform done");
     }
 
     /**

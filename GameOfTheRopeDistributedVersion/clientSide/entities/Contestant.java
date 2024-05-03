@@ -169,19 +169,14 @@ public class Contestant extends Thread {
     @Override
     public void run() {
         while (!refereeSite.endOfMatch()) {
-            GenericIO.writelnString("follow - " + contestantId);
             bench.followCoachAdvice();
             if (isPlaying) {
-                GenericIO.writelnString("get ready - " + contestantId);
                 playground.getReady();
                 pullTheRope();
-                GenericIO.writelnString("am done - " + contestantId);
                 playground.amIDone();
             }
-            GenericIO.writelnString("seat down - " + contestantId + " " + isPlaying);
             bench.seatDown();
         }
-        GenericIO.writelnString("CONTESTANT " + contestantId + " HAS ENDED");
     }
 
     /**

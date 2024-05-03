@@ -3,7 +3,6 @@ package serverSide.sharedRegions;
 
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
-import genclass.GenericIO;
 import serverSide.entities.RefereeSiteProxy;
 import serverSide.main.ServerGameOfTheRopeRefereeSite;
 import serverSide.main.SimulationParams;

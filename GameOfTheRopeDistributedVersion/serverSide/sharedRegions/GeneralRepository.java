@@ -5,6 +5,7 @@ import clientSide.entities.*;
 import clientSide.entities.data.*;
 import genclass.GenericIO;
 import genclass.TextFile;
+import serverSide.main.ServerGameOfTheRopeGeneralRepository;
 import serverSide.main.SimulationParams;
 
 import java.util.ArrayList;
@@ -62,6 +63,12 @@ public class GeneralRepository {
      * Store the name of the file to which will write
      */
     private String fileName;
+
+    /**
+     *   Number of entity groups requesting the shutdown.
+     */
+
+    private int nEntities;
 
     /**
      * Creates a new GeneralRepository instance
@@ -254,7 +261,6 @@ public class GeneralRepository {
      * @param cause The cause of the win.
      */
     public synchronized void declareGameWinner(int team, String cause) {
-        GenericIO.writelnString("Cause" + cause + " | team " + team);
         if (!cause.equals("draw")) {
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         } else {
@@ -559,5 +565,18 @@ public class GeneralRepository {
             default:
                 return "";
         }
+    }
+
+    /**
+     *   Operation server shutdown.
+     *
+     *   New operation.
+     */
+
+    public synchronized void shutdown ()
+    {
+        nEntities += 1;
+        if (nEntities >= SimulationParams.NENTITIES)
+            ServerGameOfTheRopeGeneralRepository.waitConnection = false;
     }
 }
