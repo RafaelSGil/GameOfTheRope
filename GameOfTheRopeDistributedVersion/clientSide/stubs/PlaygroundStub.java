@@ -1,9 +1,6 @@
 package clientSide.stubs;
 
-import clientSide.entities.Coach;
-import clientSide.entities.Contestant;
-import clientSide.entities.Referee;
-import clientSide.entities.RefereeStates;
+import clientSide.entities.*;
 import commInfra.ClientCom;
 import commInfra.Message;
 import commInfra.MessageType;
@@ -80,10 +77,10 @@ public class PlaygroundStub {
         // close communication channel
         com.close ();
 
-        benchStub.refereeCallTrial();
-
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
         ((Referee) Thread.currentThread()).setTrial(inMessage.getTrial());
+
+        benchStub.refereeCallTrial();
     }
 
     /**
@@ -147,8 +144,11 @@ public class PlaygroundStub {
             }catch (InterruptedException ignored) {}
         }
 
+        GenericIO.writelnString("assert referee game: " + ((Referee) Thread.currentThread()).getGame());
+
         // send message
-        outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(), ((Referee) Thread.currentThread()).getTrial());
+        outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(),
+                ((Referee) Thread.currentThread()).getTrial());
         com.writeObject(outMessage);
 
         // receive response
@@ -169,11 +169,17 @@ public class PlaygroundStub {
         // close communication channel
         com.close ();
 
-        bench.setHasTrialEnded(true);
-        bench.unblockContestantBench();
-
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
         ((Referee) Thread.currentThread()).setGameResult(inMessage.getGameResult());
+        if(inMessage.getEndOp()){
+            ((Referee) Thread.currentThread()).setWinCause(inMessage.getWinningCause());
+            if(inMessage.isEndOfMatch()){
+                ((Referee) Thread.currentThread()).signalMatchEnded();
+            }
+        }
+
+        bench.setHasTrialEnded(true);
+        bench.unblockContestantBench();
 
         return inMessage.getEndOp();
     }
@@ -209,7 +215,7 @@ public class PlaygroundStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getCoachState() != ((Coach) Thread.currentThread()).getCoachState())){
+        if((inMessage.getCoachState() != CoachStates.WATCHTRIAL)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid coach state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -240,7 +246,8 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETGR, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantState());
+        outMessage = new Message(MessageType.SETGR, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantStrength(),
+                ((Contestant) Thread.currentThread()).getContestantState(), ((Contestant) Thread.currentThread()).getContestantTeam());
         com.writeObject(outMessage);
 
         // receive response
@@ -252,7 +259,7 @@ public class PlaygroundStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
-        if((inMessage.getContestantState() != ((Contestant) Thread.currentThread()).getContestantState())){
+        if((inMessage.getContestantState() != ContestantStates.DOYOURBEST)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid contestant state!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
@@ -283,7 +290,8 @@ public class PlaygroundStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETAID, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantState());
+        outMessage = new Message(MessageType.SETAID, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantStrength(),
+                ((Contestant) Thread.currentThread()).getContestantState(), ((Contestant) Thread.currentThread()).getContestantTeam());
         com.writeObject(outMessage);
 
         // receive response
@@ -303,8 +311,6 @@ public class PlaygroundStub {
 
         // close communication channel
         com.close ();
-
-        ((Contestant) Thread.currentThread()).setContestantState(inMessage.getContestantState());
     }
 
     /**

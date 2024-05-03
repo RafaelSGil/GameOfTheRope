@@ -81,8 +81,9 @@ public class RefereeSiteStub {
         // close communication channel
         com.close ();
 
-        GenericIO.writelnString("Referee state after announce new game: " + inMessage.getRefereeState());
         ((Referee) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+        ((Referee) Thread.currentThread()).setGame(inMessage.getGame());
+        ((Referee) Thread.currentThread()).setTrial(inMessage.getTrial());
     }
 
     /**
@@ -235,14 +236,14 @@ public class RefereeSiteStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETEOFC);
+        outMessage = new Message(MessageType.MATCHEND);
         com.writeObject(outMessage);
 
         // receive response
         inMessage = (Message) com.readObject();
 
         // process response
-        if((inMessage.getMsgType() != MessageType.EOFCDONE)){
+        if((inMessage.getMsgType() != MessageType.MATCHENDDONE)){
             GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);

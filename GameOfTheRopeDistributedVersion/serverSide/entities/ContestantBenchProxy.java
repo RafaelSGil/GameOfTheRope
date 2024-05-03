@@ -52,7 +52,7 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
     /**
      * Indicates whether the contestant is currently participating in a trial.
      */
-    private boolean isPlaying;
+    private boolean isPlaying = false;
 
     /**
      *  Communication channel.
@@ -219,6 +219,16 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
     @Override
     public int getContestantId() {
         return contestantId;
+    }
+
+    /**
+     * Set contestant id
+     *
+     * @param id value of id
+     */
+    @Override
+    public void setContestantId(int id) {
+        this.contestantId = id;
     }
 
     /**

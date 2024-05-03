@@ -224,6 +224,7 @@ public class Referee extends Thread {
     public void run() {
         waitForGameStart();
         for (int i = 0; i < SimulationParams.GAMES; ++i) {
+            waitForGameStart();
             GenericIO.writelnString("announce game");
             refereeSite.announceNewGame();
             do {
@@ -239,6 +240,7 @@ public class Referee extends Thread {
         waitForGameStart();
         GenericIO.writelnString("declare match winner");
         refereeSite.declareMatchWinner();
+        GenericIO.writelnString("REFEREE HAS ENDED");
     }
 
     /**
@@ -246,7 +248,7 @@ public class Referee extends Thread {
      */
     private void waitForGameStart() {
         try {
-            sleep((long) (1 + 50 * Math.random()));
+            sleep((long) (1 + 100 * Math.random()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

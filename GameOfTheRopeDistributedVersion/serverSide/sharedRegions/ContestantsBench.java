@@ -1,16 +1,15 @@
 package serverSide.sharedRegions;
 
-
-
-
 import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.stubs.GeneralRepositoryStub;
+import genclass.GenericIO;
 import serverSide.entities.ContestantBenchProxy;
 import serverSide.main.ServerGameOfTheRopeContestantsBench;
 import serverSide.main.SimulationParams;
 import serverSide.utils.Strategy;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,14 +50,21 @@ public class ContestantsBench {
     private final GeneralRepositoryStub repository;
 
     /**
-     * Checks if trial has ended
+     * Checks if trial has ended for coaches
      */
-    private boolean hasTrialEnded;
+    private boolean[] hasTrialEndedCoaches;
+
+    /**
+     * Checks if trial has ended for contestants
+     */
+    private boolean[] hasTrialEndedContestants;
 
     /**
      * conditional flags for coaches
      */
     private final boolean[] callTrial;
+
+    private int aaaa;
 
     /**
      *   Number of entity groups requesting the shutdown.
@@ -69,14 +75,18 @@ public class ContestantsBench {
     /**
      * Creates a new ContestantsBench instance with a reference to the repository
      *
-     * @param repository The {@link GeneralRepository} object representing the repository.
+     * @param repository The {@link GeneralRepositoryStub} object representing the repository.
      */
     public ContestantsBench(GeneralRepositoryStub repository) {
         this.playing = new ArrayList<>();
         this.benched = new ArrayList<>();
         this.repository = repository;
-        this.hasTrialEnded = false;
+        this.hasTrialEndedCoaches = new boolean[SimulationParams.NTEAMS];
+        Arrays.fill(hasTrialEndedCoaches, false);
+        this.hasTrialEndedContestants = new boolean[SimulationParams.NCONTESTANTS];
+        Arrays.fill(hasTrialEndedContestants, false);
         this.callTrial = new boolean[SimulationParams.NTEAMS];
+        Arrays.fill(callTrial, false);
         this.contestants = new ContestantBenchProxy[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
@@ -85,6 +95,7 @@ public class ContestantsBench {
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             coaches[i] = null;
         }
+        this.aaaa = 0;
     }
 
     /**
@@ -100,8 +111,10 @@ public class ContestantsBench {
      */
     public synchronized void refereeCallTrial() {
         Arrays.fill(callTrial, true);
-        this.hasTrialEnded = false;
-        unblockContestantBench();
+        Arrays.fill(hasTrialEndedContestants, false);
+        Arrays.fill(hasTrialEndedCoaches, false);
+        notifyAll();
+        GenericIO.writelnString("referee call trial");
     }
 
     /**
@@ -110,7 +123,9 @@ public class ContestantsBench {
      * @param hasTrialEnded new value for the attribute
      */
     public synchronized void setHasTrialEnded(boolean hasTrialEnded) {
-        this.hasTrialEnded = hasTrialEnded;
+        Arrays.fill(hasTrialEndedCoaches, hasTrialEnded);
+        Arrays.fill(hasTrialEndedContestants, hasTrialEnded);
+        notifyAll();
     }
 
     /**
@@ -141,18 +156,20 @@ public class ContestantsBench {
      * @param team to which team does the coach belong
      */
     public synchronized void callContestants(int team) {
-        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
-        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
-
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
+        ++aaaa;
         while (!callTrial[team] || !isEveryoneSeated(team)) {
+            GenericIO.writelnString("coach " + team + " call trial - wait - " + callTrial[team] + " " + isEveryoneSeated(team) + " " + (aaaa));
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
+        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
 
         repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
 
@@ -166,6 +183,7 @@ public class ContestantsBench {
 
         // wake up contestants
         notifyAll();
+        GenericIO.writelnString("coach " + team + " call trial - done" + (aaaa));
     }
 
 
@@ -208,18 +226,18 @@ public class ContestantsBench {
     public synchronized void seatDown() {
         int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
-        while (!hasTrialEnded) {
+        while (!hasTrialEndedContestants[contestantId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
         contestants[contestantId].manageStrength();
         playing.clear();
         benched.clear();
         contestants[contestantId].setPlaying(false);
+        hasTrialEndedContestants[contestantId] = false;
 
         contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
@@ -235,7 +253,7 @@ public class ContestantsBench {
         int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
         coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
         callTrial[coachId] = false;
-        while (!hasTrialEnded) {
+        while (!hasTrialEndedCoaches[coachId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -243,6 +261,7 @@ public class ContestantsBench {
             }
         }
 
+        hasTrialEndedCoaches[coachId] = false;
         coaches[coachId].setCoachState(CoachStates.WATFORREFEREECOMMAND);
         repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
         repository.reportStatus(false);

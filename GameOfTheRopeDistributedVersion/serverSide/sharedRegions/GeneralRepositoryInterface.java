@@ -55,19 +55,10 @@ public class GeneralRepositoryInterface {
                 }
                 break;
             case MessageType.SETG:
-                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) && (inMessage.getRefereeState() != RefereeStates.ENDGAME)){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.SETT:
-                if((inMessage.getRefereeState() != RefereeStates.STARTMATCH) && (inMessage.getRefereeState() != RefereeStates.TEAMSREADY)){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.SETRP:
-                if((inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.UPREF:
                 break;
@@ -82,14 +73,8 @@ public class GeneralRepositoryInterface {
                 }
                 break;
             case MessageType.SETGW:
-                if((inMessage.getRefereeState() != RefereeStates.ENDGAME)){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.SETMW:
-                if((inMessage.getRefereeState() != RefereeStates.ENDMATCH)){
-                    throw new MessageException("Invalid referee state!", inMessage);
-                }
                 break;
             case MessageType.RS:
                 break;

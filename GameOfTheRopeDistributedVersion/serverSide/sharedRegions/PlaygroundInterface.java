@@ -6,6 +6,7 @@ import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
+import genclass.GenericIO;
 import serverSide.entities.PlaygroundProxy;
 import serverSide.main.SimulationParams;
 
@@ -56,7 +57,7 @@ public class PlaygroundInterface {
                 if(inMessage.getCoachState() != CoachStates.ASSEMBLETEAM){
                     throw new MessageException("Invalid coach state!", inMessage);
                 }
-                if((inMessage.getCoachId() < 0) || (inMessage.getCoachId() > SimulationParams.NTEAMS)){
+                if((inMessage.getCoachId() < 0) || (inMessage.getCoachId() >= SimulationParams.NTEAMS)){
                     throw new MessageException ("Invalid coach id!", inMessage);
                 }
                 break;
@@ -64,16 +65,22 @@ public class PlaygroundInterface {
                 if(inMessage.getContestantState() != ContestantStates.STANDINPOSITION){
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() > SimulationParams.NCONTESTANTS)){
+                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)){
                     throw new MessageException ("Invalid contestant id!", inMessage);
+                }
+                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                    throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.SETAID:
                 if(inMessage.getContestantState() != ContestantStates.DOYOURBEST){
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() > SimulationParams.NCONTESTANTS)){
+                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)){
                     throw new MessageException ("Invalid contestant id!", inMessage);
+                }
+                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                    throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.END:
@@ -104,20 +111,36 @@ public class PlaygroundInterface {
                 ((PlaygroundProxy) Thread.currentThread()).setGame(inMessage.getGame());
                 ((PlaygroundProxy) Thread.currentThread()).setTrial(inMessage.getTrial());
                 boolean result = playground.assertTrialDecision();
-                outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
-                        ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result);
+                if(result){
+                    outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
+                            ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result,
+                            ((PlaygroundProxy) Thread.currentThread()).getWinCause(), ((PlaygroundProxy) Thread.currentThread()).getMatchEnd());
+                }else {
+                    outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
+                            ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result);
+                }
                 break;
             case MessageType.SETIR:
+                ((PlaygroundProxy) Thread.currentThread()).setCoachState(inMessage.getCoachState());
+                ((PlaygroundProxy) Thread.currentThread()).setCoachTeam(inMessage.getCoachId());
                 playground.informReferee();
-                outMessage = new Message(MessageType.IRDONE, inMessage.getCoachId(), inMessage.getCoachState());
+                outMessage = new Message(MessageType.IRDONE, ((PlaygroundProxy) Thread.currentThread()).getCoachTeam(), ((PlaygroundProxy) Thread.currentThread()).getCoachState());
                 break;
             case MessageType.SETGR:
+                ((PlaygroundProxy) Thread.currentThread()).setContestantState(inMessage.getContestantState());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantId(inMessage.getContestantId());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantStrength(inMessage.getContestantStrength());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantTeam(inMessage.getContestantTeam());
                 playground.getReady();
-                outMessage = new Message(MessageType.GRDONE, inMessage.getContestantId(), inMessage.getContestantState());
+                outMessage = new Message(MessageType.GRDONE, ((PlaygroundProxy) Thread.currentThread()).getContestantId(), ((PlaygroundProxy) Thread.currentThread()).getContestantState());
                 break;
             case MessageType.SETAID:
+                ((PlaygroundProxy) Thread.currentThread()).setContestantState(inMessage.getContestantState());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantId(inMessage.getContestantId());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantStrength(inMessage.getContestantStrength());
+                ((PlaygroundProxy) Thread.currentThread()).setContestantTeam(inMessage.getContestantTeam());
                 playground.amIDone();
-                outMessage = new Message(MessageType.GRDONE, inMessage.getContestantId(), inMessage.getContestantState());
+                outMessage = new Message(MessageType.AIDDONE, ((PlaygroundProxy) Thread.currentThread()).getContestantId(), ((PlaygroundProxy) Thread.currentThread()).getContestantState());
                 break;
             case MessageType.END:
                 playground.endOperation(inMessage.getEntity(), inMessage.getEntity().equals(SimulationParams.CONTESTANT) ? inMessage.getContestantId() :

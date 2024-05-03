@@ -89,7 +89,12 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     /**
      * flag for Match end
      */
-    private boolean matchEnd;
+    private boolean matchEnd = false;
+
+    /**
+     * Final results of the match
+     */
+    private String finalResults;
 
     /**
      *  Number of instantiated threads.
@@ -261,6 +266,16 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     }
 
     /**
+     * Set contestant id
+     *
+     * @param id value of id
+     */
+    @Override
+    public void setContestantId(int id) {
+        this.contestantId = id;
+    }
+
+    /**
      * Checks if the contestant is currently participating in a trial.
      *
      * @return True if the contestant is playing, false otherwise.
@@ -402,35 +417,17 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
      */
     @Override
     public String finalResults() {
-        int team1 = 0;
-        int team2 = 0;
+        return finalResults;
+    }
 
-        for (int i = 0; i < SimulationParams.GAMES; i++) {
-            switch (getGameResult(i)) {
-                case -1:
-                    team1++;
-                    break;
-                case 1:
-                    team2++;
-                    break;
-                case 0:
-                    break;
-            }
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        if (team1 == team2) {
-            return "Match was a draw";
-        } else if (team1 > team2) {
-            sb.append("Match was won by team " + 1);
-        } else {
-            sb.append("Match was won by team " + 2);
-        }
-
-        sb.append(" (").append(team1).append("-").append(team2).append(").");
-
-        return sb.toString();
+    /**
+     * Sets the value of the final result of the match
+     *
+     * @param finalResults value to be set
+     */
+    @Override
+    public void setFinalResults(String finalResults) {
+        this.finalResults = finalResults;
     }
 
     /**

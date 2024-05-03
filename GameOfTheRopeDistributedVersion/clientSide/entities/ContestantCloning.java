@@ -53,6 +53,12 @@ public interface ContestantCloning {
      */
     public int getContestantId();
 
+    /**
+     * Set contestant id
+     * @param id value of id
+     */
+    public void setContestantId(int id);
+
 
     /**
      * Checks if the contestant is currently participating in a trial.

@@ -106,6 +106,7 @@ public class RefereeSite {
      * @return True if the match has ended, false otherwise.
      */
     public synchronized boolean endOfMatch(){
+
         return matchEnd;
     }
 

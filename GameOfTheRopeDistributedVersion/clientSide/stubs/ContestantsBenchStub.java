@@ -1,8 +1,6 @@
 package clientSide.stubs;
 
-import clientSide.entities.Coach;
-import clientSide.entities.Contestant;
-import clientSide.entities.Referee;
+import clientSide.entities.*;
 import commInfra.ClientCom;
 import commInfra.Message;
 import commInfra.MessageType;
@@ -164,7 +162,7 @@ public class ContestantsBenchStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETCC, team, ((Coach) Thread.currentThread()).getCoachState());
+        outMessage = new Message(MessageType.SETCC, team, ((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getStrategy());
         com.writeObject(outMessage);
 
         // receive response
@@ -176,9 +174,16 @@ public class ContestantsBenchStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
+        if((inMessage.getCoachState() != CoachStates.ASSEMBLETEAM)){
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid coach state!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
 
         // close communication channel
         com.close ();
+
+        ((Coach) Thread.currentThread()).setCoachState(inMessage.getCoachState());
     }
 
     /**
@@ -213,9 +218,17 @@ public class ContestantsBenchStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
+        if((inMessage.getContestantState() != ContestantStates.STANDINPOSITION) && (inMessage.getContestantState() != ContestantStates.SEATATBENCH)){
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid contestant state!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
 
         // close communication channel
         com.close ();
+
+        ((Contestant) Thread.currentThread()).setContestantState(inMessage.getContestantState());
+        ((Contestant) Thread.currentThread()).setPlaying(inMessage.isPlaying());
     }
 
     /**
@@ -235,8 +248,8 @@ public class ContestantsBenchStub {
         }
 
         // send message
-        outMessage = new Message(MessageType.SETSD, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantStrength(), ((Contestant) Thread.currentThread()).getContestantState(),
-                ((Contestant) Thread.currentThread()).getContestantTeam());
+        outMessage = new Message(MessageType.SETSD, ((Contestant) Thread.currentThread()).getContestantId(), ((Contestant) Thread.currentThread()).getContestantStrength(),
+                ((Contestant) Thread.currentThread()).getContestantState(), ((Contestant) Thread.currentThread()).getContestantTeam(), ((Contestant) Thread.currentThread()).isPlaying());
         com.writeObject(outMessage);
 
         // receive response
@@ -248,9 +261,18 @@ public class ContestantsBenchStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
+        if((inMessage.getContestantState() != ContestantStates.SEATATBENCH)){
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid contestant state!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
 
         // close communication channel
         com.close ();
+
+        ((Contestant) Thread.currentThread()).setContestantStrength(inMessage.getContestantStrength());
+        ((Contestant) Thread.currentThread()).setContestantState(inMessage.getContestantState());
+        ((Contestant) Thread.currentThread()).setPlaying(inMessage.isPlaying());
     }
 
     /**
@@ -282,9 +304,16 @@ public class ContestantsBenchStub {
             GenericIO.writelnString (inMessage.toString ());
             System.exit (1);
         }
+        if((inMessage.getCoachState() != CoachStates.WATFORREFEREECOMMAND)){
+            GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid coach state!");
+            GenericIO.writelnString (inMessage.toString ());
+            System.exit (1);
+        }
 
         // close communication channel
         com.close ();
+
+        ((Coach) Thread.currentThread()).setCoachState(inMessage.getCoachState());
     }
 
     /**

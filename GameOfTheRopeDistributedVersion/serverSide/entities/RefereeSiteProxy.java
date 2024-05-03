@@ -1,7 +1,6 @@
 package serverSide.entities;
 
 import clientSide.entities.*;
-import clientSide.stubs.RefereeSiteStub;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.ServerCom;

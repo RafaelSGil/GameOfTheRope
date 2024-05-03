@@ -2,6 +2,7 @@ package clientSide.entities;
 
 
 import clientSide.stubs.*;
+import genclass.GenericIO;
 
 
 /**
@@ -120,10 +121,24 @@ public class Coach extends Thread {
     @Override
     public void run() {
         while (!refereeSite.endOfMatch()) {
+            GenericIO.writelnString("call contestant - " + team);
             bench.callContestants(team);
+            GenericIO.writelnString("inform referee - " + team);
             playground.informReferee();
+            GenericIO.writelnString("review notes - " + team);
             bench.reviewNotes();
         }
+        GenericIO.writelnString("COACH " + team + " HAS ENDED");
     }
 
+    /**
+     * Introduces a simulated delay.
+     */
+    private void sleep() {
+        try {
+            sleep((long) (1 + 50 * Math.random()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

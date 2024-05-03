@@ -127,6 +127,21 @@ public class Message implements Serializable
     private String finalResult = null;
 
     /**
+     * coach strategy
+     */
+    private int strategy;
+
+    /**
+     * flag that signals if contestant is playing
+     */
+    private boolean isPlaying = false;
+
+    /**
+     * flag that signals if the match has ended
+     */
+    private boolean endOfMatch = false;
+
+    /**
      *  Message instantiation (form 1).
      *
      *     @param type message type
@@ -148,17 +163,18 @@ public class Message implements Serializable
     public Message (int type, int id, int state)
     {
         msgType = type;
-        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.SETRN) || (msgType == MessageType.UPCOA)){
+        if ((msgType == MessageType.SETCC) || (msgType == MessageType.SETIR) || (msgType == MessageType.IRDONE) || (msgType == MessageType.SETRN) || (msgType == MessageType.UPCOA)){
             coachId= id;
             coachState = state;
         }
-        else if ((msgType == MessageType.SETFCA) || (msgType == MessageType.FCADONE) || (msgType == MessageType.SETGR) ||
-                (msgType == MessageType.SETAID) || (msgType == MessageType.SETSD)){
+        else if ((msgType == MessageType.SETFCA) || (msgType == MessageType.GRDONE) || (msgType == MessageType.SETGR) ||
+                (msgType == MessageType.SETAID) || (msgType == MessageType.AIDDONE) || (msgType == MessageType.SETSD)){
             contestantId= id;
             contestantState = state;
         }
         else if((msgType == MessageType.SETANG) || (msgType == MessageType.SETCT) || (msgType == MessageType.SETST)
-                || (msgType == MessageType.SETATD) || (msgType == MessageType.STDONE)){
+                || (msgType == MessageType.SETATD) || (msgType == MessageType.STDONE) || (msgType == MessageType.DMWDONE)
+                || (msgType == MessageType.EOFCDONE) || (msgType == MessageType.SETEOFC)){
             refereeState = state;
         }else if((msgType == MessageType.SETT)){
             refereeState = state;
@@ -188,6 +204,7 @@ public class Message implements Serializable
             case MessageType.UPREF:
             case MessageType.ANGDONE:
             case MessageType.DGWDONE:
+            case MessageType.UCB:
                 refereeState = value;
                 break;
             case MessageType.SETG:
@@ -199,6 +216,9 @@ public class Message implements Serializable
             case MessageType.SETRP:
                 ropePosition = value;
                 break;
+            case MessageType.CCDONE:
+            case MessageType.RNDONE:
+                coachState = value;
 
         }
     }
@@ -217,7 +237,7 @@ public class Message implements Serializable
             case MessageType.RS:
                 this.printHeader = flag;
                 break;
-            case MessageType.EOFCDONE:
+            case MessageType.MATCHENDDONE:
             case MessageType.SETATD:
             case MessageType.ATDDONE:
             case MessageType.ENDREPLY:
@@ -249,6 +269,10 @@ public class Message implements Serializable
                 this.game = value2;
                 this.trial = value3;
                 break;
+            case MessageType.SETCC:
+                this.coachId = value1;
+                this.coachState = value2;
+                this.strategy = value3;
         }
     }
 
@@ -377,15 +401,24 @@ public class Message implements Serializable
      *  Message instantiation (form 12).
      *
      *     @param type message type
-     *     @param state state of the referee
-     *     @param gameResult result of the game
+     *     @param value1 integer value
+     *     @param value2 integer value
      *     @param flag end of operations flag / print header flag
      */
-    public Message (int type, int state, int gameResult, boolean flag){
+    public Message (int type, int value1, int value2, boolean flag){
         msgType = type;
-        refereeState = state;
-        this.gameResult = gameResult;
-        endOp = flag;
+
+        switch (type){
+            case MessageType.ATDDONE:
+                refereeState = value1;
+                this.gameResult = value2;
+                endOp = flag;
+                break;
+            case MessageType.FCADONE:
+                contestantId = value1;
+                contestantState = value2;
+                isPlaying = flag;
+        }
     }
 
     /**
@@ -404,6 +437,48 @@ public class Message implements Serializable
         game = value2;
         gameResult = value3;
         winningCause = winCause;
+    }
+
+    /**
+     *  Message instantiation (form 14)
+     *
+     *  @param type               message type
+     *  @param contestantId       The ID of the contestant to update.
+     *  @param contestantStrength The strength of the contestant.
+     *  @param contestantState    The state of the contestant.
+     *  @param contestantTeam     The team of the contestant.
+     *  @param isPlaying          flag that indicates whether the contestant has played last trial
+     */
+    public Message(int type, int contestantId, int contestantStrength, int contestantState, int contestantTeam, boolean isPlaying){
+        this.msgType = type;
+        this.contestantId = contestantId;
+        this.contestantState = contestantState;
+        this.contestantStrength = contestantStrength;
+        this.contestantTeam = contestantTeam;
+        this.isPlaying = isPlaying;
+    }
+
+    /**
+     *  Message instantiation (form 15).
+     *
+     *     @param type message type
+     *     @param value1 integer value
+     *     @param value2 integer value
+     *     @param flag end of operations flag / print header flag
+     *     @param winningCause cause of the win
+     *     @param endOfMatch flag that signals the en of the match
+     */
+    public Message (int type, int value1, int value2, boolean flag, String winningCause, boolean endOfMatch){
+        msgType = type;
+        switch (type){
+            case MessageType.ATDDONE:
+                refereeState = value1;
+                this.gameResult = value2;
+                endOp = flag;
+                this.winningCause = winningCause;
+                this.endOfMatch = endOfMatch;
+                break;
+        }
     }
 
     /**
@@ -698,6 +773,54 @@ public class Message implements Serializable
      */
     public void setFinalResult(String finalResult) {
         this.finalResult = finalResult;
+    }
+
+    /**
+     *
+     * @return the value of the coach strategy
+     */
+    public int getStrategy() {
+        return strategy;
+    }
+
+    /**
+     * Set the value of the coach strategy
+     * @param strategy value of strategy
+     */
+    public void setStrategy(int strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     *
+     * @return the value of the flag isPlaying
+     */
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    /**
+     * Set the value of the flag isPlaying
+     * @param playing value of isPlaying
+     */
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
+
+    /**
+     * Get flag endOfMatch
+     * @return whether the match has ended or not
+     */
+    public boolean isEndOfMatch() {
+        return endOfMatch;
+    }
+
+    /**
+     * Set the flag endOfMatch
+     * @param endOfMatch value that signals whether the match has ended or not
+     */
+    public void setEndOfMatch(boolean endOfMatch) {
+        this.endOfMatch = endOfMatch;
     }
 
     /**

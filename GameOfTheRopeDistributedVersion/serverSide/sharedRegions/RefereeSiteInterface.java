@@ -5,7 +5,6 @@ import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
-import genclass.GenericIO;
 import serverSide.entities.RefereeSiteProxy;
 
 public class RefereeSiteInterface {
@@ -54,6 +53,8 @@ public class RefereeSiteInterface {
                 break;
             case MessageType.SETEOFC:
                 break;
+            case MessageType.MATCHEND:
+                break;
             case MessageType.END:
                     break;
             case MessageType.SHUT:
@@ -86,7 +87,12 @@ public class RefereeSiteInterface {
                 outMessage = new Message(MessageType.DMWDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
                 break;
             case MessageType.SETEOFC:
-                outMessage = new Message(MessageType.EOFCDONE, refereeSite.endOfMatch());
+                ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
+                refereeSite.setMatchEnd(true);
+                outMessage = new Message(MessageType.EOFCDONE, 0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+                break;
+            case MessageType.MATCHEND:
+                outMessage = new Message(MessageType.MATCHENDDONE, refereeSite.endOfMatch());
                 break;
             case MessageType.END:
                 refereeSite.endOperation();

@@ -342,4 +342,14 @@ public class MessageType
      */
     public static final int ENDREPLY = 64;
 
+    /**
+     * Check if match has ended (service request)
+     */
+    public static final int MATCHEND = 65;
+
+    /**
+     * Check if match has ended (reply)
+     */
+    public static final int MATCHENDDONE = 66;
+
 }
