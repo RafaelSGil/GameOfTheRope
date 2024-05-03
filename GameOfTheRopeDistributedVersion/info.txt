@@ -1,7 +1,8 @@
 
 Global - 22120≤port number<22130
 
-sudo netstat -plten |grep java
+netstat -tuln | grep <port_number>
+fuser -k -n tcp <port_number>
 
 ________________________________________________
  SharedRegion    |LocalPort|GlobalPort|PCNumber|
