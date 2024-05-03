@@ -261,7 +261,6 @@ public class GeneralRepository {
      * @param cause The cause of the win.
      */
     public synchronized void declareGameWinner(int team, String cause) {
-        GenericIO.writelnString("Cause" + cause + " | team " + team);
         if (!cause.equals("draw")) {
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
         } else {

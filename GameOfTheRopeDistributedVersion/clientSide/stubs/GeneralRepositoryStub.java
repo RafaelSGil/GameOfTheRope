@@ -4,9 +4,6 @@ import commInfra.ClientCom;
 import commInfra.Message;
 import commInfra.MessageType;
 import genclass.GenericIO;
-import genclass.TextFile;
-import serverSide.main.SimulationParams;
-import serverSide.sharedRegions.RefereeSite;
 
 /**
  *  Stub to the general repository.

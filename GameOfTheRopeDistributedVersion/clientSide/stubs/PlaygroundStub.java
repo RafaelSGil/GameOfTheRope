@@ -144,8 +144,6 @@ public class PlaygroundStub {
             }catch (InterruptedException ignored) {}
         }
 
-        GenericIO.writelnString("assert referee game: " + ((Referee) Thread.currentThread()).getGame());
-
         // send message
         outMessage = new Message(MessageType.SETATD, ((Referee) Thread.currentThread()).getRefereeSate(), ((Referee) Thread.currentThread()).getGame(),
                 ((Referee) Thread.currentThread()).getTrial());

@@ -3,13 +3,11 @@ package serverSide.sharedRegions;
 import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.stubs.GeneralRepositoryStub;
-import genclass.GenericIO;
 import serverSide.entities.ContestantBenchProxy;
 import serverSide.main.ServerGameOfTheRopeContestantsBench;
 import serverSide.main.SimulationParams;
 import serverSide.utils.Strategy;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,8 +62,6 @@ public class ContestantsBench {
      */
     private final boolean[] callTrial;
 
-    private int aaaa;
-
     /**
      *   Number of entity groups requesting the shutdown.
      */
@@ -95,7 +91,6 @@ public class ContestantsBench {
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             coaches[i] = null;
         }
-        this.aaaa = 0;
     }
 
     /**
@@ -114,7 +109,6 @@ public class ContestantsBench {
         Arrays.fill(hasTrialEndedContestants, false);
         Arrays.fill(hasTrialEndedCoaches, false);
         notifyAll();
-        GenericIO.writelnString("referee call trial");
     }
 
     /**
@@ -158,9 +152,7 @@ public class ContestantsBench {
     public synchronized void callContestants(int team) {
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
-        ++aaaa;
         while (!callTrial[team] || !isEveryoneSeated(team)) {
-            GenericIO.writelnString("coach " + team + " call trial - wait - " + callTrial[team] + " " + isEveryoneSeated(team) + " " + (aaaa));
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -183,7 +175,6 @@ public class ContestantsBench {
 
         // wake up contestants
         notifyAll();
-        GenericIO.writelnString("coach " + team + " call trial - done" + (aaaa));
     }
 
 

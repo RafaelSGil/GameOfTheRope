@@ -121,14 +121,10 @@ public class Coach extends Thread {
     @Override
     public void run() {
         while (!refereeSite.endOfMatch()) {
-            GenericIO.writelnString("call contestant - " + team);
             bench.callContestants(team);
-            GenericIO.writelnString("inform referee - " + team);
             playground.informReferee();
-            GenericIO.writelnString("review notes - " + team);
             bench.reviewNotes();
         }
-        GenericIO.writelnString("COACH " + team + " HAS ENDED");
     }
 
     /**

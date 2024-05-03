@@ -4,7 +4,6 @@ import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
-import genclass.GenericIO;
 import serverSide.main.SimulationParams;
 
 /**

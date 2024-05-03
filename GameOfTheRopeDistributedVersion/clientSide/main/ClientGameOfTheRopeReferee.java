@@ -117,7 +117,6 @@ public class ClientGameOfTheRopeReferee {
 
         /* waiting for the end of the simulation */
         while(referee.isAlive()){
-            GenericIO.writelnString("REFEREE WIL SEND ENDOP");
             refereeSiteStub.endOperation();
             contestantsBenchStub.endOperation(SimulationParams.REFEREE, 0);
             playgroundStub.endOperation(SimulationParams.REFEREE, 0);
