@@ -151,6 +151,7 @@ public class ContestantBenchInterface {
                 outMessage = new Message(MessageType.ENDREPLY);
                 break;
             case MessageType.SHUT:
+                contestantsBench.shutdown();
                 outMessage = new Message(MessageType.SHUTDONE);
                 break;
         }

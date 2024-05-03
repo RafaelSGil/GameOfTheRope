@@ -119,11 +119,6 @@ public class ClientGameOfTheRopeCoach {
         /* waiting for the end of the simulation */
         GenericIO.writelnString ();
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
-            while (coaches[i].isAlive()){
-                contestantsBenchStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
-                playgroundStub.endOperation(SimulationParams.COACH, coaches[i].getCoachTeam());
-                Thread.yield();
-            }
             try{
                 coaches[i].join();
             }catch (InterruptedException e){};

@@ -119,11 +119,6 @@ public class ClientGameOfTheRopeContestant {
         /* waiting for the end of the simulation */
         GenericIO.writelnString ();
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
-            while (contestants[i].isAlive()){
-                contestantsBenchStub.endOperation(SimulationParams.CONTESTANT, contestants[i].getContestantId());
-                playgroundStub.endOperation(SimulationParams.CONTESTANT, contestants[i].getContestantId());
-                Thread.yield();
-            }
             try{
                 contestants[i].join();
             }catch (InterruptedException e){};

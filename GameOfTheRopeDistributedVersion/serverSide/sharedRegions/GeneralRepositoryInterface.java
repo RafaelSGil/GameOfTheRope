@@ -82,6 +82,8 @@ public class GeneralRepositoryInterface {
                 break;
             case MessageType.RGSTR:
                 break;
+            case MessageType.SHUT:
+                break;
         }
 
         /* processing */
@@ -133,6 +135,10 @@ public class GeneralRepositoryInterface {
             case MessageType.RGSTR:
                 repos.reportGameStart();
                 outMessage = new Message(MessageType.RGSTRDONE);
+                break;
+            case MessageType.SHUT:
+                repos.shutdown();
+                outMessage = new Message(MessageType.SHUTDONE);
                 break;
         }
 
