@@ -1,5 +1,5 @@
 echo "Compiling source code."
-javac -source 8 -target 8 -cp /home/$USER/2semestre/SD/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar */*.java */*/*.java */*/*/*.java
+javac -source 8 -target 8 -cp /home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar */*.java */*/*.java */*/*/*.java
 echo "Distributing intermediate code to the different execution environments."
 echo "General Repository"
 rm -rf dirGeneralRepos
