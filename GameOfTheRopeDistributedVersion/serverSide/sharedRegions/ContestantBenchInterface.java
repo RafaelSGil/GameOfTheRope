@@ -9,6 +9,17 @@ import commInfra.MessageType;
 import serverSide.entities.ContestantBenchProxy;
 import serverSide.main.SimulationParams;
 
+/**
+ * Interface to the Contestant Bench.
+ * <p>
+ * It is responsible to validate and process the incoming message, execute the corresponding method on the
+ * Contestant Bench and generate the outgoing message.
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public class ContestantBenchInterface {
     /**
      * Reference for the contestant bench
@@ -17,79 +28,80 @@ public class ContestantBenchInterface {
 
     /**
      * Instantiation of an interface for contestant bench
+     *
      * @param contestantsBench reference to the contestant bench
      */
-    public ContestantBenchInterface(ContestantsBench contestantsBench){
+    public ContestantBenchInterface(ContestantsBench contestantsBench) {
         this.contestantsBench = contestantsBench;
     }
 
     /**
-     *  Processing of the incoming messages.
+     * Processing of the incoming messages.
+     * <p>
+     * Validation, execution of the corresponding method and generation of the outgoing message.
      *
-     *  Validation, execution of the corresponding method and generation of the outgoing message.
-     *
-     *    @param inMessage service request
-     *    @return service reply
-     *    @throws MessageException if the incoming message is not valid
+     * @param inMessage service request
+     * @return service reply
+     * @throws MessageException if the incoming message is not valid
      */
 
-    public Message processAndReply (Message inMessage) throws MessageException{
+    public Message processAndReply(Message inMessage) throws MessageException {
         Message outMessage = null;                                     // outgoing message
 
         /* validation of the incoming message */
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.UCB:
-                if(inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION){
+                if (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION) {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETCT:
                 break;
             case MessageType.SETATD:
-                if(inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION){
+                if (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION) {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETCC:
-                if((inMessage.getCoachId() < 0) || inMessage.getCoachId() >= SimulationParams.NTEAMS){
+                if ((inMessage.getCoachId() < 0) || inMessage.getCoachId() >= SimulationParams.NTEAMS) {
                     throw new MessageException("Invalid coach id!", inMessage);
                 }
-                if((inMessage.getCoachState() != CoachStates.WATFORREFEREECOMMAND)){
+                if ((inMessage.getCoachState() != CoachStates.WATFORREFEREECOMMAND)) {
                     throw new MessageException("Invalid coach state!", inMessage);
                 }
                 break;
             case MessageType.SETFCA:
-                if((inMessage.getContestantId() < 0) || inMessage.getContestantId() >= SimulationParams.NCONTESTANTS){
+                if ((inMessage.getContestantId() < 0) || inMessage.getContestantId() >= SimulationParams.NCONTESTANTS) {
                     throw new MessageException("Invalid contestant id!", inMessage);
                 }
-                if((inMessage.getContestantState() != ContestantStates.SEATATBENCH)){
+                if ((inMessage.getContestantState() != ContestantStates.SEATATBENCH)) {
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                if ((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)) {
                     throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.SETSD:
-                if((inMessage.getContestantId() < 0) || inMessage.getContestantId() > SimulationParams.NCONTESTANTS){
+                if ((inMessage.getContestantId() < 0) || inMessage.getContestantId() > SimulationParams.NCONTESTANTS) {
                     throw new MessageException("Invalid contestant id!", inMessage);
                 }
-                if((inMessage.getContestantState() != ContestantStates.DOYOURBEST) && (inMessage.getContestantState() != ContestantStates.SEATATBENCH)){
+                if ((inMessage.getContestantState() != ContestantStates.DOYOURBEST) && (inMessage.getContestantState() != ContestantStates.SEATATBENCH)) {
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                if ((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)) {
                     throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.SETRN:
-                if((inMessage.getCoachId() < 0) || inMessage.getCoachId() >= SimulationParams.NTEAMS){
+                if ((inMessage.getCoachId() < 0) || inMessage.getCoachId() >= SimulationParams.NTEAMS) {
                     throw new MessageException("Invalid coach id!", inMessage);
                 }
-                if((inMessage.getCoachState() != CoachStates.WATCHTRIAL)){
+                if ((inMessage.getCoachState() != CoachStates.WATCHTRIAL)) {
                     throw new MessageException("Invalid coach state!", inMessage);
                 }
                 break;
             case MessageType.END:
-                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                if ((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))) {
                     throw new MessageException("Invalid entity!", inMessage);
                 }
                 break;
@@ -99,7 +111,7 @@ public class ContestantBenchInterface {
 
         /* processing */
 
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.UCB:
                 contestantsBench.unblockContestantBench();
                 outMessage = new Message(MessageType.UCBDONE);
@@ -156,6 +168,6 @@ public class ContestantBenchInterface {
                 break;
         }
 
-        return  outMessage;
+        return outMessage;
     }
 }

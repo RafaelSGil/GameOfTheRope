@@ -1,31 +1,30 @@
 package commInfra;
 
 /**
- *   Type of the exchanged messages.
- *
- *   Implementation of a client-server model of type 2 (server replication).
- *   Communication is based on a communication channel under the TCP protocol.
+ * Type of the exchanged messages.
+ * <p>
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
  */
 
-public class MessageType
-{
+public class MessageType {
     /**
-     *  Initialization of the logging file name and the number of iterations (service request).
+     * Initialization of the logging file name and the number of iterations (service request).
      */
     public static final int SETNFIC = 1;
 
     /**
-     *  Logging file was initialized (reply).
+     * Logging file was initialized (reply).
      */
     public static final int NFICDONE = 2;
 
     /**
-     *  Server shutdown (service request).
+     * Server shutdown (service request).
      */
     public static final int SHUT = 3;
 
     /**
-     *  Server was shutdown (reply).
+     * Server was shutdown (reply).
      */
     public static final int SHUTDONE = 4;
 
@@ -70,7 +69,7 @@ public class MessageType
     public static final int SETRN = 11;
 
     /**
-     *  Review Notes (reply).
+     * Review Notes (reply).
      */
 
     public static final int RNDONE = 12;
@@ -82,7 +81,7 @@ public class MessageType
      */
     public static final int SETFCA = 13;
     /**
-     *  Follow Coach Advice (reply).
+     * Follow Coach Advice (reply).
      */
     public static final int FCADONE = 14;
 
@@ -116,7 +115,6 @@ public class MessageType
      * Seat Down (reply).
      */
     public static final int SDDONE = 20;
-
 
 
     //todo ################### REFEREE ###################

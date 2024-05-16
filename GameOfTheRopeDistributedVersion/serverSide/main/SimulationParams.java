@@ -49,7 +49,7 @@ public class SimulationParams {
     public static final int MINSTRENGTH = 6;
 
     /**
-     *   Number of entities requesting shutdown.
+     * Number of entities requesting shutdown.
      */
     public static final int NENTITIES = 3;
 

@@ -1,56 +1,56 @@
 package serverSide.sharedRegions;
 
-import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.MessageType;
 import serverSide.main.SimulationParams;
 
 /**
- *  Interface to the General Repository of Information.
+ * Interface to the General Repository of Information.
+ * <p>
+ * It is responsible to validate and process the incoming message, execute the corresponding method on the
+ * General Repository and generate the outgoing message.
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
  *
- *    It is responsible to validate and process the incoming message, execute the corresponding method on the
- *    General Repository and generate the outgoing message.
- *    Implementation of a client-server model of type 2 (server replication).
- *    Communication is based on a communication channel under the TCP protocol.
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class GeneralRepositoryInterface {
     /**
-     *  Reference to the general repository.
+     * Reference to the general repository.
      */
 
     private final GeneralRepository repos;
 
     /**
-     *  Instantiation of an interface to the general repository.
+     * Instantiation of an interface to the general repository.
      *
-     *    @param repos reference to the general repository
+     * @param repos reference to the general repository
      */
 
-    public GeneralRepositoryInterface (GeneralRepository repos)
-    {
+    public GeneralRepositoryInterface(GeneralRepository repos) {
         this.repos = repos;
     }
 
     /**
-     *  Processing of the incoming messages.
+     * Processing of the incoming messages.
+     * <p>
+     * Validation, execution of the corresponding method and generation of the outgoing message.
      *
-     *  Validation, execution of the corresponding method and generation of the outgoing message.
-     *
-     *    @param inMessage service request
-     *    @return service reply
-     *    @throws MessageException if the incoming message is not valid
+     * @param inMessage service request
+     * @return service reply
+     * @throws MessageException if the incoming message is not valid
      */
 
-    public Message processAndReply (Message inMessage) throws MessageException
-    {
+    public Message processAndReply(Message inMessage) throws MessageException {
         Message outMessage = null;                                     // mensagem de resposta
 
         /* validation of the incoming message */
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.SETNFIC:
-                if (inMessage.getLogFName () == null){
-                    throw new MessageException ("Name of the logging file is not present!", inMessage);
+                if (inMessage.getLogFName() == null) {
+                    throw new MessageException("Name of the logging file is not present!", inMessage);
                 }
                 break;
             case MessageType.SETG:
@@ -62,12 +62,12 @@ public class GeneralRepositoryInterface {
             case MessageType.UPREF:
                 break;
             case MessageType.UPCOA:
-                if((inMessage.getCoachId() < 0) || (inMessage.getCoachId() >= SimulationParams.NTEAMS)){
+                if ((inMessage.getCoachId() < 0) || (inMessage.getCoachId() >= SimulationParams.NTEAMS)) {
                     throw new MessageException("Invalid coach id!", inMessage);
                 }
                 break;
             case MessageType.UPCONT:
-                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)){
+                if ((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)) {
                     throw new MessageException("Invalid contestant id!", inMessage);
                 }
                 break;
@@ -86,7 +86,7 @@ public class GeneralRepositoryInterface {
         }
 
         /* processing */
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.SETNFIC:
                 repos.initSimul(inMessage.getLogFName());
                 outMessage = new Message(MessageType.NFICDONE);

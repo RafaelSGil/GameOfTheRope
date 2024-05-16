@@ -1,9 +1,12 @@
 package clientSide.entities;
 
-import clientSide.stubs.*;
-import genclass.GenericIO;
-import serverSide.sharedRegions.*;
+import clientSide.stubs.ContestantsBenchStub;
+import clientSide.stubs.PlaygroundStub;
+import clientSide.stubs.RefereeSiteStub;
 import serverSide.main.SimulationParams;
+import serverSide.sharedRegions.ContestantsBench;
+import serverSide.sharedRegions.Playground;
+import serverSide.sharedRegions.RefereeSite;
 
 
 /**

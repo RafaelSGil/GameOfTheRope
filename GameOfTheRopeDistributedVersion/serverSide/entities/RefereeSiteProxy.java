@@ -1,6 +1,7 @@
 package serverSide.entities;
 
-import clientSide.entities.*;
+import clientSide.entities.RefereeCloning;
+import clientSide.entities.RefereeStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.ServerCom;
@@ -9,20 +10,27 @@ import serverSide.main.SimulationParams;
 import serverSide.sharedRegions.RefereeSite;
 import serverSide.sharedRegions.RefereeSiteInterface;
 
-
+/**
+ * Service provider agent for access to the Referee Site.
+ * <p>
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public class RefereeSiteProxy extends Thread implements RefereeCloning {
 
     /**
-     *  Communication channel.
+     * Communication channel.
      */
 
-    private ServerCom sconi;
+    private final ServerCom sconi;
 
     /**
      * Interface for the referee site
-     *
      */
-    private RefereeSiteInterface refereeSiteInterface;
+    private final RefereeSiteInterface refereeSiteInterface;
 
     /**
      * Internal state of the referee. Possible states are defined in {@link RefereeStates}.
@@ -65,30 +73,39 @@ public class RefereeSiteProxy extends Thread implements RefereeCloning {
     private String finalResults;
 
     /**
-     *  Number of instantiated threads.
+     * Number of instantiated threads.
      */
     private static int nProxy = 0;
 
-    private static int getProxyId ()
-    {
+    /**
+     * Get Proxy Identification
+     *
+     * @return proxy identification
+     */
+    private static int getProxyId() {
         Class<?> cl = null;                                            // representation of the BarberShopClientProxy object in JVM
         int proxyId;                                                   // instantiation identifier
 
-        try
-        { cl = Class.forName ("serverSide.entities.RefereeSiteProxy");
+        try {
+            cl = Class.forName("serverSide.entities.RefereeSiteProxy");
+        } catch (ClassNotFoundException e) {
+            GenericIO.writelnString("Data type RefereeSiteProxy was not found!");
+            e.printStackTrace();
+            System.exit(1);
         }
-        catch (ClassNotFoundException e)
-        { GenericIO.writelnString ("Data type RefereeSiteProxy was not found!");
-            e.printStackTrace ();
-            System.exit (1);
-        }
-        synchronized (cl)
-        { proxyId = nProxy;
+        synchronized (cl) {
+            proxyId = nProxy;
             nProxy += 1;
         }
         return proxyId;
     }
 
+    /**
+     * Referee Site Proxy Constructor
+     *
+     * @param sconi                communication channel
+     * @param refereeSiteInterface referee site interface
+     */
     public RefereeSiteProxy(ServerCom sconi, RefereeSiteInterface refereeSiteInterface) {
         super("RefereeSiteProxy_" + RefereeSiteProxy.getProxyId());
         this.sconi = sconi;
@@ -97,6 +114,9 @@ public class RefereeSiteProxy extends Thread implements RefereeCloning {
     }
 
 
+    /**
+     * Life cycle of the service provider agent.
+     */
 
     @Override
     public void run() {
@@ -105,17 +125,16 @@ public class RefereeSiteProxy extends Thread implements RefereeCloning {
 
         /* service providing */
 
-        inMessage = (Message) sconi.readObject ();                     // get service request
-        try{
-            outMessage = refereeSiteInterface.processAndReply (inMessage);         // process it
+        inMessage = (Message) sconi.readObject();                     // get service request
+        try {
+            outMessage = refereeSiteInterface.processAndReply(inMessage);         // process it
+        } catch (MessageException e) {
+            GenericIO.writelnString("Thread " + getName() + ": " + e.getMessage() + "!");
+            GenericIO.writelnString(e.getMessageVal().toString());
+            System.exit(1);
         }
-        catch (MessageException e){
-            GenericIO.writelnString ("Thread " + getName () + ": " + e.getMessage () + "!");
-            GenericIO.writelnString (e.getMessageVal ().toString ());
-            System.exit (1);
-        }
-        sconi.writeObject (outMessage);                                // send service reply
-        sconi.close ();                                                // close the communication channel
+        sconi.writeObject(outMessage);                                // send service reply
+        sconi.close();                                                // close the communication channel
     }
 
     /**

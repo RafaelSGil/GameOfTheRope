@@ -2,7 +2,9 @@ package serverSide.sharedRegions;
 
 
 import clientSide.entities.*;
-import clientSide.entities.data.*;
+import clientSide.entities.data.CoachData;
+import clientSide.entities.data.ContestantData;
+import clientSide.entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
 import serverSide.main.ServerGameOfTheRopeGeneralRepository;
@@ -65,7 +67,7 @@ public class GeneralRepository {
     private String fileName;
 
     /**
-     *   Number of entity groups requesting the shutdown.
+     * Number of entity groups requesting the shutdown.
      */
 
     private int nEntities;
@@ -101,7 +103,6 @@ public class GeneralRepository {
 
     /**
      * Creates a new GeneralRepository instance
-     *
      */
     public GeneralRepository() {
         this.fileName = "logger";
@@ -124,19 +125,18 @@ public class GeneralRepository {
     }
 
     /**
-     *   Operation initialization of simulation.
+     * Operation initialization of simulation.
+     * <p>
+     * New operation.
      *
-     *   New operation.
-     *
-     *     @param logFileName name of the logging file
+     * @param logFileName name of the logging file
      */
 
-    public synchronized void initSimul (String logFileName)
-    {
-        if (!Objects.equals (logFileName, ""))
+    public synchronized void initSimul(String logFileName) {
+        if (!Objects.equals(logFileName, ""))
             this.fileName = logFileName;
 
-        reportInitialStatus ();
+        reportInitialStatus();
     }
 
     /**
@@ -568,13 +568,12 @@ public class GeneralRepository {
     }
 
     /**
-     *   Operation server shutdown.
-     *
-     *   New operation.
+     * Operation server shutdown.
+     * <p>
+     * New operation.
      */
 
-    public synchronized void shutdown ()
-    {
+    public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES)
             ServerGameOfTheRopeGeneralRepository.waitConnection = false;

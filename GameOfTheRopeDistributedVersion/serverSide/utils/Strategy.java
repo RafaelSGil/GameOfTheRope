@@ -9,6 +9,9 @@ import java.util.List;
 
 /**
  * The Strategy class provides methods to determine the strategy for selecting players in the game.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class Strategy {
     /**

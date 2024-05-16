@@ -9,6 +9,17 @@ import commInfra.MessageType;
 import serverSide.entities.PlaygroundProxy;
 import serverSide.main.SimulationParams;
 
+/**
+ * Interface to the Playground.
+ * <p>
+ * It is responsible to validate and process the incoming message, execute the corresponding method on the
+ * Playground and generate the outgoing message.
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public class PlaygroundInterface {
     /**
      * Reference to the playground
@@ -17,73 +28,74 @@ public class PlaygroundInterface {
 
     /**
      * Instantiation of an interface for playground
+     *
      * @param playground reference to playground
      */
-    public PlaygroundInterface(Playground playground){
+    public PlaygroundInterface(Playground playground) {
         this.playground = playground;
     }
 
     /**
-     *  Processing of the incoming messages.
+     * Processing of the incoming messages.
+     * <p>
+     * Validation, execution of the corresponding method and generation of the outgoing message.
      *
-     *  Validation, execution of the corresponding method and generation of the outgoing message.
-     *
-     *    @param inMessage service request
-     *    @return service reply
-     *    @throws MessageException if the incoming message is not valid
+     * @param inMessage service request
+     * @return service reply
+     * @throws MessageException if the incoming message is not valid
      */
-    public Message processAndReply (Message inMessage) throws MessageException{
+    public Message processAndReply(Message inMessage) throws MessageException {
         Message outMessage = null;                                     // outgoing message
 
         /* validation of the incoming message */
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.SETCT:
-                if((inMessage.getRefereeState() != RefereeStates.STARTGAME) && (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)){
+                if ((inMessage.getRefereeState() != RefereeStates.STARTGAME) && (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION)) {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETST:
-                if(inMessage.getRefereeState() != RefereeStates.TEAMSREADY){
+                if (inMessage.getRefereeState() != RefereeStates.TEAMSREADY) {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETATD:
-                if(inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION){
+                if (inMessage.getRefereeState() != RefereeStates.WAITTRIALCONCLUSION) {
                     throw new MessageException("Invalid referee state!", inMessage);
                 }
                 break;
             case MessageType.SETIR:
-                if(inMessage.getCoachState() != CoachStates.ASSEMBLETEAM){
+                if (inMessage.getCoachState() != CoachStates.ASSEMBLETEAM) {
                     throw new MessageException("Invalid coach state!", inMessage);
                 }
-                if((inMessage.getCoachId() < 0) || (inMessage.getCoachId() >= SimulationParams.NTEAMS)){
-                    throw new MessageException ("Invalid coach id!", inMessage);
+                if ((inMessage.getCoachId() < 0) || (inMessage.getCoachId() >= SimulationParams.NTEAMS)) {
+                    throw new MessageException("Invalid coach id!", inMessage);
                 }
                 break;
             case MessageType.SETGR:
-                if(inMessage.getContestantState() != ContestantStates.STANDINPOSITION){
+                if (inMessage.getContestantState() != ContestantStates.STANDINPOSITION) {
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)){
-                    throw new MessageException ("Invalid contestant id!", inMessage);
+                if ((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)) {
+                    throw new MessageException("Invalid contestant id!", inMessage);
                 }
-                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                if ((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)) {
                     throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.SETAID:
-                if(inMessage.getContestantState() != ContestantStates.DOYOURBEST){
+                if (inMessage.getContestantState() != ContestantStates.DOYOURBEST) {
                     throw new MessageException("Invalid contestant state!", inMessage);
                 }
-                if((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)){
-                    throw new MessageException ("Invalid contestant id!", inMessage);
+                if ((inMessage.getContestantId() < 0) || (inMessage.getContestantId() >= SimulationParams.NCONTESTANTS)) {
+                    throw new MessageException("Invalid contestant id!", inMessage);
                 }
-                if((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)){
+                if ((inMessage.getContestantTeam() < 0) || (inMessage.getContestantTeam() >= SimulationParams.NTEAMS)) {
                     throw new MessageException("Invalid contestant team", inMessage);
                 }
                 break;
             case MessageType.END:
-                if((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))){
+                if ((!inMessage.getEntity().equals(SimulationParams.REFEREE)) && (!inMessage.getEntity().equals(SimulationParams.COACH)) && (!inMessage.getEntity().equals(SimulationParams.CONTESTANT))) {
                     throw new MessageException("Invalid entity!", inMessage);
                 }
                 break;
@@ -92,7 +104,7 @@ public class PlaygroundInterface {
         }
 
         /* processing */
-        switch (inMessage.getMsgType ()){
+        switch (inMessage.getMsgType()) {
             case MessageType.SETCT:
                 ((PlaygroundProxy) Thread.currentThread()).setRefereeSate(inMessage.getRefereeState());
                 ((PlaygroundProxy) Thread.currentThread()).setGame(inMessage.getGame());
@@ -110,11 +122,11 @@ public class PlaygroundInterface {
                 ((PlaygroundProxy) Thread.currentThread()).setGame(inMessage.getGame());
                 ((PlaygroundProxy) Thread.currentThread()).setTrial(inMessage.getTrial());
                 boolean result = playground.assertTrialDecision();
-                if(result){
+                if (result) {
                     outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
                             ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result,
                             ((PlaygroundProxy) Thread.currentThread()).getWinCause(), ((PlaygroundProxy) Thread.currentThread()).getMatchEnd());
-                }else {
+                } else {
                     outMessage = new Message(MessageType.ATDDONE, ((PlaygroundProxy) Thread.currentThread()).getRefereeSate(),
                             ((PlaygroundProxy) Thread.currentThread()).getGameResult(((PlaygroundProxy) Thread.currentThread()).getGame() - 1), result);
                 }
@@ -152,6 +164,6 @@ public class PlaygroundInterface {
                 break;
         }
 
-        return  outMessage;
+        return outMessage;
     }
 }

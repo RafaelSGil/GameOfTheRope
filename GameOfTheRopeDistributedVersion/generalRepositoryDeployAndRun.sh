@@ -7,4 +7,6 @@ sshpass -f password ssh sd103@l040101-ws01.ua.pt 'cd test/GameOfTheRope ; unzip 
 echo "Executing program at the server general repository."
 sshpass -f password ssh sd103@l040101-ws01.ua.pt 'cd test/GameOfTheRope/dirGeneralRepos ; java serverSide.main.ServerGameOfTheRopeGeneralRepository 22121'
 echo "Server shutdown."
-sshpass -f password ssh sd103@l040101-ws01.ua.pt 'cd test/GameOfTheRope/dirGeneralRepos ; less log'
+#sshpass -f password ssh sd103@l040101-ws01.ua.pt 'cd test/GameOfTheRope/dirGeneralRepos ; less log'
+sshpass -f password scp sd103@l040101-ws01.ua.pt:test/GameOfTheRope/dirGeneralRepos/log .
+intellij-idea-ultimate log

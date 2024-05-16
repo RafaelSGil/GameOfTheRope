@@ -20,7 +20,7 @@ import java.util.Arrays;
  */
 public class Playground {
     /**
-     *   Number of entity groups requesting the shutdown.
+     * Number of entity groups requesting the shutdown.
      */
     private int nEntities;
     /**
@@ -49,7 +49,7 @@ public class Playground {
     /**
      * Flag that signals if the trial has started
      */
-    private boolean[] trialStarted;
+    private final boolean[] trialStarted;
     /**
      * Accumulated power of the team 1
      */
@@ -67,7 +67,7 @@ public class Playground {
     /**
      * stores counter of contestant that signal they are ready for both teams
      */
-    private int[] readyCounters;
+    private final int[] readyCounters;
 
     /**
      * Creates a new Playground instance with a reference to the repository
@@ -320,20 +320,18 @@ public class Playground {
     }
 
     /**
-     *   Operation server shutdown.
-     *
-     *   New operation.
+     * Operation server shutdown.
+     * <p>
+     * New operation.
      */
-    public synchronized void endOperation (String entity, int id)
-    {
-        while (nEntities == 0)
-        {
-            try
-            { wait ();
+    public synchronized void endOperation(String entity, int id) {
+        while (nEntities == 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
             }
-            catch (InterruptedException e) {}
         }
-        switch (entity){
+        switch (entity) {
             case SimulationParams.REFEREE:
                 Thread.currentThread().interrupt();
                 break;
@@ -347,14 +345,13 @@ public class Playground {
     }
 
     /**
-     *Operation shut down
+     * Operation shut down
      */
-    public synchronized void shutdown ()
-    {
+    public synchronized void shutdown() {
         nEntities += 1;
-        if(nEntities >= SimulationParams.NENTITIES){
+        if (nEntities >= SimulationParams.NENTITIES) {
             ServerGameOfTheRopePlayground.waitConnection = false;
         }
-        notifyAll ();                                        // the barber may now terminate
+        notifyAll();                                        // the barber may now terminate
     }
 }

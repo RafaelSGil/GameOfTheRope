@@ -6,30 +6,33 @@ import commInfra.MessageType;
 import genclass.GenericIO;
 
 /**
- *  Stub to the general repository.
+ * Stub to the general repository.
+ * <p>
+ * It instantiates a remote reference to the general repository.
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
  *
- *    It instantiates a remote reference to the general repository.
- *    Implementation of a client-server model of type 2 (server replication).
- *    Communication is based on a communication channel under the TCP protocol.
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class GeneralRepositoryStub {
     /**
-     *  Name of the platform where is located the general repository server.
+     * Name of the platform where is located the general repository server.
      */
 
-    private String serverHostName;
+    private final String serverHostName;
 
     /**
-     *  Port number for listening to service requests.
+     * Port number for listening to service requests.
      */
 
-    private int serverPortNumb;
+    private final int serverPortNumb;
 
     /**
-     *   Instantiation of a stub to the general repository.
+     * Instantiation of a stub to the general repository.
      *
-     *     @param serverHostName name of the platform where is located the barber shop server
-     *     @param serverPortNumb port number for listening to service requests
+     * @param serverHostName name of the platform where is located the barber shop server
+     * @param serverPortNumb port number for listening to service requests
      */
     public GeneralRepositoryStub(String serverHostName, int serverPortNumb) {
         this.serverHostName = serverHostName;
@@ -37,58 +40,57 @@ public class GeneralRepositoryStub {
     }
 
     /**
-     *   Operation initialization of the simulation.
+     * Operation initialization of the simulation.
      *
-     *     @param fileName logging file name
+     * @param fileName logging file name
      */
-    public void initSimul (String fileName)
-    {
+    public void initSimul(String fileName) {
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETNFIC, fileName);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.NFICDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETNFIC, fileName);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.NFICDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
      * Set the current game
      */
-    public void setGame(int game, int refereeState){
+    public void setGame(int game, int refereeState) {
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETG, game, refereeState);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.GDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETG, game, refereeState);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.GDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -101,22 +103,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETT, trial, refereeState);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.SETTDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETT, trial, refereeState);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.SETTDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -129,22 +131,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETRP, ropePosition);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.RPDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETRP, ropePosition);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.RPDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -157,22 +159,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.UPREF, refereeState);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.UPREFDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.UPREF, refereeState);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.UPREFDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -188,22 +190,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.UPCONT, contestantId, contestantStrength, contestantState, contestantTeam);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.UPCONTDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.UPCONT, contestantId, contestantStrength, contestantState, contestantTeam);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.UPCONTDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -217,22 +219,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.UPCOA, coachTeam, coachState);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.UPCOADONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.UPCOA, coachTeam, coachState);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.UPCOADONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -246,22 +248,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETGW, team, cause);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.GWDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETGW, team, cause);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.GWDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -274,22 +276,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETMW, msg);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.MWDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETMW, msg);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.MWDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -300,22 +302,22 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.RS, header);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.RSDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.RS, header);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.RSDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
@@ -326,23 +328,24 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.RGS);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.RGSDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.RGS);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.RGSDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
+
     /**
      * Reports the status of the game start.
      */
@@ -351,83 +354,81 @@ public class GeneralRepositoryStub {
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.RGSTR);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.RGSTRDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.RGSTR);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.RGSTRDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
-     *  Operation end of work.
+     * Operation end of work.
+     * <p>
+     * New operation.
      *
-     *   New operation.
-     *
-     *      @param id id
+     * @param id id
      */
 
-    public void endOperation (int id)
-    {
+    public void endOperation(int id) {
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SETEOFC, id);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.EOFCDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SETEOFC, id);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.EOFCDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 
     /**
-     *   Operation server shutdown.
-     *
-     *   New operation.
+     * Operation server shutdown.
+     * <p>
+     * New operation.
      */
 
-    public void shutdown ()
-    {
+    public void shutdown() {
         ClientCom com;                                                 // communication channel
         Message outMessage,                                            // outgoing message
                 inMessage;                                             // incoming message
 
-        com = new ClientCom (serverHostName, serverPortNumb);
-        while (!com.open ())
-        { try
-        { Thread.sleep ((long) (1000));
+        com = new ClientCom(serverHostName, serverPortNumb);
+        while (!com.open()) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
         }
-        catch (InterruptedException e) {}
+        outMessage = new Message(MessageType.SHUT);
+        com.writeObject(outMessage);
+        inMessage = (Message) com.readObject();
+        if (inMessage.getMsgType() != MessageType.SHUTDONE) {
+            GenericIO.writelnString("Thread " + Thread.currentThread().getName() + ": Invalid message type!");
+            GenericIO.writelnString(inMessage.toString());
+            System.exit(1);
         }
-        outMessage = new Message (MessageType.SHUT);
-        com.writeObject (outMessage);
-        inMessage = (Message) com.readObject ();
-        if (inMessage.getMsgType() != MessageType.SHUTDONE)
-        { GenericIO.writelnString ("Thread " + Thread.currentThread ().getName () + ": Invalid message type!");
-            GenericIO.writelnString (inMessage.toString ());
-            System.exit (1);
-        }
-        com.close ();
+        com.close();
     }
 }

@@ -5,4 +5,4 @@
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-package entities.data;
+package clientSide.entities.data;

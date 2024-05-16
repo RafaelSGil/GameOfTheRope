@@ -1,8 +1,9 @@
 package clientSide.entities;
 
 
-import clientSide.stubs.*;
-import genclass.GenericIO;
+import clientSide.stubs.ContestantsBenchStub;
+import clientSide.stubs.PlaygroundStub;
+import clientSide.stubs.RefereeSiteStub;
 
 
 /**

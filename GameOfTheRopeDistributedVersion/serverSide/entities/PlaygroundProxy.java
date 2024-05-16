@@ -10,7 +10,15 @@ import serverSide.main.SimulationParams;
 import serverSide.sharedRegions.PlaygroundInterface;
 import serverSide.sharedRegions.RefereeSite;
 
-
+/**
+ * Service provider agent for access to the Playground.
+ * <p>
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public class PlaygroundProxy extends Thread implements CoachCloning, ContestantCloning, RefereeCloning {
 
     /**
@@ -97,44 +105,52 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     private String finalResults;
 
     /**
-     *  Number of instantiated threads.
+     * Number of instantiated threads.
      */
     private static int nProxy = 0;
 
 
     /**
-     *  Communication channel.
+     * Communication channel.
      */
 
-    private ServerCom sconi;
+    private final ServerCom sconi;
 
     /**
      * Interface for the playground
-     *
      */
-    private PlaygroundInterface playgroundInterface;
+    private final PlaygroundInterface playgroundInterface;
 
-    private static int getProxyId ()
-    {
+    /**
+     * Get Proxy Identification
+     *
+     * @return proxy identification
+     */
+    private static int getProxyId() {
         Class<?> cl = null;                                            // representation of the BarberShopClientProxy object in JVM
         int proxyId;                                                   // instantiation identifier
 
-        try
-        { cl = Class.forName ("serverSide.entities.PlaygroundProxy");
+        try {
+            cl = Class.forName("serverSide.entities.PlaygroundProxy");
+        } catch (ClassNotFoundException e) {
+            GenericIO.writelnString("Data type PlaygroundProxy was not found!");
+            e.printStackTrace();
+            System.exit(1);
         }
-        catch (ClassNotFoundException e)
-        { GenericIO.writelnString ("Data type PlaygroundProxy was not found!");
-            e.printStackTrace ();
-            System.exit (1);
-        }
-        synchronized (cl)
-        { proxyId = nProxy;
+        synchronized (cl) {
+            proxyId = nProxy;
             nProxy += 1;
         }
         return proxyId;
     }
 
-    public PlaygroundProxy(ServerCom sconi, PlaygroundInterface playgroundInterface){
+    /**
+     * Constructor for the Playground Proxy
+     *
+     * @param sconi               communication channel
+     * @param playgroundInterface interface for the playground
+     */
+    public PlaygroundProxy(ServerCom sconi, PlaygroundInterface playgroundInterface) {
         super("PlaygroundProxy_" + PlaygroundProxy.getProxyId());
         this.sconi = sconi;
         this.playgroundInterface = playgroundInterface;
@@ -142,6 +158,11 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
 
     }
 
+    /**
+     * Gets the current state of the coach.
+     *
+     * @return The current coach state as defined in {@link CoachStates}.
+     */
     @Override
     public int getCoachState() {
         return coachState;
@@ -304,7 +325,7 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
     public void manageStrength() {
         if (isPlaying && contestantStrength > 0) {
             contestantStrength = contestantStrength - 1;
-        } else if(!isPlaying && contestantStrength >0){
+        } else if (!isPlaying && contestantStrength > 0) {
             contestantStrength = contestantStrength + 1;
         }
     }
@@ -448,6 +469,9 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
         return matchEnd;
     }
 
+    /**
+     * Life cycle of the service provider agent.
+     */
 
     @Override
     public void run() {
@@ -456,16 +480,15 @@ public class PlaygroundProxy extends Thread implements CoachCloning, ContestantC
 
         /* service providing */
 
-        inMessage = (Message) sconi.readObject ();                     // get service request
-        try
-        { outMessage = playgroundInterface.processAndReply (inMessage);         // process it
+        inMessage = (Message) sconi.readObject();                     // get service request
+        try {
+            outMessage = playgroundInterface.processAndReply(inMessage);         // process it
+        } catch (MessageException e) {
+            GenericIO.writelnString("Thread " + getName() + ": " + e.getMessage() + "!");
+            GenericIO.writelnString(e.getMessageVal().toString());
+            System.exit(1);
         }
-        catch (MessageException e)
-        { GenericIO.writelnString ("Thread " + getName () + ": " + e.getMessage () + "!");
-            GenericIO.writelnString (e.getMessageVal ().toString ());
-            System.exit (1);
-        }
-        sconi.writeObject (outMessage);                                // send service reply
-        sconi.close ();                                                // close the communication channel
+        sconi.writeObject(outMessage);                                // send service reply
+        sconi.close();                                                // close the communication channel
     }
 }

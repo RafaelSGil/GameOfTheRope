@@ -1,14 +1,25 @@
 package serverSide.entities;
 
-import clientSide.entities.*;
+import clientSide.entities.CoachCloning;
+import clientSide.entities.CoachStates;
+import clientSide.entities.ContestantCloning;
+import clientSide.entities.ContestantStates;
 import commInfra.Message;
 import commInfra.MessageException;
 import commInfra.ServerCom;
 import genclass.GenericIO;
 import serverSide.main.SimulationParams;
 import serverSide.sharedRegions.ContestantBenchInterface;
-import serverSide.sharedRegions.GeneralRepositoryInterface;
 
+/**
+ * Service provider agent for access to the Contestant Bench.
+ * <p>
+ * Implementation of a client-server model of type 2 (server replication).
+ * Communication is based on a communication channel under the TCP protocol.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public class ContestantBenchProxy extends Thread implements CoachCloning, ContestantCloning {
 
     /**
@@ -55,44 +66,41 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
     private boolean isPlaying = false;
 
     /**
-     *  Communication channel.
+     * Communication channel.
      */
 
-    private ServerCom sconi;
+    private final ServerCom sconi;
 
     /**
      * Interface for the contestant bench
-     *
      */
-    private ContestantBenchInterface contestantBenchInterface;
+    private final ContestantBenchInterface contestantBenchInterface;
 
     /**
-     *  Number of instantiated threads.
+     * Number of instantiated threads.
      */
 
     private static int nProxy = 0;
 
-    private static int getProxyId ()
-    {
+    private static int getProxyId() {
         Class<?> cl = null;                                            // representation of the BarberShopClientProxy object in JVM
         int proxyId;                                                   // instantiation identifier
 
-        try
-        { cl = Class.forName ("serverSide.entities.ContestantBenchProxy");
+        try {
+            cl = Class.forName("serverSide.entities.ContestantBenchProxy");
+        } catch (ClassNotFoundException e) {
+            GenericIO.writelnString("Data type ContestantBenchProxy was not found!");
+            e.printStackTrace();
+            System.exit(1);
         }
-        catch (ClassNotFoundException e)
-        { GenericIO.writelnString ("Data type ContestantBenchProxy was not found!");
-            e.printStackTrace ();
-            System.exit (1);
-        }
-        synchronized (cl)
-        { proxyId = nProxy;
+        synchronized (cl) {
+            proxyId = nProxy;
             nProxy += 1;
         }
         return proxyId;
     }
 
-    public ContestantBenchProxy(ServerCom sconi, ContestantBenchInterface contestantBenchInterface){
+    public ContestantBenchProxy(ServerCom sconi, ContestantBenchInterface contestantBenchInterface) {
         super("ContestantBenchProxy_" + ContestantBenchProxy.getProxyId());
         this.sconi = sconi;
         this.contestantBenchInterface = contestantBenchInterface;
@@ -260,11 +268,14 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
     public void manageStrength() {
         if (isPlaying && contestantStrength > 0) {
             contestantStrength = contestantStrength - 1;
-        } else if(!isPlaying && contestantStrength >0){
+        } else if (!isPlaying && contestantStrength > 0) {
             contestantStrength = contestantStrength + 1;
         }
     }
 
+    /**
+     * Life cycle of the service provider agent.
+     */
     @Override
     public void run() {
         Message inMessage = null,                                      // service request
@@ -272,16 +283,15 @@ public class ContestantBenchProxy extends Thread implements CoachCloning, Contes
 
         /* service providing */
 
-        inMessage = (Message) sconi.readObject ();                     // get service request
-        try
-        { outMessage = contestantBenchInterface.processAndReply (inMessage);         // process it
+        inMessage = (Message) sconi.readObject();                     // get service request
+        try {
+            outMessage = contestantBenchInterface.processAndReply(inMessage);         // process it
+        } catch (MessageException e) {
+            GenericIO.writelnString("Thread " + getName() + ": " + e.getMessage() + "!");
+            GenericIO.writelnString(e.getMessageVal().toString());
+            System.exit(1);
         }
-        catch (MessageException e)
-        { GenericIO.writelnString ("Thread " + getName () + ": " + e.getMessage () + "!");
-            GenericIO.writelnString (e.getMessageVal ().toString ());
-            System.exit (1);
-        }
-        sconi.writeObject (outMessage);                                // send service reply
-        sconi.close ();                                                // close the communication channel
+        sconi.writeObject(outMessage);                                // send service reply
+        sconi.close();                                                // close the communication channel
     }
 }

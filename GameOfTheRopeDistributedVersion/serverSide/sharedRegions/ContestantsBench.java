@@ -50,12 +50,12 @@ public class ContestantsBench {
     /**
      * Checks if trial has ended for coaches
      */
-    private boolean[] hasTrialEndedCoaches;
+    private final boolean[] hasTrialEndedCoaches;
 
     /**
      * Checks if trial has ended for contestants
      */
-    private boolean[] hasTrialEndedContestants;
+    private final boolean[] hasTrialEndedContestants;
 
     /**
      * conditional flags for coaches
@@ -63,7 +63,7 @@ public class ContestantsBench {
     private final boolean[] callTrial;
 
     /**
-     *   Number of entity groups requesting the shutdown.
+     * Number of entity groups requesting the shutdown.
      */
     private int nEntities;
 
@@ -259,20 +259,18 @@ public class ContestantsBench {
     }
 
     /**
-     *   Operation server shutdown.
-     *
-     *   New operation.
+     * Operation server shutdown.
+     * <p>
+     * New operation.
      */
-    public synchronized void endOperation (String entity, int id)
-    {
-        while (nEntities == 0)
-        {
-            try
-            { wait ();
+    public synchronized void endOperation(String entity, int id) {
+        while (nEntities == 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
             }
-            catch (InterruptedException e) {}
         }
-        switch (entity){
+        switch (entity) {
             case SimulationParams.REFEREE:
                 Thread.currentThread().interrupt();
                 break;
@@ -286,14 +284,13 @@ public class ContestantsBench {
     }
 
     /**
-     *Operation shut down
+     * Operation shut down
      */
-    public synchronized void shutdown ()
-    {
+    public synchronized void shutdown() {
         nEntities += 1;
-        if(nEntities >= SimulationParams.NENTITIES){
+        if (nEntities >= SimulationParams.NENTITIES) {
             ServerGameOfTheRopeContestantsBench.waitConnection = false;
         }
-        notifyAll ();
+        notifyAll();
     }
 }

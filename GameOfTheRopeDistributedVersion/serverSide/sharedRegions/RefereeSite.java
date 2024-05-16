@@ -28,7 +28,7 @@ public class RefereeSite {
     private boolean matchEnd;
 
     /**
-     *   Number of entity groups requesting the shutdown.
+     * Number of entity groups requesting the shutdown.
      */
     private int nEntities;
 
@@ -37,18 +37,17 @@ public class RefereeSite {
      *
      * @param repository The reference to the GeneralRepository object.
      */
-    public RefereeSite(GeneralRepositoryStub repository){
+    public RefereeSite(GeneralRepositoryStub repository) {
         this.repository = repository;
         this.matchEnd = false;
     }
-
 
 
     /**
      * Announces the start of a new game to all entities.
      * Updates the game number, trial number, and referee state in the repository.
      */
-    public synchronized void announceNewGame(){
+    public synchronized void announceNewGame() {
         ((RefereeSiteProxy) Thread.currentThread()).setGame(((RefereeSiteProxy) Thread.currentThread()).getGame() + 1);
         ((RefereeSiteProxy) Thread.currentThread()).setTrial(0);
         repository.setTrial(0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
@@ -65,11 +64,11 @@ public class RefereeSite {
      * Declares the winner of a completed game based on the trial results.
      * Updates the referee state.
      */
-    public synchronized void declareGameWinner(){
+    public synchronized void declareGameWinner() {
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
 
-        switch (((RefereeSiteProxy) Thread.currentThread()).getGameResult(((RefereeSiteProxy) Thread.currentThread()).getGame() - 1)){
+        switch (((RefereeSiteProxy) Thread.currentThread()).getGameResult(((RefereeSiteProxy) Thread.currentThread()).getGame() - 1)) {
             case -1:
                 repository.declareGameWinner(0, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
                 break;
@@ -90,7 +89,7 @@ public class RefereeSite {
      * Declares the winner of the entire match based on the final results.
      * Updates the referee state and inform that the match is ended.
      */
-    public synchronized void declareMatchWinner(){
+    public synchronized void declareMatchWinner() {
         this.matchEnd = true;
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
@@ -102,41 +101,41 @@ public class RefereeSite {
 
     /**
      * Check if the match is ended or not
+     *
      * @return True if the match has ended, false otherwise.
      */
-    public synchronized boolean endOfMatch(){
+    public synchronized boolean endOfMatch() {
 
         return matchEnd;
     }
 
     /**
      * Set the match end flag to true is the match is ended, false otherwise
+     *
      * @param matchEnd The new value for the match end flag.
      */
-    public synchronized void setMatchEnd(boolean matchEnd){
+    public synchronized void setMatchEnd(boolean matchEnd) {
         this.matchEnd = matchEnd;
     }
 
     /**
-     *   Operation server shutdown.
-     *
-     *   New operation.
+     * Operation server shutdown.
+     * <p>
+     * New operation.
      */
-    public synchronized void endOperation ()
-    {
+    public synchronized void endOperation() {
         Thread.currentThread().interrupt();
     }
 
     /**
-     *Operation shut down
+     * Operation shut down
      */
-    public synchronized void shutdown ()
-    {
+    public synchronized void shutdown() {
         nEntities += 1;
-        if(nEntities >= SimulationParams.NENTITIES){
+        if (nEntities >= SimulationParams.NENTITIES) {
             ServerGameOfTheRopeRefereeSite.waitConnection = false;
         }
-        notifyAll ();                                        // the barber may now terminate
+        notifyAll();                                        // the barber may now terminate
     }
 
 }

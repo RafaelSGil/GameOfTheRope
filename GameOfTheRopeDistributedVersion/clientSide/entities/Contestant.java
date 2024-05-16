@@ -1,9 +1,12 @@
 package clientSide.entities;
 
-import clientSide.stubs.*;
-import genclass.GenericIO;
+import clientSide.stubs.ContestantsBenchStub;
+import clientSide.stubs.PlaygroundStub;
+import clientSide.stubs.RefereeSiteStub;
 import serverSide.main.SimulationParams;
-import serverSide.sharedRegions.*;
+import serverSide.sharedRegions.ContestantsBench;
+import serverSide.sharedRegions.Playground;
+import serverSide.sharedRegions.RefereeSite;
 
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
