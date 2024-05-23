@@ -15,6 +15,11 @@ import utils.Strategy;
  * @author [Rafael Gil]
  */
 public class GameOfTheRope {
+    /**
+     *
+     * Main program for the Game of the Rope simulation.
+     * @param args program arguments
+     */
     public static void main(String[] args) {
         Contestant[] contestants = new Contestant[SimulationParams.NCONTESTANTS];       // array of contestants threads
         Coach[] coaches = new Coach[SimulationParams.NTEAMS];                           // array of coach threads
@@ -71,7 +76,6 @@ public class GameOfTheRope {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             GenericIO.writelnString("The contestant " + (i) + " has terminated");
         }
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {

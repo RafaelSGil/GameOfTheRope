@@ -84,7 +84,6 @@ public class RefereeSite {
         this.matchEnd = true;
         ((Referee) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
         repository.updateReferee(((Referee) Thread.currentThread()).getRefereeSate());
-
         repository.reportStatus(false);
         repository.declareMatchWinner(((Referee) Thread.currentThread()).finalResults());
     }

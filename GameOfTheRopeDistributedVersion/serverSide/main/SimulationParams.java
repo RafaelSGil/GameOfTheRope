@@ -1,4 +1,4 @@
-package main;
+package serverSide.main;
 
 /**
  * This class defines constants representing various parameters used in the Game of the Rope simulation.
@@ -47,4 +47,24 @@ public class SimulationParams {
      * The minimum possible strength value for a contestant.
      */
     public static final int MINSTRENGTH = 6;
+
+    /**
+     * Number of entities requesting shutdown.
+     */
+    public static final int NENTITIES = 3;
+
+    /**
+     * String identification for contestants
+     */
+    public static final String CONTESTANT = "contestant";
+
+    /**
+     * String identification for coaches
+     */
+    public static final String COACH = "coach";
+
+    /**
+     * String identification for referee
+     */
+    public static final String REFEREE = "referee";
 }

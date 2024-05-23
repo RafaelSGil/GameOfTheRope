@@ -1,10 +1,14 @@
-package sharedregions;
+package serverSide.sharedRegions;
 
-import entities.*;
-import entities.data.*;
-import main.SimulationParams;
+
+import clientSide.entities.*;
+import clientSide.entities.data.CoachData;
+import clientSide.entities.data.ContestantData;
+import clientSide.entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
+import serverSide.main.ServerGameOfTheRopeGeneralRepository;
+import serverSide.main.SimulationParams;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -60,7 +64,13 @@ public class GeneralRepository {
     /**
      * Store the name of the file to which will write
      */
-    private final String fileName;
+    private String fileName;
+
+    /**
+     * Number of entity groups requesting the shutdown.
+     */
+
+    private int nEntities;
 
     /**
      * Creates a new GeneralRepository instance
@@ -87,6 +97,44 @@ public class GeneralRepository {
         this.gameWinMsg = "";
         this.trial = 0;
         this.ropePosition = 0;
+
+        reportInitialStatus();
+    }
+
+    /**
+     * Creates a new GeneralRepository instance
+     */
+    public GeneralRepository() {
+        this.fileName = "logger";
+
+        this.referee = new RefereeData();
+        coaches = new CoachData[SimulationParams.NTEAMS];
+        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
+            coaches[i] = new CoachData(i);
+        }
+
+        contestants = new ContestantData[SimulationParams.NCONTESTANTS];
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            contestants[i] = new ContestantData(i);
+        }
+
+        this.game = 0;
+        this.gameWinMsg = "";
+        this.trial = 0;
+        this.ropePosition = 0;
+    }
+
+    /**
+     * Operation initialization of simulation.
+     * <p>
+     * New operation.
+     *
+     * @param logFileName name of the logging file
+     */
+
+    public synchronized void initSimul(String logFileName) {
+        if (!Objects.equals(logFileName, ""))
+            this.fileName = logFileName;
 
         reportInitialStatus();
     }
@@ -244,7 +292,7 @@ public class GeneralRepository {
     /**
      * Reports the initial status of the game.
      */
-    private void reportInitialStatus() {
+    private synchronized void reportInitialStatus() {
         TextFile log = new TextFile();
 
         if (!log.openForWriting(".", fileName)) {
@@ -462,7 +510,7 @@ public class GeneralRepository {
      * @param state The state of the referee.
      * @return The string representation of the referee state.
      */
-    private String translateRefereeStates(int state) {
+    private synchronized String translateRefereeStates(int state) {
         switch (state) {
             case 0:
                 return "SOM";
@@ -487,7 +535,7 @@ public class GeneralRepository {
      * @param state The state of the coach.
      * @return The string representation of the coach state.
      */
-    private String translateCoachStates(int state) {
+    private synchronized String translateCoachStates(int state) {
         switch (state) {
             case 0:
                 return "WFRC";
@@ -506,7 +554,7 @@ public class GeneralRepository {
      * @param state The state of the contestant.
      * @return The string representation of the contestant state.
      */
-    private String translateContestantStates(int state) {
+    private synchronized String translateContestantStates(int state) {
         switch (state) {
             case 0:
                 return "SAB";
@@ -517,5 +565,17 @@ public class GeneralRepository {
             default:
                 return "";
         }
+    }
+
+    /**
+     * Operation server shutdown.
+     * <p>
+     * New operation.
+     */
+
+    public synchronized void shutdown() {
+        nEntities += 1;
+        if (nEntities >= SimulationParams.NENTITIES)
+            ServerGameOfTheRopeGeneralRepository.waitConnection = false;
     }
 }

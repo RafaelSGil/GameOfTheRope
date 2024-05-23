@@ -1,9 +1,13 @@
-package sharedregions;
+package serverSide.sharedRegions;
 
+import clientSide.entities.CoachStates;
+import clientSide.entities.ContestantStates;
+import clientSide.stubs.GeneralRepositoryStub;
+import serverSide.entities.ContestantBenchProxy;
+import serverSide.main.ServerGameOfTheRopeContestantsBench;
+import serverSide.main.SimulationParams;
+import serverSide.utils.Strategy;
 
-import entities.*;
-import main.SimulationParams;
-import utils.Strategy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +25,12 @@ public class ContestantsBench {
     /**
      * Array to store all Contestants
      */
-    private final Contestant[] contestants;
+    private final ContestantBenchProxy[] contestants;
+
+    /**
+     * Array to store all coaches
+     */
+    private final ContestantBenchProxy[] coaches;
 
     /**
      * List to store Playing players
@@ -36,33 +45,51 @@ public class ContestantsBench {
     /**
      * General Repository
      */
-    private final GeneralRepository repository;
+    private final GeneralRepositoryStub repository;
 
     /**
-     * Checks if trial has ended
+     * Checks if trial has ended for coaches
      */
-    private boolean hasTrialEnded;
+    private final boolean[] hasTrialEndedCoaches;
+
+    /**
+     * Checks if trial has ended for contestants
+     */
+    private final boolean[] hasTrialEndedContestants;
 
     /**
      * conditional flags for coaches
      */
     private final boolean[] callTrial;
 
+    /**
+     * Number of entity groups requesting the shutdown.
+     */
+    private int nEntities;
+
 
     /**
      * Creates a new ContestantsBench instance with a reference to the repository
      *
-     * @param repository The {@link GeneralRepository} object representing the repository.
+     * @param repository The {@link GeneralRepositoryStub} object representing the repository.
      */
-    public ContestantsBench(GeneralRepository repository) {
+    public ContestantsBench(GeneralRepositoryStub repository) {
         this.playing = new ArrayList<>();
         this.benched = new ArrayList<>();
         this.repository = repository;
-        this.hasTrialEnded = false;
+        this.hasTrialEndedCoaches = new boolean[SimulationParams.NTEAMS];
+        Arrays.fill(hasTrialEndedCoaches, false);
+        this.hasTrialEndedContestants = new boolean[SimulationParams.NCONTESTANTS];
+        Arrays.fill(hasTrialEndedContestants, false);
         this.callTrial = new boolean[SimulationParams.NTEAMS];
-        this.contestants = new Contestant[SimulationParams.NCONTESTANTS];
+        Arrays.fill(callTrial, false);
+        this.contestants = new ContestantBenchProxy[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
+        }
+        this.coaches = new ContestantBenchProxy[SimulationParams.NTEAMS];
+        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
+            coaches[i] = null;
         }
     }
 
@@ -79,8 +106,9 @@ public class ContestantsBench {
      */
     public synchronized void refereeCallTrial() {
         Arrays.fill(callTrial, true);
-        this.hasTrialEnded = false;
-        unblockContestantBench();
+        Arrays.fill(hasTrialEndedContestants, false);
+        Arrays.fill(hasTrialEndedCoaches, false);
+        notifyAll();
     }
 
     /**
@@ -89,7 +117,9 @@ public class ContestantsBench {
      * @param hasTrialEnded new value for the attribute
      */
     public synchronized void setHasTrialEnded(boolean hasTrialEnded) {
-        this.hasTrialEnded = hasTrialEnded;
+        Arrays.fill(hasTrialEndedCoaches, hasTrialEnded);
+        Arrays.fill(hasTrialEndedContestants, hasTrialEnded);
+        notifyAll();
     }
 
     /**
@@ -100,7 +130,7 @@ public class ContestantsBench {
      */
     private boolean isEveryoneSeated(int team) {
         int contSeated = 0;
-        for (Contestant c : contestants) {
+        for (ContestantBenchProxy c : contestants) {
             try {
                 if (c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH) {
                     contSeated++;
@@ -130,15 +160,19 @@ public class ContestantsBench {
             }
         }
 
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
+        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
+
+        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
 
         //choose the players
-        Strategy.useStrategy(((Coach) Thread.currentThread()).getStrategy(), ((Coach) Thread.currentThread()).getCoachTeam(), contestants, playing, benched);
+        Strategy.useStrategy(coaches[coachId].getStrategy(), coaches[coachId].getCoachTeam(), contestants, playing, benched);
 
 
-        ((Coach) Thread.currentThread()).setCoachState(CoachStates.ASSEMBLETEAM);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        coaches[coachId].setCoachState(CoachStates.ASSEMBLETEAM);
+        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
         repository.reportStatus(false);
+
         // wake up contestants
         notifyAll();
     }
@@ -150,12 +184,11 @@ public class ContestantsBench {
      * acting accordingly
      */
     public synchronized void followCoachAdvice() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
+        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-
 
         // wait for coach to choose team
         while (!playing.contains(contestantId) && !benched.contains(contestantId)) {
@@ -182,37 +215,36 @@ public class ContestantsBench {
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
     public synchronized void seatDown() {
-        int contestantId = ((Contestant) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((Contestant) Thread.currentThread());
-        while (!hasTrialEnded) {
+        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
+        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
+        while (!hasTrialEndedContestants[contestantId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
         contestants[contestantId].manageStrength();
         playing.clear();
         benched.clear();
         contestants[contestantId].setPlaying(false);
+        hasTrialEndedContestants[contestantId] = false;
 
         contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
         repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
                 contestants[contestantId].getContestantState(),
                 contestants[contestantId].getContestantTeam());
-<<<<<<< Updated upstream:assignment1/sharedregions/ContestantsBench.java
         repository.reportStatus(false);
-=======
->>>>>>> Stashed changes:sharedregions/ContestantsBench.java
     }
 
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
     public synchronized void reviewNotes() {
-        callTrial[((Coach) Thread.currentThread()).getCoachTeam()] = false;
-        while (!hasTrialEnded) {
+        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
+        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
+        callTrial[coachId] = false;
+        while (!hasTrialEndedCoaches[coachId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -220,8 +252,45 @@ public class ContestantsBench {
             }
         }
 
-        ((Coach) Thread.currentThread()).setCoachState(CoachStates.WATFORREFEREECOMMAND);
-        repository.updateCoach(((Coach) Thread.currentThread()).getCoachState(), ((Coach) Thread.currentThread()).getCoachTeam());
+        hasTrialEndedCoaches[coachId] = false;
+        coaches[coachId].setCoachState(CoachStates.WATFORREFEREECOMMAND);
+        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
         repository.reportStatus(false);
+    }
+
+    /**
+     * Operation server shutdown.
+     * <p>
+     * New operation.
+     */
+    public synchronized void endOperation(String entity, int id) {
+        while (nEntities == 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+            }
+        }
+        switch (entity) {
+            case SimulationParams.REFEREE:
+                Thread.currentThread().interrupt();
+                break;
+            case SimulationParams.COACH:
+                coaches[id].interrupt();
+                break;
+            case SimulationParams.CONTESTANT:
+                contestants[id].interrupt();
+                break;
+        }
+    }
+
+    /**
+     * Operation shut down
+     */
+    public synchronized void shutdown() {
+        nEntities += 1;
+        if (nEntities >= SimulationParams.NENTITIES) {
+            ServerGameOfTheRopeContestantsBench.waitConnection = false;
+        }
+        notifyAll();
     }
 }

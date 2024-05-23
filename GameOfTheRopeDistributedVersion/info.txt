@@ -1,0 +1,21 @@
+
+Global - 22120≤port number<22130
+
+netstat -tuln | grep <port_number>
+fuser -k -n tcp <port_number>
+
+________________________________________________
+ SharedRegion    |LocalPort|GlobalPort|PCNumber|
+_________________|____________________|________|
+generalRepository|  22161  |  22121   |   1    |
+contestantsBench |  22162  |  22122   |   2    |
+playGround       |  22163  |  22125   |   5    |
+refereeSite      |  22164  |  22126   |   6    |
+_________________|_________|__________|________|
+ Entitie         |         |          |PCNumber|
+_________________|_________|__________|________|
+Coach            |         |          |   7    |
+Contestants      |         |          |   8    |
+Referee          |         |          |   9    |
+_________________|_________|__________|________|
+WARNING: CHANGE GNOME TERMINAL PREFERENCES -> Command -> When command exits -> Hold The Terminal Open
