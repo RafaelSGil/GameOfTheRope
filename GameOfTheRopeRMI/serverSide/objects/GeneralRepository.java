@@ -7,6 +7,7 @@ import clientSide.entities.data.ContestantData;
 import clientSide.entities.data.RefereeData;
 import genclass.GenericIO;
 import genclass.TextFile;
+import interfaces.IGeneralRepository;
 import serverSide.main.ServerGameOfTheRopeGeneralRepository;
 import serverSide.main.SimulationParams;
 
@@ -23,7 +24,7 @@ import java.util.Objects;
  * @author [Rafael Gil]
  */
 
-public class GeneralRepository {
+public class GeneralRepository implements IGeneralRepository {
     /**
      * Reference to the {@link RefereeData} object
      * which holds the data relative to the {@link Referee} object
@@ -131,7 +132,7 @@ public class GeneralRepository {
      *
      * @param logFileName name of the logging file
      */
-
+    @Override
     public synchronized void initSimul(String logFileName) {
         if (!Objects.equals(logFileName, ""))
             this.fileName = logFileName;
@@ -144,6 +145,7 @@ public class GeneralRepository {
      *
      * @param game new value
      */
+    @Override
     public synchronized void setGame(int game) {
         this.game = game;
     }
@@ -153,6 +155,7 @@ public class GeneralRepository {
      *
      * @return value of game
      */
+    @Override
     public synchronized int getGame() {
         return game;
     }
@@ -162,6 +165,7 @@ public class GeneralRepository {
      *
      * @return value of gameWinMsg
      */
+    @Override
     public synchronized String getGameWinMsg() {
         return gameWinMsg;
     }
@@ -171,6 +175,7 @@ public class GeneralRepository {
      *
      * @param gameWinMsg new value
      */
+    @Override
     public synchronized void setGameWinMsg(String gameWinMsg) {
         this.gameWinMsg = gameWinMsg;
     }
@@ -180,6 +185,7 @@ public class GeneralRepository {
      *
      * @return value of the attribute trail
      */
+    @Override
     public synchronized int getTrial() {
         return trial;
     }
@@ -189,6 +195,7 @@ public class GeneralRepository {
      *
      * @param trial The trial count to set.
      */
+    @Override
     public synchronized void setTrial(int trial) {
         this.trial = Math.min(trial, SimulationParams.NTRIALS);
     }
@@ -198,6 +205,7 @@ public class GeneralRepository {
      *
      * @return The current position of the rope.
      */
+    @Override
     public synchronized int getRopePosition() {
         return ropePosition;
     }
@@ -207,6 +215,7 @@ public class GeneralRepository {
      *
      * @param ropePosition The position to set for the rope.
      */
+    @Override
     public synchronized void setRopePosition(int ropePosition) {
         this.ropePosition = ropePosition;
     }
@@ -216,6 +225,7 @@ public class GeneralRepository {
      *
      * @param refereeState The new state of the referee.
      */
+    @Override
     public synchronized void updateReferee(int refereeState) {
         referee.setState(refereeState);
     }
@@ -228,6 +238,7 @@ public class GeneralRepository {
      * @param contestantState    The state of the contestant.
      * @param contestantTeam     The team of the contestant.
      */
+    @Override
     public synchronized void updateContestant(int contestantId, int contestantStrength, int contestantState, int contestantTeam) {
         try {
             contestants[contestantId].setState(contestantState);
@@ -245,6 +256,7 @@ public class GeneralRepository {
      * @param coachState The new state of the coach.
      * @param coachTeam  The team of the coach.
      */
+    @Override
     public synchronized void updateCoach(int coachState, int coachTeam) {
         try {
             coaches[coachTeam].setState(coachState);
@@ -260,6 +272,7 @@ public class GeneralRepository {
      * @param team  The winning team.
      * @param cause The cause of the win.
      */
+    @Override
     public synchronized void declareGameWinner(int team, String cause) {
         if (!cause.equals("draw")) {
             gameWinMsg = " was won by team " + (team + 1) + " by " + cause + " in " + trial + " trials.";
@@ -273,6 +286,7 @@ public class GeneralRepository {
      *
      * @param msg The message declaring the match winner.
      */
+    @Override
     public synchronized void declareMatchWinner(String msg) {
         TextFile log = new TextFile();
 
@@ -314,6 +328,7 @@ public class GeneralRepository {
     /**
      * Reports the current status of the game.
      */
+    @Override
     public synchronized void reportStatus(boolean header) {
         TextFile log = new TextFile();
 
@@ -334,6 +349,7 @@ public class GeneralRepository {
     /**
      * Reports the status of the game after its completion.
      */
+    @Override
     public synchronized void reportGameStatus() {
         TextFile log = new TextFile();
 
@@ -355,6 +371,7 @@ public class GeneralRepository {
     /**
      * Reports the status of the game start.
      */
+    @Override
     public synchronized void reportGameStart() {
         TextFile log = new TextFile();
 
@@ -572,7 +589,7 @@ public class GeneralRepository {
      * <p>
      * New operation.
      */
-
+    @Override
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES)

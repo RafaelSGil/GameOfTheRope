@@ -3,6 +3,7 @@ package serverSide.objects;
 import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.stubs.GeneralRepositoryStub;
+import interfaces.IContestantsBench;
 import serverSide.entities.ContestantBenchProxy;
 import serverSide.main.ServerGameOfTheRopeContestantsBench;
 import serverSide.main.SimulationParams;
@@ -21,7 +22,7 @@ import java.util.List;
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-public class ContestantsBench {
+public class ContestantsBench implements IContestantsBench {
     /**
      * Array to store all Contestants
      */
@@ -96,6 +97,7 @@ public class ContestantsBench {
     /**
      * Signal the coaches and contestants to wake up
      */
+    @Override
     public synchronized void unblockContestantBench() {
         notifyAll();
     }
@@ -104,6 +106,7 @@ public class ContestantsBench {
      * start of new trial iteration
      * wake up the coaches
      */
+    @Override
     public synchronized void refereeCallTrial() {
         Arrays.fill(callTrial, true);
         Arrays.fill(hasTrialEndedContestants, false);
@@ -116,6 +119,7 @@ public class ContestantsBench {
      *
      * @param hasTrialEnded new value for the attribute
      */
+    @Override
     public synchronized void setHasTrialEnded(boolean hasTrialEnded) {
         Arrays.fill(hasTrialEndedCoaches, hasTrialEnded);
         Arrays.fill(hasTrialEndedContestants, hasTrialEnded);
@@ -149,6 +153,7 @@ public class ContestantsBench {
      *
      * @param team to which team does the coach belong
      */
+    @Override
     public synchronized void callContestants(int team) {
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
@@ -183,6 +188,7 @@ public class ContestantsBench {
      * checking whether they were chosen to play or not,
      * acting accordingly
      */
+    @Override
     public synchronized void followCoachAdvice() {
         int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
@@ -214,6 +220,7 @@ public class ContestantsBench {
     /**
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
+    @Override
     public synchronized void seatDown() {
         int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
@@ -240,6 +247,7 @@ public class ContestantsBench {
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
+    @Override
     public synchronized void reviewNotes() {
         int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
         coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
@@ -263,6 +271,7 @@ public class ContestantsBench {
      * <p>
      * New operation.
      */
+    @Override
     public synchronized void endOperation(String entity, int id) {
         while (nEntities == 0) {
             try {
@@ -286,6 +295,7 @@ public class ContestantsBench {
     /**
      * Operation shut down
      */
+    @Override
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {

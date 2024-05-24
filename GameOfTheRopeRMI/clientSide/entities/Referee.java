@@ -1,12 +1,11 @@
 package clientSide.entities;
 
-import clientSide.stubs.ContestantsBenchStub;
-import clientSide.stubs.PlaygroundStub;
-import clientSide.stubs.RefereeSiteStub;
+import genclass.GenericIO;
 import serverSide.main.SimulationParams;
-import serverSide.sharedRegions.ContestantsBench;
-import serverSide.sharedRegions.Playground;
-import serverSide.sharedRegions.RefereeSite;
+import serverSide.objects.*;
+import interfaces.*;
+
+import java.rmi.RemoteException;
 
 
 /**
@@ -27,17 +26,17 @@ public class Referee extends Thread {
     /**
      * Reference to the {@link ContestantsBench} object.
      */
-    private final ContestantsBenchStub bench;
+    private final IContestantsBench bench;
 
     /**
      * Reference to the {@link RefereeSite} object.
      */
-    private final RefereeSiteStub refereeSite;
+    private final IRefereeSite refereeSite;
 
     /**
      * Reference to the {@link Playground} object
      */
-    private final PlaygroundStub playground;
+    private final IPlayground playground;
 
     /**
      * Current game number (1 to {@link SimulationParams#GAMES}
@@ -72,7 +71,7 @@ public class Referee extends Thread {
      * @param playground  The {@link Playground} object
      * @param bench       The {@link ContestantsBench} object
      */
-    public Referee(String threadName, RefereeSiteStub refereeSite, PlaygroundStub playground, ContestantsBenchStub bench) {
+    public Referee(String threadName, IRefereeSite refereeSite, IPlayground playground, IContestantsBench bench) {
         super(threadName);
         this.playground = playground;
         this.refereeSite = refereeSite;
@@ -217,7 +216,7 @@ public class Referee extends Thread {
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
     public synchronized void signalMatchEnded() {
-        refereeSite.setMatchEnd();
+        //refereeSite.setMatchEnd();
     }
 
     /**
@@ -228,15 +227,100 @@ public class Referee extends Thread {
         waitForGameStart();
         for (int i = 0; i < SimulationParams.GAMES; ++i) {
             waitForGameStart();
-            refereeSite.announceNewGame();
+            announceNewGame();
             do {
-                playground.callTrial(bench);
-                playground.startTrial();
-            } while (!playground.assertTrialDecision(bench));
-            refereeSite.declareGameWinner();
+                callTrial();
+                startTrial();
+            } while (!assertTrialDecision());
+            declareGameWinner();
         }
         waitForGameStart();
-        refereeSite.declareMatchWinner();
+        declareMatchWinner();
+    }
+
+    /**
+     * Announces the start of a new game to all entities.
+     * Updates the game number, trial number, and referee state in the repository.
+     */
+    private void announceNewGame(){
+        try{
+            refereeSite.announceNewGame();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Initiates the trial, updating referee state, trial count, and notifying coaches.
+     */
+    private void callTrial(){
+        try{
+            playground.callTrial();
+            bench.refereeCallTrial();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Referee wait for the last coach to signal it's ready to
+     * Wake up the contestants
+     */
+    private void startTrial(){
+        try{
+            playground.startTrial();
+            bench.refereeCallTrial();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Assert trial results and updates the game status accordingly.
+     *
+     * @return True if this trial has concluded the game, false otherwise.
+     */
+    private boolean assertTrialDecision(){
+        boolean ret = false;
+        try{
+            ret = playground.assertTrialDecision();
+            bench.setHasTrialEnded(true);
+            bench.unblockContestantBench();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return ret;
+    }
+
+    /**
+     * Declares the winner of a completed game based on the trial results.
+     * Updates the referee state.
+     */
+    private void declareGameWinner(){
+        try{
+            refereeSite.declareGameWinner();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Declares the winner of the entire match based on the final results.
+     * Updates the referee state and inform that the match is ended.
+     */
+    private void declareMatchWinner(){
+        try{
+            refereeSite.declareMatchWinner();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
     }
 
     /**

@@ -1,12 +1,12 @@
 package clientSide.entities;
 
-import clientSide.stubs.ContestantsBenchStub;
-import clientSide.stubs.PlaygroundStub;
-import clientSide.stubs.RefereeSiteStub;
+
+import genclass.GenericIO;
 import serverSide.main.SimulationParams;
-import serverSide.sharedRegions.ContestantsBench;
-import serverSide.sharedRegions.Playground;
-import serverSide.sharedRegions.RefereeSite;
+import interfaces.*;
+import serverSide.objects.*;
+
+import java.rmi.RemoteException;
 
 /**
  * This class represents a Contestant entity in the game of the rope simulation.
@@ -41,20 +41,20 @@ public class Contestant extends Thread {
     private final int contestantId;
 
     /**
-     * Reference to the {@link ContestantsBenchStub} object representing the bench where the contestant sits.
+     * Reference to the {@link IContestantsBench} object representing the bench where the contestant sits.
      */
-    private final ContestantsBenchStub bench;
+    private final IContestantsBench bench;
 
     /**
-     * Reference to the {@link PlaygroundStub} object representing the playground area.
+     * Reference to the {@link IPlayground} object representing the playground area.
      */
-    private final PlaygroundStub playground;
+    private final IPlayground playground;
 
     /**
-     * Reference to the {@link RefereeSiteStub} object representing the referee's post.
+     * Reference to the {@link IRefereeSite} object representing the referee's post.
      * The contestant receives instructions and signals the referee through the referee site.
      */
-    private final RefereeSiteStub refereeSite;
+    private final IRefereeSite refereeSite;
     /**
      * Indicates whether the contestant is currently participating in a trial.
      */
@@ -67,11 +67,11 @@ public class Contestant extends Thread {
      * @param contestantId The unique identifier for the contestant.
      * @param team         The team that the contestant belongs to (0 or 1).
      * @param strength     The initial strength level of the contestant.
-     * @param bench        The {@link ContestantsBenchStub} object representing the team's bench.
-     * @param playground   The {@link PlaygroundStub} object representing the playground area.
-     * @param refereeSite  The {@link RefereeSiteStub} object representing the referee's post.
+     * @param bench        The {@link IContestantsBench} object representing the team's bench.
+     * @param playground   The {@link IPlayground} object representing the playground area.
+     * @param refereeSite  The {@link IRefereeSite} object representing the referee's post.
      */
-    public Contestant(String threadName, int contestantId, int team, int strength, ContestantsBenchStub bench, PlaygroundStub playground, RefereeSiteStub refereeSite) {
+    public Contestant(String threadName, int contestantId, int team, int strength, IContestantsBench bench, IPlayground playground, IRefereeSite refereeSite) {
         super(threadName);
         this.bench = bench;
         this.contestantState = ContestantStates.SEATATBENCH;
@@ -171,14 +171,83 @@ public class Contestant extends Thread {
      */
     @Override
     public void run() {
-        while (!refereeSite.endOfMatch()) {
-            bench.followCoachAdvice();
+        while (!endOfMatch()) {
+            followCoachAdvice();
             if (isPlaying) {
-                playground.getReady();
+                getReady();
                 pullTheRope();
-                playground.amIDone();
+                amIDone();
             }
+            seatDown();
+        }
+    }
+
+    /**
+     * Check if the match is ended or not
+     *
+     * @return True if the match has ended, false otherwise.
+     */
+    private boolean endOfMatch(){
+        boolean ret = false;                                 // return value
+
+        try
+        { ret = refereeSite.endOfMatch();
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+        return ret;
+    }
+
+    /**
+     * Contestants will wait until the coach wakes them up,
+     * checking whether they were chosen to play or not,
+     * acting accordingly
+     */
+    private void followCoachAdvice(){
+        try{
+            bench.followCoachAdvice();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Contestant signals it's ready for the trial,
+     * calculates team power, and waits for the referee to signal the trial start.
+     */
+    private void getReady(){
+        try{
+            playground.getReady();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Contestant signals that it's done pulling the rope
+     */
+    private void amIDone(){
+        try{
+            playground.amIDone();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
+        }
+    }
+
+    /**
+     * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
+     */
+    private void seatDown(){
+        try{
             bench.seatDown();
+        }catch (RemoteException e){
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            System.exit (1);
         }
     }
 

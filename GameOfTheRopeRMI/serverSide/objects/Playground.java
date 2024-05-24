@@ -5,6 +5,7 @@ import clientSide.entities.CoachStates;
 import clientSide.entities.ContestantStates;
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
+import interfaces.IPlayground;
 import serverSide.entities.PlaygroundProxy;
 import serverSide.main.ServerGameOfTheRopePlayground;
 import serverSide.main.SimulationParams;
@@ -18,7 +19,7 @@ import java.util.Arrays;
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-public class Playground {
+public class Playground implements IPlayground {
     /**
      * Number of entity groups requesting the shutdown.
      */
@@ -98,6 +99,7 @@ public class Playground {
     /**
      * Initiates the trial, updating referee state, trial count, and notifying coaches.
      */
+    @Override
     public synchronized void callTrial() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
         referee.setRefereeSate(RefereeStates.TEAMSREADY);
@@ -131,6 +133,7 @@ public class Playground {
      * Referee wait for the last coach to signal it's ready to
      * Wake up the contestants
      */
+    @Override
     public synchronized void startTrial() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
         //trialStarted = false;
@@ -168,6 +171,7 @@ public class Playground {
      *
      * @return True if this trial has concluded the game, false otherwise.
      */
+    @Override
     public synchronized boolean assertTrialDecision() {
         this.referee = ((PlaygroundProxy) Thread.currentThread());
 
@@ -248,6 +252,7 @@ public class Playground {
      * Coach waits for every contestant of its team to be ready and
      * informs the referee that the team is ready.
      */
+    @Override
     public synchronized void informReferee() {
         int coachId = ((PlaygroundProxy) Thread.currentThread()).getCoachTeam();
         coaches[coachId] = ((PlaygroundProxy) Thread.currentThread());
@@ -274,6 +279,7 @@ public class Playground {
      * Contestant signals it's ready for the trial,
      * calculates team power, and waits for the referee to signal the trial start.
      */
+    @Override
     public synchronized void getReady() {
         int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
@@ -309,6 +315,7 @@ public class Playground {
     /**
      * Contestant signals that it's done pulling the rope
      */
+    @Override
     public synchronized void amIDone() {
         int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
         contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
@@ -324,6 +331,7 @@ public class Playground {
      * <p>
      * New operation.
      */
+    @Override
     public synchronized void endOperation(String entity, int id) {
         while (nEntities == 0) {
             try {
@@ -347,6 +355,7 @@ public class Playground {
     /**
      * Operation shut down
      */
+    @Override
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {

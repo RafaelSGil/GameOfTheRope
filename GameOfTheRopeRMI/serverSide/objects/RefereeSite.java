@@ -3,6 +3,7 @@ package serverSide.objects;
 
 import clientSide.entities.RefereeStates;
 import clientSide.stubs.GeneralRepositoryStub;
+import interfaces.IRefereeSite;
 import serverSide.entities.RefereeSiteProxy;
 import serverSide.main.ServerGameOfTheRopeRefereeSite;
 import serverSide.main.SimulationParams;
@@ -15,7 +16,7 @@ import serverSide.main.SimulationParams;
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
-public class RefereeSite {
+public class RefereeSite implements IRefereeSite {
 
     /**
      * Reference to the GeneralRepository object.
@@ -47,6 +48,7 @@ public class RefereeSite {
      * Announces the start of a new game to all entities.
      * Updates the game number, trial number, and referee state in the repository.
      */
+    @Override
     public synchronized void announceNewGame() {
         ((RefereeSiteProxy) Thread.currentThread()).setGame(((RefereeSiteProxy) Thread.currentThread()).getGame() + 1);
         ((RefereeSiteProxy) Thread.currentThread()).setTrial(0);
@@ -64,6 +66,7 @@ public class RefereeSite {
      * Declares the winner of a completed game based on the trial results.
      * Updates the referee state.
      */
+    @Override
     public synchronized void declareGameWinner() {
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
         repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
@@ -89,6 +92,7 @@ public class RefereeSite {
      * Declares the winner of the entire match based on the final results.
      * Updates the referee state and inform that the match is ended.
      */
+    @Override
     public synchronized void declareMatchWinner() {
         this.matchEnd = true;
         ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
@@ -104,6 +108,7 @@ public class RefereeSite {
      *
      * @return True if the match has ended, false otherwise.
      */
+    @Override
     public synchronized boolean endOfMatch() {
 
         return matchEnd;
@@ -114,6 +119,7 @@ public class RefereeSite {
      *
      * @param matchEnd The new value for the match end flag.
      */
+    @Override
     public synchronized void setMatchEnd(boolean matchEnd) {
         this.matchEnd = matchEnd;
     }
@@ -123,6 +129,7 @@ public class RefereeSite {
      * <p>
      * New operation.
      */
+    @Override
     public synchronized void endOperation() {
         Thread.currentThread().interrupt();
     }
@@ -130,6 +137,7 @@ public class RefereeSite {
     /**
      * Operation shut down
      */
+    @Override
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {

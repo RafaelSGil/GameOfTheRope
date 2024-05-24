@@ -1,18 +1,23 @@
 package clientSide.main;
 
 import clientSide.entities.Referee;
-import clientSide.stubs.ContestantsBenchStub;
-import clientSide.stubs.GeneralRepositoryStub;
-import clientSide.stubs.PlaygroundStub;
-import clientSide.stubs.RefereeSiteStub;
 import genclass.GenericIO;
+import interfaces.IContestantsBench;
+import interfaces.IGeneralRepository;
+import interfaces.IPlayground;
+import interfaces.IRefereeSite;
 import serverSide.main.SimulationParams;
+
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 /**
  * Client side of the Game of the Rope (referee).
  * <p>
  * Implementation of a client-server model of type 2 (server replication).
- * Communication is based on a communication channel under the TCP protocol.
+ * Communication is based on RMI.
  *
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
@@ -22,94 +27,120 @@ public class ClientGameOfTheRopeReferee {
      * Main method.
      *
      * @param args runtime arguments
-     *             args[0] - name of the platform where is located the general repository server
-     *             args[1] - port number for listening to service requests
-     *             args[2] - name of the platform where is located the contestant bench server
-     *             args[3] - port number for listening to service requests
-     *             args[4] - name of the platform where is located the referee site server
-     *             args[5] - port number for listening to service requests
-     *             args[6] - name of the platform where is located the playground server
-     *             args[7] - port number for listening to service requests
-     *             args[8] - name of the logging file
+     *    args[0] - name of the platform where is located the RMI registering service
+     *    args[1] - port number where the registering service is listening to service requests
+     *    args[2] - name of the logging file
      */
     public static void main(String[] args) {
-        String generalRepositoryServerHostName;                 //name of the platform where is located the general repository server
-        int generalRepositoryServerPortNumber = -1;             //port number for listening to service requests
-        String contestantBenchServerHostName;                   //name of the platform where is located the contestant bench server
-        int contestantBenchServerPortNumber = -1;               //port number for listening to service requests
-        String refereeSiteServerHostName;                       //name of the platform where is located the referee site server
-        int refereeSiteServerPortNumber = -1;                   //port number for listening to service requests
-        String playgroundServerHostName;                        //name of the platform where is located the playground server
-        int playgroundServerPortNumber = -1;                    //port number for listening to service requests
-
-        Referee referee;                                        //referee thread
-
-        GeneralRepositoryStub generalRepositoryStub;            //remote reference to the general repository
-        ContestantsBenchStub contestantsBenchStub;              //remote reference to the contestant bench
-        PlaygroundStub playgroundStub;                          //remote reference to the playground
-        RefereeSiteStub refereeSiteStub;                        //remote reference to the referee site
+        String rmiRegHostName;                                         // name of the platform where is located the RMI registering service
+        int rmiRegPortNumb = -1;                                       // port number where the registering service is listening to service requests
+        String fileName;                                               // name of the logging file
 
         /* getting problem runtime parameters */
-        if (args.length != 9) {
-            GenericIO.writelnString("Wrong number of parameters!");
-            System.exit(1);
-        }
 
-        generalRepositoryServerHostName = args[0];
-        try {
-            generalRepositoryServerPortNumber = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            GenericIO.writelnString("args[1] is not a number!");
-            System.exit(1);
+        if (args.length != 3)
+        { GenericIO.writelnString ("Wrong number of parameters!");
+            System.exit (1);
         }
-        if ((generalRepositoryServerPortNumber < 4000) || (generalRepositoryServerPortNumber >= 65536)) {
-            GenericIO.writelnString("args[1] is not a valid port number!");
-            System.exit(1);
+        rmiRegHostName = args[0];
+        try
+        { rmiRegPortNumb = Integer.parseInt (args[1]);
         }
-
-        contestantBenchServerHostName = args[2];
-        try {
-            contestantBenchServerPortNumber = Integer.parseInt(args[3]);
-        } catch (NumberFormatException e) {
-            GenericIO.writelnString("args[3] is not a number!");
-            System.exit(1);
+        catch (NumberFormatException e)
+        { GenericIO.writelnString ("args[1] is not a number!");
+            System.exit (1);
         }
-        if ((contestantBenchServerPortNumber < 4000) || (contestantBenchServerPortNumber >= 65536)) {
-            GenericIO.writelnString("args[3] is not a valid port number!");
-            System.exit(1);
+        if ((rmiRegPortNumb < 4000) || (rmiRegPortNumb >= 65536))
+        { GenericIO.writelnString ("args[1] is not a valid port number!");
+            System.exit (1);
         }
-
-        refereeSiteServerHostName = args[4];
-        try {
-            refereeSiteServerPortNumber = Integer.parseInt(args[5]);
-        } catch (NumberFormatException e) {
-            GenericIO.writelnString("args[5] is not a number!");
-            System.exit(1);
-        }
-        if ((refereeSiteServerPortNumber < 4000) || (refereeSiteServerPortNumber >= 65536)) {
-            GenericIO.writelnString("args[5] is not a valid port number!");
-            System.exit(1);
-        }
-
-        playgroundServerHostName = args[6];
-        try {
-            playgroundServerPortNumber = Integer.parseInt(args[7]);
-        } catch (NumberFormatException e) {
-            GenericIO.writelnString("args[7] is not a number!");
-            System.exit(1);
-        }
-        if ((playgroundServerPortNumber < 4000) || (playgroundServerPortNumber >= 65536)) {
-            GenericIO.writelnString("args[7] is not a valid port number!");
-            System.exit(1);
-        }
+        fileName = args[2];
 
         /* initialization */
-        generalRepositoryStub = new GeneralRepositoryStub(generalRepositoryServerHostName, generalRepositoryServerPortNumber);
-        refereeSiteStub = new RefereeSiteStub(refereeSiteServerHostName, refereeSiteServerPortNumber);
-        contestantsBenchStub = new ContestantsBenchStub(contestantBenchServerHostName, contestantBenchServerPortNumber);
-        playgroundStub = new PlaygroundStub(playgroundServerHostName, playgroundServerPortNumber);
+        String nameEntryGeneralRepository = "GeneralRepository";                 // public name of the general repository object
+        IGeneralRepository reposStub = null;                                     // remote reference to the general repository object
+        String nameEntryRefereeSite = "RefereeSite";                             // public name of the referee site object
+        IRefereeSite refereeSiteStub = null;                                     // remote reference to the referee site object
+        String nameEntryContestantBench = "ContestantBench";                     // public name of the contestant bench object
+        IContestantsBench contestantsBenchStub = null;                           // remote reference to the contetant bench object
+        String nameEntryPlayground = "Playground";                               // public name of the playground object
+        IPlayground playgroundStub = null;                                       // remote reference to the playground object
 
-        generalRepositoryStub.initSimul(args[8]);
+        Registry registry = null;                                                // remote reference for registration in the RMI registry service
+        Referee referee = null;                                                  // referee thread
+
+        try
+        { registry = LocateRegistry.getRegistry (rmiRegHostName, rmiRegPortNumb);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("RMI registry creation exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+
+        try
+        { reposStub = (IGeneralRepository) registry.lookup (nameEntryGeneralRepository);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("GeneralRepos lookup exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        catch (NotBoundException e)
+        { GenericIO.writelnString ("GeneralRepos not bound exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+
+        try
+        { refereeSiteStub = (IRefereeSite) registry.lookup (nameEntryRefereeSite);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("RefereeSite lookup exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        catch (NotBoundException e)
+        { GenericIO.writelnString ("RefereeSite not bound exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+
+        try
+        { contestantsBenchStub = (IContestantsBench) registry.lookup (nameEntryContestantBench);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("ContestantsBench lookup exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        catch (NotBoundException e)
+        { GenericIO.writelnString ("ContestantsBench not bound exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+
+        try
+        { playgroundStub = (IPlayground) registry.lookup (nameEntryPlayground);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("Playground lookup exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+        catch (NotBoundException e)
+        { GenericIO.writelnString ("Playground not bound exception: " + e.getMessage ());
+            e.printStackTrace ();
+            System.exit (1);
+        }
+
+        try
+        { reposStub.initSimul (fileName);
+        }
+        catch (RemoteException e)
+        { GenericIO.writelnString ("Customer generator remote exception on initSimul: " + e.getMessage ());
+            System.exit (1);
+        }
 
         referee = new Referee("referee", refereeSiteStub, playgroundStub, contestantsBenchStub);   // referee thread
 
@@ -119,9 +150,27 @@ public class ClientGameOfTheRopeReferee {
 
         /* waiting for the end of the simulation */
         while (referee.isAlive()) {
-            refereeSiteStub.endOperation();
-            contestantsBenchStub.endOperation(SimulationParams.REFEREE, 0);
-            playgroundStub.endOperation(SimulationParams.REFEREE, 0);
+            try {
+                refereeSiteStub.endOperation();
+            } catch (RemoteException e) {
+                GenericIO.writelnString ("RefereeSite endOfOperation: " + e.getMessage ());
+                e.printStackTrace();
+                System.exit(1);
+            }
+            try {
+                contestantsBenchStub.endOperation(SimulationParams.REFEREE, 0);
+            } catch (RemoteException e) {
+                GenericIO.writelnString ("ContestantBench endOfOperation: " + e.getMessage ());
+                e.printStackTrace();
+                System.exit(1);
+            }
+            try {
+                playgroundStub.endOperation(SimulationParams.REFEREE, 0);
+            } catch (RemoteException e) {
+                GenericIO.writelnString ("Playground endOfOperation: " + e.getMessage ());
+                e.printStackTrace();
+                System.exit(1);
+            }
             Thread.yield();
         }
         try {
@@ -130,9 +179,33 @@ public class ClientGameOfTheRopeReferee {
         }
         GenericIO.writelnString("The referee has terminated.");
         GenericIO.writelnString();
-        refereeSiteStub.shutdown();
-        contestantsBenchStub.shutdown();
-        playgroundStub.shutdown();
-        generalRepositoryStub.shutdown();
+        try {
+            refereeSiteStub.shutdown();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("RefereeSite shutdown: " + e.getMessage ());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try {
+            contestantsBenchStub.shutdown();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("ContestantBench shutdown: " + e.getMessage ());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try {
+            playgroundStub.shutdown();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Playground shutdown: " + e.getMessage ());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try {
+            reposStub.shutdown();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("General Repository shutdown: " + e.getMessage ());
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }
