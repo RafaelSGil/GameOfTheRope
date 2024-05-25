@@ -206,12 +206,17 @@ public class Contestant extends Thread {
      * acting accordingly
      */
     private void followCoachAdvice(){
+        ReturnContestant ret = null;
         try{
-            bench.followCoachAdvice();
+            ret = bench.followCoachAdvice(contestantId, contestantTeam, contestantStrength);
         }catch (RemoteException e){
             GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        contestantState = ret.getState();
+        contestantStrength = getContestantStrength();
+        isPlaying = ret.isPlaying();
     }
 
     /**
@@ -219,12 +224,15 @@ public class Contestant extends Thread {
      * calculates team power, and waits for the referee to signal the trial start.
      */
     private void getReady(){
+        ReturnContestant ret = null;
         try{
-            playground.getReady();
+            ret = playground.getReady(contestantId, contestantTeam, contestantStrength);
         }catch (RemoteException e){
             GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        contestantState = ret.getState();
     }
 
     /**
@@ -243,12 +251,17 @@ public class Contestant extends Thread {
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
     private void seatDown(){
+        ReturnContestant ret = null;
         try{
-            bench.seatDown();
+            ret = bench.seatDown(contestantId, contestantTeam, contestantStrength, isPlaying);
         }catch (RemoteException e){
             GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        contestantState = ret.getState();
+        contestantStrength = getContestantStrength();
+        isPlaying = ret.isPlaying();
     }
 
     /**
@@ -277,12 +290,15 @@ public class Contestant extends Thread {
      * If playing, strength decreases by 1 (up to a minimum of {@link serverSide.main.SimulationParams#MINSTRENGTH}).
      * If not playing, strength increases by 1 (up to a maximum of {@link serverSide.main.SimulationParams#MAXSTRENGTH}).
      */
-    public synchronized void manageStrength() {
+    public static int manageStrength(boolean isPlaying, int contestantStrength) {
+        int str = 0;
         if (isPlaying && contestantStrength > 0) {
-            contestantStrength = contestantStrength - 1;
+            str = contestantStrength - 1;
         } else if(!isPlaying && contestantStrength >0){
-            contestantStrength = contestantStrength + 1;
+            str = contestantStrength + 1;
         }
+
+        return str;
     }
 
 }

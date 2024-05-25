@@ -1,14 +1,18 @@
 package serverSide.objects;
 
 import clientSide.entities.CoachStates;
+import clientSide.entities.Contestant;
 import clientSide.entities.ContestantStates;
-import clientSide.stubs.GeneralRepositoryStub;
+import genclass.GenericIO;
 import interfaces.IContestantsBench;
-import serverSide.entities.ContestantBenchProxy;
+import interfaces.IGeneralRepository;
+import interfaces.ReturnCoach;
+import interfaces.ReturnContestant;
 import serverSide.main.ServerGameOfTheRopeContestantsBench;
 import serverSide.main.SimulationParams;
 import serverSide.utils.Strategy;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,12 +30,32 @@ public class ContestantsBench implements IContestantsBench {
     /**
      * Array to store all Contestants
      */
-    private final ContestantBenchProxy[] contestants;
+    private final Thread[] contestants;
+
+    /**
+     * Array to store the states of the contestants
+     */
+    private final int[] contStates;
+
+    /**
+     * Array to store the strength of the contestants
+     */
+    private final int[] contStrength;
+
+    /**
+     * Array to store the team of the contestants
+     */
+    private final int[] contTeam;
 
     /**
      * Array to store all coaches
      */
-    private final ContestantBenchProxy[] coaches;
+    private final Thread[] coaches;
+
+    /**
+     * Array to store the states of the coaches
+     */
+    private final int[] coaStates;
 
     /**
      * List to store Playing players
@@ -46,7 +70,7 @@ public class ContestantsBench implements IContestantsBench {
     /**
      * General Repository
      */
-    private final GeneralRepositoryStub repository;
+    private final IGeneralRepository repository;
 
     /**
      * Checks if trial has ended for coaches
@@ -72,9 +96,9 @@ public class ContestantsBench implements IContestantsBench {
     /**
      * Creates a new ContestantsBench instance with a reference to the repository
      *
-     * @param repository The {@link GeneralRepositoryStub} object representing the repository.
+     * @param repository The {@link IGeneralRepository} object representing the repository.
      */
-    public ContestantsBench(GeneralRepositoryStub repository) {
+    public ContestantsBench(IGeneralRepository repository) {
         this.playing = new ArrayList<>();
         this.benched = new ArrayList<>();
         this.repository = repository;
@@ -84,11 +108,15 @@ public class ContestantsBench implements IContestantsBench {
         Arrays.fill(hasTrialEndedContestants, false);
         this.callTrial = new boolean[SimulationParams.NTEAMS];
         Arrays.fill(callTrial, false);
-        this.contestants = new ContestantBenchProxy[SimulationParams.NCONTESTANTS];
+        this.contestants = new Thread[SimulationParams.NCONTESTANTS];
+        this.contStates = new int[SimulationParams.NCONTESTANTS];
+        this.contStrength = new int[SimulationParams.NCONTESTANTS];
+        this.contTeam = new int[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
         }
-        this.coaches = new ContestantBenchProxy[SimulationParams.NTEAMS];
+        this.coaches = new Thread[SimulationParams.NTEAMS];
+        this.coaStates = new int[SimulationParams.NTEAMS];
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             coaches[i] = null;
         }
@@ -134,9 +162,9 @@ public class ContestantsBench implements IContestantsBench {
      */
     private boolean isEveryoneSeated(int team) {
         int contSeated = 0;
-        for (ContestantBenchProxy c : contestants) {
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             try {
-                if (c.getContestantTeam() == team && c.getContestantState() == ContestantStates.SEATATBENCH) {
+                if (this.contTeam[i] == team && this.contStates[i] == ContestantStates.SEATATBENCH) {
                     contSeated++;
                 }
             } catch (Exception e) {
@@ -149,12 +177,15 @@ public class ContestantsBench implements IContestantsBench {
     /**
      * Coaches will wait until they receive a signal from the referee and until their team is not ready
      * Afterward, pick which contestants will be playing and which will be benched
-     * Wake up the contestatns
+     * Wake up the contestants
      *
      * @param team to which team does the coach belong
      */
     @Override
-    public synchronized void callContestants(int team) {
+    public synchronized ReturnCoach callContestants(int team, int strategy) {
+        coaches[team] = Thread.currentThread();
+        coaStates[team] = CoachStates.WATFORREFEREECOMMAND;
+
         // wait for the first notify of every iteration
         // that corresponds to the call trial of the referee
         while (!callTrial[team] || !isEveryoneSeated(team)) {
@@ -165,21 +196,35 @@ public class ContestantsBench implements IContestantsBench {
             }
         }
 
-        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
-        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
-
-        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
+        try {
+            repository.updateCoach(coaStates[team], team);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach " + team + " remote exception on callContestants - updateCoach 0: " + e.getMessage ());
+            System.exit (1);
+        }
 
         //choose the players
-        Strategy.useStrategy(coaches[coachId].getStrategy(), coaches[coachId].getCoachTeam(), contestants, playing, benched);
+        Strategy.useStrategy(strategy, team, contestants, playing, benched);
 
 
-        coaches[coachId].setCoachState(CoachStates.ASSEMBLETEAM);
-        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
-        repository.reportStatus(false);
+        coaStates[team] = CoachStates.ASSEMBLETEAM;
+        try {
+            repository.updateCoach(coaStates[team], team);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach " + team + " remote exception on callContestants - updateCoach 1: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach " + team + " remote exception on callContestants - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
 
         // wake up contestants
         notifyAll();
+
+        return new ReturnCoach(coaStates[team]);
     }
 
 
@@ -189,15 +234,23 @@ public class ContestantsBench implements IContestantsBench {
      * acting accordingly
      */
     @Override
-    public synchronized void followCoachAdvice() {
-        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
+    public synchronized ReturnContestant followCoachAdvice(int contId, int contTeam, int contStrength) {
+        contestants[contId] = Thread.currentThread();
+        this.contStrength[contId] = contStrength;
+        this.contStates[contId] = ContestantStates.SEATATBENCH;
+        this.contTeam[contId] = contTeam;
+
+        try {
+            repository.updateContestant(contId, this.contStrength[contId],
+                    this.contStates[contId],
+                    contTeam);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on followCoachAdvice - updateContestant 0: " + e.getMessage ());
+            System.exit (1);
+        }
 
         // wait for coach to choose team
-        while (!playing.contains(contestantId) && !benched.contains(contestantId)) {
+        while (!playing.contains(contId) && !benched.contains(contId)) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -205,54 +258,80 @@ public class ContestantsBench implements IContestantsBench {
             }
         }
 
-        if (benched.contains(contestantId)) {
-            return;
+        if (benched.contains(contId)) {
+            return new ReturnContestant(this.contStates[contId], this.contStrength[contId], false);
         }
 
-        contestants[contestantId].setPlaying(true);
-        contestants[contestantId].setContestantState(ContestantStates.STANDINPOSITION);
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
-        repository.reportStatus(false);
+        this.contStates[contId] = ContestantStates.STANDINPOSITION;
+        try {
+            repository.updateContestant(contId, this.contStrength[contId],
+                    this.contStates[contId],
+                    contTeam);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on followCoachAdvice - updateContestant 1: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on followCoachAdvice - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnContestant(this.contStates[contId], this.contStrength[contId], true);
     }
 
     /**
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
     @Override
-    public synchronized void seatDown() {
-        int contestantId = ((ContestantBenchProxy) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((ContestantBenchProxy) Thread.currentThread());
-        while (!hasTrialEndedContestants[contestantId]) {
+    public synchronized ReturnContestant seatDown(int contId, int contTeam, int contStrength, boolean isPlaying) {
+        contestants[contId] = Thread.currentThread();
+        this.contStrength[contId] = contStrength;
+        this.contStates[contId] = ContestantStates.DOYOURBEST;
+        this.contTeam[contId] = contTeam;
+
+        while (!hasTrialEndedContestants[contId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        contestants[contestantId].manageStrength();
+
+        this.contStrength[contId] = Contestant.manageStrength(isPlaying, contStrength);
         playing.clear();
         benched.clear();
-        contestants[contestantId].setPlaying(false);
-        hasTrialEndedContestants[contestantId] = false;
+        hasTrialEndedContestants[contId] = false;
 
-        contestants[contestantId].setContestantState(ContestantStates.SEATATBENCH);
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
-        repository.reportStatus(false);
+        this.contStates[contId] = ContestantStates.SEATATBENCH;
+
+        try {
+            repository.updateContestant(contId, this.contStrength[contId],
+                    this.contStates[contId],
+                    contTeam);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on seatDown - updateContestant 0: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on seatDown - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnContestant(this.contStates[contId], this.contStrength[contId], false);
     }
 
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
     @Override
-    public synchronized void reviewNotes() {
-        int coachId = ((ContestantBenchProxy) Thread.currentThread()).getCoachTeam();
-        coaches[coachId] = ((ContestantBenchProxy) Thread.currentThread());
-        callTrial[coachId] = false;
-        while (!hasTrialEndedCoaches[coachId]) {
+    public synchronized ReturnCoach reviewNotes(int team) {
+        coaches[team] = Thread.currentThread();
+        callTrial[team] = false;
+        while (!hasTrialEndedCoaches[team]) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -260,10 +339,23 @@ public class ContestantsBench implements IContestantsBench {
             }
         }
 
-        hasTrialEndedCoaches[coachId] = false;
-        coaches[coachId].setCoachState(CoachStates.WATFORREFEREECOMMAND);
-        repository.updateCoach(coaches[coachId].getCoachState(), coaches[coachId].getCoachTeam());
-        repository.reportStatus(false);
+        hasTrialEndedCoaches[team] = false;
+        coaStates[team] = CoachStates.WATFORREFEREECOMMAND;
+
+        try {
+            repository.updateCoach(coaStates[team], team);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach " + team + " remote exception on reviewNotes - updateCoach 0: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach " + team + " remote exception on reviewNotes - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnCoach(coaStates[team]);
     }
 
     /**

@@ -1,15 +1,13 @@
 package serverSide.objects;
 
 
-import clientSide.entities.CoachStates;
-import clientSide.entities.ContestantStates;
-import clientSide.entities.RefereeStates;
-import clientSide.stubs.GeneralRepositoryStub;
-import interfaces.IPlayground;
-import serverSide.entities.PlaygroundProxy;
+import clientSide.entities.*;
+import genclass.GenericIO;
+import interfaces.*;
 import serverSide.main.ServerGameOfTheRopePlayground;
 import serverSide.main.SimulationParams;
 
+import java.rmi.RemoteException;
 import java.util.Arrays;
 
 /**
@@ -25,22 +23,48 @@ public class Playground implements IPlayground {
      */
     private int nEntities;
     /**
-     * Array of instances of the {@link PlaygroundProxy} objects
+     * Array of instances of the {@link Contestant} objects
      */
-    private final PlaygroundProxy[] contestants;
+    private final Thread[] contestants;
+
     /**
-     * Array of instances of the {@link PlaygroundProxy} objects
+     * Array to store the states of the contestants
      */
-    private final PlaygroundProxy[] coaches;
+    private final int[] contStates;
+
+    /**
+     * Array to store the strength of the contestants
+     */
+    private final int[] contStrength;
+
+    /**
+     * Array to store the team of the contestants
+     */
+    private final int[] contTeam;
+
+    /**
+     * Array of instances of the {@link Coach} objects
+     */
+    private final Thread[] coaches;
+
+    /**
+     * Array to store the states of the coaches
+     */
+    private final int[] coaStates;
 
     /**
      * Instance of the {@link GeneralRepository} object
      */
-    private final GeneralRepositoryStub repository;
+    private final IGeneralRepository repository;
     /**
-     * Instance of the {@link PlaygroundProxy} object
+     * Instance of the {@link Referee} object
      */
-    private PlaygroundProxy referee;
+    private Thread referee;
+
+    /**
+     * Variable to store the states of the referee
+     */
+    private int refState;
 
     /**
      * Store the amount of times the rope has been pulled in the current trial
@@ -75,17 +99,23 @@ public class Playground implements IPlayground {
      *
      * @param repository The {@link GeneralRepository} object representing the repository.
      */
-    public Playground(GeneralRepositoryStub repository) {
+    public Playground(IGeneralRepository repository) {
         this.repository = repository;
-        this.contestants = new PlaygroundProxy[SimulationParams.NCONTESTANTS];
+        this.contestants = new Thread[SimulationParams.NCONTESTANTS];
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
             contestants[i] = null;
         }
-        this.coaches = new PlaygroundProxy[SimulationParams.NTEAMS];
+        this.contStrength = new int[SimulationParams.NCONTESTANTS];
+        this.contStates = new int[SimulationParams.NCONTESTANTS];
+        this.contTeam = new int[SimulationParams.NCONTESTANTS];
+
+        this.coaches = new Thread[SimulationParams.NTEAMS];
         for (int i = 0; i < SimulationParams.NTEAMS; i++) {
             coaches[i] = null;
         }
+        this.coaStates = new int[SimulationParams.NTEAMS];
         this.referee = null;
+        this.refState = 0;
         this.ropesPulled = 0;
         this.trialStarted = new boolean[SimulationParams.NCONTESTANTS];
         this.team0Power = 0;
@@ -100,14 +130,32 @@ public class Playground implements IPlayground {
      * Initiates the trial, updating referee state, trial count, and notifying coaches.
      */
     @Override
-    public synchronized void callTrial() {
-        this.referee = ((PlaygroundProxy) Thread.currentThread());
-        referee.setRefereeSate(RefereeStates.TEAMSREADY);
-        repository.updateReferee(referee.getRefereeSate());
-        referee.setTrial(referee.getTrial() + 1);
-        repository.setTrial(referee.getTrial(), referee.getRefereeSate());
-        repository.reportStatus(false);
+    public synchronized ReturnReferee callTrial(int trial) {
+        this.referee = Thread.currentThread();
+        refState = RefereeStates.TEAMSREADY;
+        try {
+            repository.updateReferee(refState);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on callTrial - updateReferee 2: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        try {
+            repository.setTrial(trial + 1);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on callTrial - setTrial: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on callTrial - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
         Arrays.fill(trialStarted, false);
+
+        return new ReturnReferee(refState, trial);
     }
 
     /**
@@ -117,8 +165,8 @@ public class Playground implements IPlayground {
      */
     private boolean haveCoachesChosenTeams() {
         try {
-            for (PlaygroundProxy c : coaches) {
-                if (c.getCoachState() != CoachStates.WATCHTRIAL) {
+            for (int c : coaStates) {
+                if (c != CoachStates.WATCHTRIAL) {
                     return false;
                 }
             }
@@ -134,9 +182,8 @@ public class Playground implements IPlayground {
      * Wake up the contestants
      */
     @Override
-    public synchronized void startTrial() {
-        this.referee = ((PlaygroundProxy) Thread.currentThread());
-        //trialStarted = false;
+    public synchronized ReturnReferee startTrial() {
+        this.referee = Thread.currentThread();
 
         // synchronize, will get waken up by the last coach
         while (!haveCoachesChosenTeams()) {
@@ -147,14 +194,32 @@ public class Playground implements IPlayground {
             }
         }
 
-        referee.setRefereeSate(RefereeStates.WAITTRIALCONCLUSION);
-        repository.updateReferee(referee.getRefereeSate());
-        repository.setRopePosition(ropePosition);
-        repository.reportStatus(false);
+        refState = RefereeStates.WAITTRIALCONCLUSION;
+
+        try {
+            repository.updateReferee(refState);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on startTrial - updateReferee 3: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.setRopePosition(ropePosition);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on startTrial - setRopePosition: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on startTrial - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
 
         Arrays.fill(trialStarted, true);
         // wake up contestants
         notifyAll();
+
+        return  new ReturnReferee(refState);
     }
 
     /**
@@ -172,8 +237,8 @@ public class Playground implements IPlayground {
      * @return True if this trial has concluded the game, false otherwise.
      */
     @Override
-    public synchronized boolean assertTrialDecision() {
-        this.referee = ((PlaygroundProxy) Thread.currentThread());
+    public synchronized ReturnReferee assertTrialDecision(int trial, int game) {
+        this.referee = Thread.currentThread();
 
         // synchronize, will get waken up by the last contestant
         while (!haveContestantsPulledRope()) {
@@ -192,40 +257,43 @@ public class Playground implements IPlayground {
             ropePosition -= ropeMove;
         }
 
-        repository.setRopePosition(ropePosition);
-        repository.reportStatus(false);
+        try {
+            repository.setRopePosition(ropePosition);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on assertTrialDecision - setRopePosition: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on assertTrialDecision - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
 
         // reset counters
         this.ropesPulled = 0;
         this.team0Power = 0;
         this.team1Power = 0;
 
-        if (referee.getTrial() == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3) {
+        if (trial == SimulationParams.NTRIALS || ropePosition > 3 || ropePosition < -3) {
+            int gameResult = 0;
+            String winCause = null;
             if (ropePosition > 0) {
-                referee.setGameResult(1);
-                referee.setWinCause(ropePosition > 3 ? "knockout" : "points");
-
-
+                gameResult = 1;
+                winCause = ropePosition > 3 ? "knockout" : "points";
             } else if (ropePosition < 0) {
-                referee.setGameResult(-1);
-                referee.setWinCause(ropePosition < -3 ? "knockout" : "points");
-
-
+                gameResult = -1;
+                winCause = ropePosition < -3 ? "knockout" : "points";
             } else {
-                referee.setGameResult(0);
-                referee.setWinCause("draw");
+                winCause = "draw";
             }
 
             ropePosition = 0;
 
-            if (referee.getGame() == SimulationParams.GAMES) {
-                referee.signalMatchEnded();
-            }
-
-            return true;
+            return new ReturnReferee(refState, gameResult, winCause, true, game == SimulationParams.GAMES);
         }
 
-        return false;
+        return new ReturnReferee(refState, false);
     }
 
     /**
@@ -253,12 +321,11 @@ public class Playground implements IPlayground {
      * informs the referee that the team is ready.
      */
     @Override
-    public synchronized void informReferee() {
-        int coachId = ((PlaygroundProxy) Thread.currentThread()).getCoachTeam();
-        coaches[coachId] = ((PlaygroundProxy) Thread.currentThread());
+    public synchronized ReturnCoach informReferee(int team) {
+        coaches[team] = Thread.currentThread();
 
         // waits for the team to be ready
-        while (!checkIfTeamIsReady(coachId)) {
+        while (!checkIfTeamIsReady(team)) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -266,13 +333,26 @@ public class Playground implements IPlayground {
             }
         }
 
-        readyCounters[coachId] = 0;
-        coaches[coachId].setCoachState(CoachStates.WATCHTRIAL);
-        repository.updateCoach(coaches[coachId].getCoachState(), coachId);
-        repository.reportStatus(false);
+        readyCounters[team] = 0;
+        coaStates[team] = CoachStates.WATCHTRIAL;
+
+        try {
+            repository.updateCoach(coaStates[team], team);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach" + team + " remote exception on informReferee - updateCoach 2: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Coach" + team + " remote exception on informReferee - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
 
         // alerts the referee that its team is ready
         notifyAll();
+
+        return new ReturnCoach(coaStates[team]);
     }
 
     /**
@@ -280,22 +360,23 @@ public class Playground implements IPlayground {
      * calculates team power, and waits for the referee to signal the trial start.
      */
     @Override
-    public synchronized void getReady() {
-        int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
-        readyCounters[contestants[contestantId].getContestantTeam()] += 1;
-        int team = contestants[contestantId].getContestantTeam();
-        if (team == 0) {
-            team0Power += contestants[contestantId].getContestantStrength();
+    public synchronized ReturnContestant getReady(int contId, int contTeam, int contStrength) {
+        contestants[contId] = Thread.currentThread();
+        this.contTeam[contId] = contTeam;
+        this.contStrength[contId] = contStrength;
+        readyCounters[this.contTeam[contId]] += 1;
+
+        if (this.contTeam[contId] == 0) {
+            team0Power += this.contStrength[contId];
         } else {
-            team1Power += contestants[contestantId].getContestantStrength();
+            team1Power += this.contStrength[contId];
         }
 
         // wake up the coach
         notifyAll();
 
         // wait for referee sign
-        while (!trialStarted[contestantId]) {
+        while (!trialStarted[contId]) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -303,13 +384,26 @@ public class Playground implements IPlayground {
             }
         }
 
-        trialStarted[contestantId] = false;
+        trialStarted[contId] = false;
 
-        contestants[contestantId].setContestantState(ContestantStates.DOYOURBEST);
-        repository.updateContestant(contestantId, contestants[contestantId].getContestantStrength(),
-                contestants[contestantId].getContestantState(),
-                contestants[contestantId].getContestantTeam());
-        repository.reportStatus(false);
+        this.contStates[contId] = ContestantStates.DOYOURBEST;
+
+        try {
+            repository.updateContestant(contId, this.contStrength[contId],
+                    this.contStates[contId],
+                    contTeam);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on getReady - updateContestant 2: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Contestant " + contId + " remote exception on getReady - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnContestant(this.contStates[contId]);
     }
 
     /**

@@ -35,7 +35,7 @@ public class Strategy {
      * @param playing     A list to store the IDs of contestants selected for playing.
      * @param benched     A list to store the IDs of contestants selected for being benched.
      */
-    public static void useStrategy(int strategy, int team, ContestantBenchProxy[] contestants, List<Integer> playing, List<Integer> benched) {
+    public static void useStrategy(int strategy, int team, Thread[] contestants, List<Integer> playing, List<Integer> benched) {
         switch (strategy) {
             case 0:
                 useStrength(team, contestants, playing, benched);

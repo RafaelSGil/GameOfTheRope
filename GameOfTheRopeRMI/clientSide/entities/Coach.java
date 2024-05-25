@@ -162,13 +162,17 @@ public class Coach extends Thread {
      * Wake up the contestants
      */
     private void callContestants(){
+        ReturnCoach ret = null;
         try
-        { bench.callContestants(team);
+        {
+            ret = bench.callContestants(team, strategy);
         }
         catch (RemoteException e)
         { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        coachState = ret.getState();
     }
 
     /**
@@ -176,25 +180,33 @@ public class Coach extends Thread {
      * informs the referee that the team is ready.
      */
     private void informReferee(){
+        ReturnCoach ret = null;
         try
-        { playground.informReferee();
+        {
+            ret = playground.informReferee(team);
         }
         catch (RemoteException e)
         { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        coachState = ret.getState();
     }
 
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
     private void reviewNotes(){
+        ReturnCoach ret = null;
         try
-        { bench.reviewNotes();
+        {
+            ret = bench.reviewNotes(team);
         }
         catch (RemoteException e)
         { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        coachState = ret.getState();
     }
 }

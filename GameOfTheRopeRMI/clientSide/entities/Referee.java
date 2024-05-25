@@ -216,7 +216,7 @@ public class Referee extends Thread {
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
     public synchronized void signalMatchEnded() {
-        //refereeSite.setMatchEnd();
+        refereeSite.setMatchEnd();
     }
 
     /**
@@ -255,13 +255,17 @@ public class Referee extends Thread {
      * Initiates the trial, updating referee state, trial count, and notifying coaches.
      */
     private void callTrial(){
+        ReturnReferee ret = null;
         try{
-            playground.callTrial();
+            ret = playground.callTrial(trial);
             bench.refereeCallTrial();
         }catch (RemoteException e){
             GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        this.refereeSate = ret.getState();
+        this.trial = ret.getTrial();
     }
 
     /**
@@ -269,13 +273,15 @@ public class Referee extends Thread {
      * Wake up the contestants
      */
     private void startTrial(){
+        ReturnReferee ret = null;
         try{
-            playground.startTrial();
-            bench.refereeCallTrial();
+            ret = playground.startTrial();
         }catch (RemoteException e){
             GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        this.refereeSate = ret.getState();
     }
 
     /**
@@ -284,9 +290,9 @@ public class Referee extends Thread {
      * @return True if this trial has concluded the game, false otherwise.
      */
     private boolean assertTrialDecision(){
-        boolean ret = false;
+        ReturnReferee ret = null;
         try{
-            ret = playground.assertTrialDecision();
+            ret = playground.assertTrialDecision(trial, game);
             bench.setHasTrialEnded(true);
             bench.unblockContestantBench();
         }catch (RemoteException e){
@@ -294,7 +300,18 @@ public class Referee extends Thread {
             System.exit (1);
         }
 
-        return ret;
+        refereeSate = ret.getState();
+
+        if (ret.isGameEnded()){
+            this.winCause = ret.getWinCause();
+            setGameResult(ret.getGameresult());
+            if(ret.isMatchEnded()){
+                signalMatchEnded();
+            }
+            return true;
+        }
+
+        return false;
     }
 
     /**

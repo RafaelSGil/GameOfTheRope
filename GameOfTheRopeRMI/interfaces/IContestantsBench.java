@@ -29,24 +29,24 @@ public interface IContestantsBench extends Remote {
      *
      * @param team to which team does the coach belong
      */
-    void callContestants(int team) throws RemoteException;
+    ReturnCoach callContestants(int team, int strategy) throws RemoteException;
 
     /**
      * Contestants will wait until the coach wakes them up,
      * checking whether they were chosen to play or not,
      * acting accordingly
      */
-    void followCoachAdvice() throws RemoteException;
+    ReturnContestant followCoachAdvice(int contId, int contTeam, int contStrength) throws RemoteException;
 
     /**
      * Contestants, which have played in the last trial, will wait until the referee signals the end of the trial
      */
-    void seatDown() throws RemoteException;
+    ReturnContestant seatDown(int contId, int contTeam, int contStrength, boolean isPlaying) throws RemoteException;
 
     /**
      * Coaches will wait until the referee signals the end of the trial
      */
-    void reviewNotes() throws RemoteException;
+    ReturnCoach reviewNotes(int team) throws RemoteException;
 
     /**
      * Operation server shutdown.

@@ -7,32 +7,30 @@ public interface IPlayground extends Remote {
     /**
      * Initiates the trial, updating referee state, trial count, and notifying coaches.
      */
-    void callTrial() throws RemoteException;
+    ReturnReferee callTrial(int trial) throws RemoteException;
 
     /**
      * Referee wait for the last coach to signal it's ready to
      * Wake up the contestants
      */
-    void startTrial() throws RemoteException;
+    ReturnReferee startTrial() throws RemoteException;
 
     /**
      * Assert trial results and updates the game status accordingly.
-     *
-     * @return True if this trial has concluded the game, false otherwise.
      */
-    boolean assertTrialDecision() throws RemoteException;
+    ReturnReferee assertTrialDecision(int trial, int game) throws RemoteException;
 
     /**
      * Coach waits for every contestant of its team to be ready and
      * informs the referee that the team is ready.
      */
-    void informReferee() throws RemoteException;
+    ReturnCoach informReferee(int team) throws RemoteException;
 
     /**
      * Contestant signals it's ready for the trial,
      * calculates team power, and waits for the referee to signal the trial start.
      */
-    void getReady() throws RemoteException;
+    ReturnContestant getReady(int contId, int contTeam, int contStrength) throws RemoteException;
 
     /**
      * Contestant signals that it's done pulling the rope
