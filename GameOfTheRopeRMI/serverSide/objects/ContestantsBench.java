@@ -204,7 +204,7 @@ public class ContestantsBench implements IContestantsBench {
         }
 
         //choose the players
-        Strategy.useStrategy(strategy, team, contestants, playing, benched);
+        Strategy.useStrategy(strategy, team, contStrength, contTeam, playing, benched);
 
 
         coaStates[team] = CoachStates.ASSEMBLETEAM;

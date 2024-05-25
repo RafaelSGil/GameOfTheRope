@@ -2,11 +2,14 @@ package serverSide.objects;
 
 
 import clientSide.entities.RefereeStates;
-import clientSide.stubs.GeneralRepositoryStub;
+import genclass.GenericIO;
+import interfaces.IGeneralRepository;
 import interfaces.IRefereeSite;
-import serverSide.entities.RefereeSiteProxy;
+import interfaces.ReturnReferee;
 import serverSide.main.ServerGameOfTheRopeRefereeSite;
 import serverSide.main.SimulationParams;
+
+import java.rmi.RemoteException;
 
 /**
  * This class represents the RefereeSite shared region in the Game of the Rope simulation.
@@ -21,7 +24,22 @@ public class RefereeSite implements IRefereeSite {
     /**
      * Reference to the GeneralRepository object.
      */
-    private final GeneralRepositoryStub repository;
+    private final IGeneralRepository repository;
+
+    /**
+     * Current game
+     */
+    private int game;
+
+    /**
+     * Current trial
+     */
+    private int trial;
+
+    /**
+     * State of the referee
+     */
+    private int refState;
 
     /**
      * Flag that indicates the end of the match
@@ -38,7 +56,7 @@ public class RefereeSite implements IRefereeSite {
      *
      * @param repository The reference to the GeneralRepository object.
      */
-    public RefereeSite(GeneralRepositoryStub repository) {
+    public RefereeSite(IGeneralRepository repository) {
         this.repository = repository;
         this.matchEnd = false;
     }
@@ -49,17 +67,49 @@ public class RefereeSite implements IRefereeSite {
      * Updates the game number, trial number, and referee state in the repository.
      */
     @Override
-    public synchronized void announceNewGame() {
-        ((RefereeSiteProxy) Thread.currentThread()).setGame(((RefereeSiteProxy) Thread.currentThread()).getGame() + 1);
-        ((RefereeSiteProxy) Thread.currentThread()).setTrial(0);
-        repository.setTrial(0, ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
-        repository.setGame(((RefereeSiteProxy) Thread.currentThread()).getGame(), ((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
-        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
-        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.STARTGAME);
-        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+    public synchronized ReturnReferee announceNewGame(int game, boolean startMatch) {
+        try {
+            repository.setTrial(0);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on announceNewGame - setTrial: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.setGame(game + 1);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on announceNewGame - setGame: " + e.getMessage ());
+            System.exit (1);
+        }
+        if(startMatch){
+            try {
+                repository.updateReferee(RefereeStates.STARTMATCH);
+            } catch (RemoteException e) {
+                GenericIO.writelnString ("Referee remote exception on announceNewGame - updateReferee 0: " + e.getMessage ());
+                System.exit (1);
+            }
+        }
+        refState = RefereeStates.STARTGAME;
+        try {
+            repository.updateReferee(refState);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on announceNewGame - updateReferee 1: " + e.getMessage ());
+            System.exit (1);
+        }
 
-        repository.reportGameStart();
-        repository.reportStatus(true);
+        try {
+            repository.reportGameStart();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on announceNewGame - reportGameStart: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportStatus(true);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on announceNewGame - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnReferee(refState, game + 1, true);
     }
 
     /**
@@ -67,25 +117,62 @@ public class RefereeSite implements IRefereeSite {
      * Updates the referee state.
      */
     @Override
-    public synchronized void declareGameWinner() {
-        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDGAME);
-        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+    public synchronized ReturnReferee declareGameWinner(int gameResult, String winCause) {
+        refState = RefereeStates.ENDGAME;
+        try {
+            repository.updateReferee(refState);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareGameWinner - updateReferee 4: " + e.getMessage ());
+            System.exit (1);
+        }
 
-        switch (((RefereeSiteProxy) Thread.currentThread()).getGameResult(((RefereeSiteProxy) Thread.currentThread()).getGame() - 1)) {
+        switch (gameResult) {
             case -1:
-                repository.declareGameWinner(0, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
+                try {
+                    repository.declareGameWinner(0, winCause);
+                } catch (RemoteException e) {
+                    GenericIO.writelnString ("Referee remote exception on declareGameWinner - declareGameWinner -1: " + e.getMessage ());
+                    System.exit (1);
+                }
                 break;
             case 1:
-                repository.declareGameWinner(1, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
+                try {
+                    repository.declareGameWinner(1, winCause);
+                } catch (RemoteException e) {
+                    GenericIO.writelnString ("Referee remote exception on declareGameWinner - declareGameWinner 1: " + e.getMessage ());
+                    System.exit (1);
+                }
                 break;
             case 0:
-                repository.declareGameWinner(2, ((RefereeSiteProxy) Thread.currentThread()).getWinCause());
+                try {
+                    repository.declareGameWinner(2, winCause);
+                } catch (RemoteException e) {
+                    GenericIO.writelnString ("Referee remote exception on declareGameWinner - declareGameWinner 0: " + e.getMessage ());
+                    System.exit (1);
+                }
                 break;
         }
 
-        repository.reportStatus(false);
-        repository.reportGameStatus();
-        repository.setRopePosition(0);
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareGameWinner - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.reportGameStatus();
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareGameWinner - reportGameStatus: " + e.getMessage ());
+            System.exit (1);
+        }
+        try {
+            repository.setRopePosition(0);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareGameWinner - setRopePosition: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnReferee(refState);
     }
 
     /**
@@ -93,14 +180,31 @@ public class RefereeSite implements IRefereeSite {
      * Updates the referee state and inform that the match is ended.
      */
     @Override
-    public synchronized void declareMatchWinner() {
+    public synchronized ReturnReferee declareMatchWinner(String finalResults) {
         this.matchEnd = true;
-        ((RefereeSiteProxy) Thread.currentThread()).setRefereeSate(RefereeStates.ENDMATCH);
-        repository.updateReferee(((RefereeSiteProxy) Thread.currentThread()).getRefereeSate());
+        refState = RefereeStates.ENDMATCH;
+        try {
+            repository.updateReferee(refState);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareMatchWinner - updateReferee 5: " + e.getMessage ());
+            System.exit (1);
+        }
 
-        repository.reportStatus(false);
+        try {
+            repository.reportStatus(false);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareMatchWinner - reportStatus: " + e.getMessage ());
+            System.exit (1);
+        }
 
-        repository.declareMatchWinner(((RefereeSiteProxy) Thread.currentThread()).finalResults());
+        try {
+            repository.declareMatchWinner(finalResults);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on declareMatchWinner - declareMatchWinner: " + e.getMessage ());
+            System.exit (1);
+        }
+
+        return new ReturnReferee(refState);
     }
 
     /**

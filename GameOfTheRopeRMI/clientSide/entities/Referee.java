@@ -63,6 +63,8 @@ public class Referee extends Thread {
      */
     private final int[] matchRecords;
 
+    private boolean startMatch;
+
     /**
      * Creates a new Referee instance
      *
@@ -80,6 +82,7 @@ public class Referee extends Thread {
         this.game = 0;
         this.trial = 0;
         this.matchRecords = new int[SimulationParams.GAMES];
+        this.startMatch = false;
     }
 
     /**
@@ -216,7 +219,12 @@ public class Referee extends Thread {
      * Signals the end of the match to the {@link RefereeSite} by setting the corresponding flag.
      */
     public synchronized void signalMatchEnded() {
-        refereeSite.setMatchEnd();
+        try {
+            refereeSite.setMatchEnd(true);
+        } catch (RemoteException e) {
+            GenericIO.writelnString ("Referee remote exception on signalMatchEnded: " + e.getMessage ());
+            System.exit (1);
+        }
     }
 
     /**
@@ -243,12 +251,17 @@ public class Referee extends Thread {
      * Updates the game number, trial number, and referee state in the repository.
      */
     private void announceNewGame(){
+        ReturnReferee ret = null;
         try{
-            refereeSite.announceNewGame();
+            ret = refereeSite.announceNewGame(game, startMatch);
         }catch (RemoteException e){
             GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        refereeSate = ret.getState();
+        game = ret.getGame();
+        startMatch = false;
     }
 
     /**
@@ -319,12 +332,15 @@ public class Referee extends Thread {
      * Updates the referee state.
      */
     private void declareGameWinner(){
+        ReturnReferee ret = null;
         try{
-            refereeSite.declareGameWinner();
+            ret = refereeSite.declareGameWinner(getGameResult(game-1), winCause);
         }catch (RemoteException e){
             GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        refereeSate = ret.getState();
     }
 
     /**
@@ -332,12 +348,15 @@ public class Referee extends Thread {
      * Updates the referee state and inform that the match is ended.
      */
     private void declareMatchWinner(){
+        ReturnReferee ret = null;
         try{
-            refereeSite.declareMatchWinner();
+            ret = refereeSite.declareMatchWinner(finalResults());
         }catch (RemoteException e){
             GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
             System.exit (1);
         }
+
+        refereeSate = ret.getState();
     }
 
     /**
