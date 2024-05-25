@@ -411,9 +411,6 @@ public class Playground implements IPlayground {
      */
     @Override
     public synchronized void amIDone() {
-        int contestantId = ((PlaygroundProxy) Thread.currentThread()).getContestantId();
-        contestants[contestantId] = ((PlaygroundProxy) Thread.currentThread());
-
         ropesPulled++;
 
         // wake up the referee
