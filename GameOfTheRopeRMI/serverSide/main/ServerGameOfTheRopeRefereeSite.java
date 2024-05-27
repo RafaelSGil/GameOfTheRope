@@ -1,46 +1,40 @@
 package serverSide.main;
 
-import clientSide.stubs.GeneralRepositoryStub;
-import commInfra.ServerCom;
+import java.rmi.registry.*;
+import java.rmi.*;
+import java.rmi.server.*;
+import serverSide.objects.*;
+import interfaces.*;
 import genclass.GenericIO;
-import serverSide.entities.RefereeSiteProxy;
-import serverSide.sharedRegions.RefereeSite;
-import serverSide.sharedRegions.RefereeSiteInterface;
-
-import java.net.SocketTimeoutException;
 
 /**
  * Server side of the Referee Site.
  * <p>
  * Implementation of a client-server model of type 2 (server replication).
- * Communication is based on a communication channel under the TCP protocol.
+ * Communication is based on Java RMI.
  *
- * @author [Miguel Cabral]
- * @author [Rafael Gil]
+ * @autor [Miguel Cabral]
+ * @autor [Rafael Gil]
  */
 public class ServerGameOfTheRopeRefereeSite {
     /**
-     * Flag signaling the service is active.
+     * Flag signaling the end of operations.
      */
 
-    public static boolean waitConnection;
+    private static boolean end = false;
 
     /**
      * Main method.
      *
      * @param args runtime arguments
      *             args[0] - port number for listening to service requests
-     *             args[1] - name of the platform where is located the server for the general repository
-     *             args[2] - port number where the server for the general repository is listening to service requests
+     *             args[1] - name of the platform where is located the RMI registering service
+     *             args[2] - port number where the registering service is listening to service requests
      */
     public static void main(String[] args) {
-        RefereeSite refereeSite;                                       // referee site (service to be rendered)
-        RefereeSiteInterface refereeSiteInterface;                     // interface to the referee site
-        GeneralRepositoryStub generalRepositoryStub;                   // stub to the general repository
-        ServerCom scon, sconi;                                         // communication channels
         int portNumb = -1;                                             // port number for listening to service requests
-        String reposServerName;                                        // name of the platform where is located the server for the general repository
-        int reposPortNumb = -1;                                        // port nunber where the server for the general repository is listening to service requests
+        String rmiRegHostName;                                         // name of the platform where is located the RMI registering service
+        int rmiRegPortNumb = -1;                                       // port number where the registering service is listening to service requests
 
         if (args.length != 3) {
             GenericIO.writelnString("Wrong number of parameters!");
@@ -58,42 +52,159 @@ public class ServerGameOfTheRopeRefereeSite {
             System.exit(1);
         }
 
-        reposServerName = args[1];
+        rmiRegHostName = args[1];
 
         try {
-            reposPortNumb = Integer.parseInt(args[2]);
+            rmiRegPortNumb = Integer.parseInt(args[2]);
         } catch (NumberFormatException e) {
             GenericIO.writelnString("args[2] is not a number!");
             System.exit(1);
         }
-        if ((reposPortNumb < 4000) || (reposPortNumb >= 65536)) {
+        if ((rmiRegPortNumb < 4000) || (rmiRegPortNumb >= 65536)) {
             GenericIO.writelnString("args[2] is not a valid port number!");
             System.exit(1);
         }
 
-        /* service is established */
+        /* create and install the security manager */
 
-        generalRepositoryStub = new GeneralRepositoryStub(reposServerName, reposPortNumb);       // communication to the general repository is instantiated
-        refereeSite = new RefereeSite(generalRepositoryStub);                                     // service is instantiated
-        refereeSiteInterface = new RefereeSiteInterface(refereeSite);                             // interface for the service is instantiated
-        scon = new ServerCom(portNumb);                                                          // listening channel at the public port is established
-        scon.start();
-        GenericIO.writelnString("Service is established!");
-        GenericIO.writelnString("Server is listening for service requests.");
+        if (System.getSecurityManager() == null)
+            System.setSecurityManager(new SecurityManager());
+        GenericIO.writelnString("Security manager was installed!");
 
-        /* service request processing */
-        RefereeSiteProxy refereeSiteProxy;
+        /* get a remote reference to the general repository object */
 
-        waitConnection = true;
-        while (waitConnection) {
-            try {
-                sconi = scon.accept();                                                     // enter listening procedure
-                refereeSiteProxy = new RefereeSiteProxy(sconi, refereeSiteInterface);      // start a service provider agent to address
-                refereeSiteProxy.start();                                                  //   the request of service
-            } catch (SocketTimeoutException e) {
-            }
+        String nameEntryGeneralRepos = "GeneralRepository";            // public name of the general repository object
+        IGeneralRepository reposStub = null;                   // remote reference to the general repository object
+        Registry registry = null;                                      // remote reference for registration in the RMI registry service
+
+        try {
+            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("RMI registry creation exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
-        scon.end();                                                                        // operations termination
-        GenericIO.writelnString("Server was shutdown.");
+        GenericIO.writelnString("RMI registry was created!");
+
+        try {
+            reposStub = (IGeneralRepository) registry.lookup(nameEntryGeneralRepos);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("GeneralRepository lookup exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (NotBoundException e) {
+            GenericIO.writelnString("GeneralRepository not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        /* instantiate a referee site object */
+
+        RefereeSite refereeSite = new RefereeSite(reposStub);           // referee site object
+        IRefereeSite refereeSiteStub = null;                    // remote reference to the referee site object
+
+        try {
+            refereeSiteStub = (IRefereeSite) UnicastRemoteObject.exportObject(refereeSite, portNumb);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("Referee Site stub generation exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        GenericIO.writelnString("Stub was generated!");
+
+        /* register it with the general registry service */
+
+        String nameEntryBase = "RegisterHandler";                      // public name of the object that enables the registration
+        // of other remote objects
+        String nameEntryObject = "RefereeSite";                        // public name of the referee site object
+        Register reg = null;                                           // remote reference to the object that enables the registration
+        // of other remote objects
+
+        try {
+            reg = (Register) registry.lookup(nameEntryBase);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("RegisterRemoteObject lookup exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (NotBoundException e) {
+            GenericIO.writelnString("RegisterRemoteObject not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        try {
+            reg.bind(nameEntryObject, refereeSiteStub);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("Referee Site registration exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (AlreadyBoundException e) {
+            GenericIO.writelnString("Referee Site already bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        GenericIO.writelnString("Referee Site object was registered!");
+
+        /* wait for the end of operations */
+
+        GenericIO.writelnString("Referee Site is in operation!");
+        try {
+            while (!end)
+                synchronized (Class.forName("serverSide.main.ServerGameOfTheRopeRefereeSite")) {
+                    try {
+                        (Class.forName("serverSide.main.ServerGameOfTheRopeRefereeSite")).wait();
+                    } catch (InterruptedException e) {
+                        GenericIO.writelnString("Referee Site main thread was interrupted!");
+                    }
+                }
+        } catch (ClassNotFoundException e) {
+            GenericIO.writelnString("The data type ServerGameOfTheRopeRefereeSite was not found (blocking)!");
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        /* server shutdown */
+
+        boolean shutdownDone = false;                                  // flag signalling the shutdown of the referee site service
+
+        try {
+            reg.unbind(nameEntryObject);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("Referee Site deregistration exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (NotBoundException e) {
+            GenericIO.writelnString("Referee Site not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        GenericIO.writelnString("Referee Site was deregistered!");
+
+        try {
+            shutdownDone = UnicastRemoteObject.unexportObject(refereeSite, true);
+        } catch (NoSuchObjectException e) {
+            GenericIO.writelnString("Referee Site unexport exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        if (shutdownDone)
+            GenericIO.writelnString("Referee Site was shutdown!");
+    }
+
+    /**
+     * Close of operations.
+     */
+    public static void shutdown() {
+        end = true;
+        try {
+            synchronized (Class.forName("serverSide.main.ServerGameOfTheRopeRefereeSite")) {
+                (Class.forName("serverSide.main.ServerGameOfTheRopeRefereeSite")).notify();
+            }
+        } catch (ClassNotFoundException e) {
+            GenericIO.writelnString("The data type ServerGameOfTheRopeRefereeSite was not found (waking up)!");
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

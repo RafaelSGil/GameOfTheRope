@@ -1,0 +1,1 @@
+java clientSide.main.ClientGameOfTheRopeReferee localhost 22126

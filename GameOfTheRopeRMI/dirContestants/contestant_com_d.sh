@@ -1,0 +1,1 @@
+java clientSide.main.ClientGameOfTheRopeContestant l040101-ws10.ua.pt 22128
