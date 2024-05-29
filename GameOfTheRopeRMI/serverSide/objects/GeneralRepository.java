@@ -593,6 +593,6 @@ public class GeneralRepository implements IGeneralRepository {
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES)
-            ServerGameOfTheRopeGeneralRepository.waitConnection = false;
+            ServerGameOfTheRopeGeneralRepository.shutdown();
     }
 }

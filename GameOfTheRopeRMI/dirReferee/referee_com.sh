@@ -1,1 +1,1 @@
-java clientSide.main.ClientGameOfTheRopeReferee localhost 22126
+java clientSide.main.ClientGameOfTheRopeReferee localhost 22126 log

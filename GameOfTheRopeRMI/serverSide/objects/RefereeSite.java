@@ -245,7 +245,7 @@ public class RefereeSite implements IRefereeSite {
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {
-            ServerGameOfTheRopeRefereeSite.waitConnection = false;
+            ServerGameOfTheRopeRefereeSite.shutdown();
         }
         notifyAll();                                        // the barber may now terminate
     }

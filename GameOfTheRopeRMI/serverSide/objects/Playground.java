@@ -450,7 +450,7 @@ public class Playground implements IPlayground {
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {
-            ServerGameOfTheRopePlayground.waitConnection = false;
+            ServerGameOfTheRopePlayground.shutdown();
         }
         notifyAll();                                        // the barber may now terminate
     }

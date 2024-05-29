@@ -391,7 +391,7 @@ public class ContestantsBench implements IContestantsBench {
     public synchronized void shutdown() {
         nEntities += 1;
         if (nEntities >= SimulationParams.NENTITIES) {
-            ServerGameOfTheRopeContestantsBench.waitConnection = false;
+            ServerGameOfTheRopeContestantsBench.shutdown();
         }
         notifyAll();
     }
