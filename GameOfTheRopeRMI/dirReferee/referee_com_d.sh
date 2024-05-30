@@ -1,1 +1,1 @@
-java clientSide.main.ClientGameOfTheRopeReferee l040101-ws09.ua.pt 22126 log
+java clientSide.main.ClientGameOfTheRopeReferee l040101-ws01.ua.pt 22121 log

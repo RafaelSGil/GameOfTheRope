@@ -1,1 +1,1 @@
-java clientSide.main.ClientGameOfTheRopeCoach localhost 22127
+java clientSide.main.ClientGameOfTheRopeCoach localhost 22121

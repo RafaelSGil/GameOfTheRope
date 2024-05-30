@@ -1,1 +1,1 @@
-java clientSide.main.ClientGameOfTheRopeCoach l040101-ws10.ua.pt 22127
+java clientSide.main.ClientGameOfTheRopeCoach l040101-ws01.ua.pt 22121
