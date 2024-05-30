@@ -1,6 +1,6 @@
-xterm  -T "RMI registry" -hold -e "./RMIRegistryDeployAndRun.sh" &
+xterm  -T "RMI registry" -hold -e "sh RMIRegistryDeployAndRun.sh" &
 sleep 4
-xterm  -T "Registry" -hold -e "./RegistryDeployAndRun.sh" &
+xterm  -T "Registry" -hold -e "sh RegistryDeployAndRun.sh" &
 sleep 10
 xterm  -T "General Repository" -hold -e "sh generalRepositoryDeployAndRun.sh" &
 sleep 6

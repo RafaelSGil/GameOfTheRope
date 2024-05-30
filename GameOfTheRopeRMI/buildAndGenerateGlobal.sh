@@ -66,6 +66,12 @@ cp clientSide/entities/Referee.class clientSide/entities/RefereeStates.class dir
 cp interfaces/*.class dirReferee/interfaces
 cp commInfra/*.class dirReferee/commInfra
 echo "Compressing execution environments."
+echo "RMI registry"
+rm -f dirRMIRegistry.zip
+zip -rq dirRMIRegistry.zip dirRMIRegistry
+echo "Register Remote Objects"
+rm -f dirRegistry.zip
+zip -rq dirRegistry.zip dirRegistry
 echo "General Repository"
 rm -f dirGeneralRepos.zip
 zip -rq dirGeneralRepos.zip dirGeneralRepos
