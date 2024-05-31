@@ -1,12 +1,14 @@
 package interfaces;
 
+import java.io.Serializable;
+
 /**
  /**
  *  Data type to return the data to contestants.
  *
  *  Used in calls on remote objects.
  */
-public class ReturnCoach {
+public class ReturnCoach implements Serializable {
     /**
      *  Serialization key.
      */

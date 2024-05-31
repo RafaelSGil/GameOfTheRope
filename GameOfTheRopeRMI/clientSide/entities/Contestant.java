@@ -191,10 +191,11 @@ public class Contestant extends Thread {
         boolean ret = false;                                 // return value
 
         try
-        { ret = refereeSite.endOfMatch();
+        {
+            ret = refereeSite.endOfMatch();
         }
         catch (RemoteException e)
-        { GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+        { GenericIO.writelnString ("Contestant " + contestantId + " remote exception on endOfMatch: " + e.getMessage ());
             System.exit (1);
         }
         return ret;
@@ -210,7 +211,7 @@ public class Contestant extends Thread {
         try{
             ret = bench.followCoachAdvice(contestantId, contestantTeam, contestantStrength);
         }catch (RemoteException e){
-            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on followCoachAdvice: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -228,7 +229,7 @@ public class Contestant extends Thread {
         try{
             ret = playground.getReady(contestantId, contestantTeam, contestantStrength);
         }catch (RemoteException e){
-            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on getReady: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -242,7 +243,7 @@ public class Contestant extends Thread {
         try{
             playground.amIDone();
         }catch (RemoteException e){
-            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on amIDone: " + e.getMessage ());
             System.exit (1);
         }
     }
@@ -255,7 +256,7 @@ public class Contestant extends Thread {
         try{
             ret = bench.seatDown(contestantId, contestantTeam, contestantStrength, isPlaying);
         }catch (RemoteException e){
-            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Contestant " + contestantId + " remote exception on seatDown: " + e.getMessage ());
             System.exit (1);
         }
 

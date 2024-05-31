@@ -1,5 +1,5 @@
 echo "Compiling source code."
-javac -source 8 -target 8 -cp /home/$USER/Documents/GameOfTheRope/GameOfTheRopeDistributedVersion/genclass.jar */*.java */*/*.java */*/*/*.java
+javac -source 8 -target 8 -cp /home/$USER/2semestre/SD/genclass.jar */*.java */*/*.java */*/*/*.java
 echo "Distributing intermediate code to the different execution environments."
 echo "RMI registry"
 rm -rf dirRMIRegistry/interfaces
@@ -20,7 +20,7 @@ cp interfaces/Register.class interfaces/IGeneralRepository.class dirGeneralRepos
 cp clientSide/entities/*.class dirGeneralRepos/clientSide/entities
 cp clientSide/entities/data/*.class dirGeneralRepos/clientSide/entities/data
 echo "Contestants Bench"
-rm -rf dirContestantsBench/serverSide dirGeneralRepos/clientSide dirContestantsBench/interfaces dirContestantsBench/commInfra
+rm -rf dirContestantsBench/serverSide dirContestantsBench/clientSide dirContestantsBench/interfaces dirContestantsBench/commInfra
 mkdir -p dirContestantsBench/serverSide dirContestantsBench/serverSide/main dirContestantsBench/serverSide/objects dirContestantsBench/interfaces dirContestantsBench/serverSide/utils dirContestantsBench/clientSide dirContestantsBench/clientSide/entities dirContestantsBench/commInfra
 cp serverSide/main/ServerGameOfTheRopeContestantsBench.class dirContestantsBench/serverSide/main
 cp serverSide/objects/*.class dirContestantsBench/serverSide/objects
@@ -46,14 +46,18 @@ cp clientSide/entities/RefereeStates.class clientSide/entities/Referee.class dir
 cp commInfra/*.class dirRefereeSite/commInfra
 echo "Coach"
 rm -rf dirCoach/interfaces dirCoach/clientSide dirCoach/commInfra
-mkdir -p dirCoach/interfaces dirCoach/clientSide dirCoach/clientSide/main dirCoach/clientSide/entities dirCoach/commInfra
+mkdir -p dirCoach/serverSide dirCoach/serverSide/main dirCoach/serverSide/utils dirCoach/interfaces dirCoach/clientSide dirCoach/clientSide/main dirCoach/clientSide/entities dirCoach/commInfra
+cp serverSide/main/SimulationParams.class dirCoach/serverSide/main
+cp serverSide/utils/Strategy.class dirCoach/serverSide/utils
 cp clientSide/main/ClientGameOfTheRopeCoach.class dirCoach/clientSide/main
 cp clientSide/entities/Coach.class clientSide/entities/CoachStates.class dirCoach/clientSide/entities
-cp interfaces/*.class dirContestant/interfaces
+cp interfaces/*.class dirCoach/interfaces
 cp commInfra/*.class dirCoach/commInfra
 echo "Contestant"
 rm -rf dirContestant/interfaces dirContestant/clientSide dirContestant/commInfra
-mkdir -p dirContestant/interfaces dirContestant/clientSide dirContestant/clientSide/main dirContestant/clientSide/entities dirContestant/commInfra
+mkdir -p dirContestant/serverSide dirContestant/serverSide/main dirContestant/serverSide/utils dirContestant/interfaces dirContestant/clientSide dirContestant/clientSide/main dirContestant/clientSide/entities dirContestant/commInfra
+cp serverSide/main/SimulationParams.class dirContestant/serverSide/main
+cp serverSide/utils/Strategy.class dirContestant/serverSide/utils
 cp clientSide/main/ClientGameOfTheRopeContestant.class dirContestant/clientSide/main
 cp clientSide/entities/Contestant.class clientSide/entities/ContestantStates.class dirContestant/clientSide/entities
 cp interfaces/*.class dirContestant/interfaces

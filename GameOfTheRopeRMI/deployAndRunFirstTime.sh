@@ -11,7 +11,7 @@ sleep 4
 xterm  -T "Contestants Bench" -hold -e "sh contestantsBenchDeployAndRun.sh" &
 sleep 4
 xterm  -T "Contestants" -hold -e "sh contestantsDeployAndRun.sh" &
-sleep 2
+sleep 4
 xterm  -T "Coach" -hold -e "sh coachDeployAndRun.sh" &
-sleep 2
+sleep 4
 xterm  -T "Referee" -hold -e "sh refereeDeployAndRun.sh" &

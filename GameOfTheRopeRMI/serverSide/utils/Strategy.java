@@ -1,5 +1,6 @@
 package serverSide.utils;
 
+import genclass.GenericIO;
 import serverSide.main.SimulationParams;
 
 import java.util.*;
@@ -58,12 +59,18 @@ public class Strategy {
         List<Set<Integer>> aux = new ArrayList<>();
 
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
-            if(contTeam[i] == team){
-                Set<Integer> s1 = new HashSet<>();
+            if (contTeam[i] == team) {
+                Set<Integer> s1 = new LinkedHashSet<>();
                 s1.add(i);
                 s1.add(contStrength[i]);
-                aux.add(s1);
+                if (s1.size() == 2) {
+                    aux.add(s1);
+                }
             }
+        }
+
+        if (aux.size() < SimulationParams.NPLAYERS) {
+            throw new IllegalArgumentException("Not enough players to form a team");
         }
 
         Comparator<Set<Integer>> comparator = (s1, s2) -> {
@@ -72,7 +79,9 @@ public class Strategy {
             return Integer.compare(secondElement2, secondElement1);
         };
 
+        GenericIO.writelnString("GOING TO COMPARE - STRENGTH");
         aux.sort(comparator);
+        GenericIO.writelnString("COMPARED - STRENGTH");
 
         for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION; i++) {
             Set<Integer> set = aux.get(i);
@@ -99,12 +108,18 @@ public class Strategy {
         List<Set<Integer>> aux = new ArrayList<>();
 
         for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
-            if(contTeam[i] == team){
-                Set<Integer> s1 = new HashSet<>();
+            if (contTeam[i] == team) {
+                Set<Integer> s1 = new LinkedHashSet<>();
                 s1.add(i);
                 s1.add(contStrength[i]);
-                aux.add(s1);
+                if (s1.size() == 2) {
+                    aux.add(s1);
+                }
             }
+        }
+
+        if (aux.size() < SimulationParams.NPLAYERS) {
+            throw new IllegalArgumentException("Not enough players to form a team");
         }
 
         Comparator<Set<Integer>> comparator = (s1, s2) -> {
@@ -113,14 +128,15 @@ public class Strategy {
             return Integer.compare(secondElement2, secondElement1);
         };
 
+        GenericIO.writelnString("GOING TO COMPARE - MODERATE");
         aux.sort(comparator);
+        GenericIO.writelnString("COMPARED - MODERATE");
 
         for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION - 1; i++) {
             Set<Integer> set = aux.get(i);
             int elem = getFirstElement(set);
             playing.add(elem);
         }
-        // Get last contestant
         Set<Integer> lastSet = aux.get(aux.size() - 1);
         int elem1 = getFirstElement(lastSet);
         playing.add(elem1);

@@ -184,13 +184,12 @@ public class Playground implements IPlayground {
     @Override
     public synchronized ReturnReferee startTrial() {
         this.referee = Thread.currentThread();
-
         // synchronize, will get waken up by the last coach
         while (!haveCoachesChosenTeams()) {
             try {
                 wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 
@@ -245,7 +244,7 @@ public class Playground implements IPlayground {
             try {
                 wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 

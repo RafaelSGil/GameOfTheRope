@@ -147,10 +147,11 @@ public class Coach extends Thread {
         boolean ret = false;                                 // return value
 
         try
-        { ret = refereeSite.endOfMatch();
+        {
+            ret = refereeSite.endOfMatch();
         }
         catch (RemoteException e)
-        { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
+        { GenericIO.writelnString ("Coach " + team + " remote exception on enOfMatch: " + e.getMessage ());
             System.exit (1);
         }
         return ret;
@@ -168,7 +169,7 @@ public class Coach extends Thread {
             ret = bench.callContestants(team, strategy);
         }
         catch (RemoteException e)
-        { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
+        { GenericIO.writelnString ("Coach " + team + " remote exception on callContestants: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -186,7 +187,7 @@ public class Coach extends Thread {
             ret = playground.informReferee(team);
         }
         catch (RemoteException e)
-        { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
+        { GenericIO.writelnString ("Coach " + team + " remote exception on informReferee: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -203,7 +204,7 @@ public class Coach extends Thread {
             ret = bench.reviewNotes(team);
         }
         catch (RemoteException e)
-        { GenericIO.writelnString ("Coach " + team + " remote exception on goToSleep: " + e.getMessage ());
+        { GenericIO.writelnString ("Coach " + team + " remote exception on reviewNotes: " + e.getMessage ());
             System.exit (1);
         }
 

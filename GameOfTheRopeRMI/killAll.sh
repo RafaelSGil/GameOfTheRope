@@ -20,9 +20,9 @@ kill_if_running_and_check() {
 }
 kill_if_running_and_check "RMI registry" l040101-ws01.ua.pt 22121
 kill_if_running_and_check "Registry" l040101-ws01.ua.pt 22122
-#kill_if_running_and_check "General Repository" l040101-ws01.ua.pt 22121
-#kill_if_running_and_check "Contestants Bench" l040101-ws10.ua.pt 22122
-#kill_if_running_and_check "Playground" l040101-ws05.ua.pt 22125
-#kill_if_running_and_check "Referee Site" l040101-ws06.ua.pt 22126
+kill_if_running_and_check "General Repository" l040101-ws05.ua.pt 22122
+kill_if_running_and_check "Contestants Bench" l040101-ws06.ua.pt 22123
+kill_if_running_and_check "Playground" l040101-ws07.ua.pt 22124
+kill_if_running_and_check "Referee Site" l040101-ws08.ua.pt 22125
 
 echo "Completed"

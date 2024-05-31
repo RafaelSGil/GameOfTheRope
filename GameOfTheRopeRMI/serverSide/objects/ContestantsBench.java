@@ -13,9 +13,7 @@ import serverSide.main.SimulationParams;
 import serverSide.utils.Strategy;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class represents a ContestantsBench entity in the game of the rope simulation.
@@ -204,7 +202,41 @@ public class ContestantsBench implements IContestantsBench {
         }
 
         //choose the players
-        Strategy.useStrategy(strategy, team, contStrength, contTeam, playing, benched);
+        ArrayList<Integer> auxIds = new ArrayList<>(SimulationParams.NPLAYERS);
+
+        for (int i = 0; i < SimulationParams.NCONTESTANTS; i++) {
+            if(contTeam[i] == team){
+                auxIds.add(i);
+            }
+        }
+
+        auxIds.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer a, Integer b) {
+                return Integer.compare(contStrength[b], contStrength[a]);
+            }
+        });
+
+        // strength strat
+        if(strategy == 0){
+            for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION; i++) {
+                playing.add(auxIds.get(i));
+            }
+            for (int i = SimulationParams.NPLAYERSINCOMPETITION; i < SimulationParams.NPLAYERS; i++) {
+                benched.add(auxIds.get(i));
+            }
+        }
+
+        // moderate strat
+        if(strategy == 1){
+            for (int i = 0; i < SimulationParams.NPLAYERSINCOMPETITION - 1; i++) {
+                playing.add(auxIds.get(i));
+            }
+            playing.add(auxIds.get(auxIds.size() - 1));
+            for (int i = SimulationParams.NPLAYERSINCOMPETITION - 1; i < SimulationParams.NPLAYERS - 1; i++) {
+                benched.add(auxIds.get(i));
+            }
+        }
 
 
         coaStates[team] = CoachStates.ASSEMBLETEAM;

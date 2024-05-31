@@ -58,7 +58,7 @@ public class ClientGameOfTheRopeContestant {
         IGeneralRepository reposStub = null;                                        // remote reference to the general repository object
         String nameEntryRefereeSite = "RefereeSite";                                // public name of the referee site object
         IRefereeSite refereeSiteStub = null;                                        // remote reference to the referee site object
-        String nameEntryContestantBench = "ContestantBench";                        // public name of the contestant bench object
+        String nameEntryContestantBench = "ContestantsBench";                        // public name of the contestant bench object
         IContestantsBench contestantsBenchStub = null;                              // remote reference to the contetant bench object
         String nameEntryPlayground = "Playground";                                  // public name of the playground object
         IPlayground playgroundStub = null;                                          // remote reference to the playground object

@@ -243,6 +243,8 @@ public class Referee extends Thread {
             declareGameWinner();
         }
         waitForGameStart();
+        waitForGameStart();
+        waitForGameStart();
         declareMatchWinner();
     }
 
@@ -255,7 +257,7 @@ public class Referee extends Thread {
         try{
             ret = refereeSite.announceNewGame(game, startMatch);
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on announceNewGame: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -273,7 +275,7 @@ public class Referee extends Thread {
             ret = playground.callTrial(trial);
             bench.refereeCallTrial();
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on callTrial: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -290,7 +292,7 @@ public class Referee extends Thread {
         try{
             ret = playground.startTrial();
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on startTrial: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -306,10 +308,15 @@ public class Referee extends Thread {
         ReturnReferee ret = null;
         try{
             ret = playground.assertTrialDecision(trial, game);
+            if (ret.isGameEnded()){
+                if(ret.isMatchEnded()){
+                    signalMatchEnded();
+                }
+            }
             bench.setHasTrialEnded(true);
             bench.unblockContestantBench();
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on assertTrialDecision: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -318,9 +325,7 @@ public class Referee extends Thread {
         if (ret.isGameEnded()){
             this.winCause = ret.getWinCause();
             setGameResult(ret.getGameresult());
-            if(ret.isMatchEnded()){
-                signalMatchEnded();
-            }
+
             return true;
         }
 
@@ -336,7 +341,7 @@ public class Referee extends Thread {
         try{
             ret = refereeSite.declareGameWinner(getGameResult(game-1), winCause);
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on declareGameWinner: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -352,7 +357,7 @@ public class Referee extends Thread {
         try{
             ret = refereeSite.declareMatchWinner(finalResults());
         }catch (RemoteException e){
-            GenericIO.writelnString ("Referee remote exception on goToSleep: " + e.getMessage ());
+            GenericIO.writelnString ("Referee remote exception on declareMatchWinner: " + e.getMessage ());
             System.exit (1);
         }
 
@@ -364,7 +369,7 @@ public class Referee extends Thread {
      */
     private void waitForGameStart() {
         try {
-            sleep((long) (1 + 100 * Math.random()));
+            sleep((long) (1 + 500 * Math.random()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

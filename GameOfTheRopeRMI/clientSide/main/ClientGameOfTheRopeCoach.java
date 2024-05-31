@@ -59,7 +59,7 @@ public class ClientGameOfTheRopeCoach {
         IGeneralRepository reposStub = null;                                        // remote reference to the general repository object
         String nameEntryRefereeSite = "RefereeSite";                                // public name of the referee site object
         IRefereeSite refereeSiteStub = null;                                        // remote reference to the referee site object
-        String nameEntryContestantBench = "ContestantBench";                        // public name of the contestant bench object
+        String nameEntryContestantBench = "ContestantsBench";                        // public name of the contestant bench object
         IContestantsBench contestantsBenchStub = null;                              // remote reference to the contetant bench object
         String nameEntryPlayground = "Playground";                                  // public name of the playground object
         IPlayground playgroundStub = null;                                          // remote reference to the playground object
@@ -143,6 +143,17 @@ public class ClientGameOfTheRopeCoach {
             GenericIO.writelnString("The coach " + (i + 1) + " has started");
             coaches[i].start();
         }
+
+        /* waiting for the end of the simulation */
+        GenericIO.writelnString();
+        for (int i = 0; i < SimulationParams.NTEAMS; i++) {
+            try {
+                coaches[i].join();
+            } catch (InterruptedException e) {
+            }
+            GenericIO.writelnString("The coach " + (i + 1) + " has terminated.");
+        }
+        GenericIO.writelnString();
 
         /* waiting for the end of the simulation */
         GenericIO.writelnString();

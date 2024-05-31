@@ -69,31 +69,6 @@ public class ServerGameOfTheRopeGeneralRepository {
             System.setSecurityManager(new SecurityManager());
         GenericIO.writelnString("Security manager was installed!");
 
-        /* get a remote reference to the general repository object */
-        String nameEntryGeneralRepos = "GeneralRepository";            // public name of the general repository object
-        IGeneralRepository reposStub = null;                   // remote reference to the general repository object
-        Registry registry = null;                                      // remote reference for registration in the RMI registry service
-
-        try {
-            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
-        } catch (RemoteException e) {
-            GenericIO.writelnString("RMI registry creation exception: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
-        GenericIO.writelnString("RMI registry was created!");
-
-        try {
-            reposStub = (IGeneralRepository) registry.lookup(nameEntryGeneralRepos);
-        } catch (RemoteException e) {
-            GenericIO.writelnString("GeneralRepository lookup exception: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        } catch (NotBoundException e) {
-            GenericIO.writelnString("GeneralRepository not bound exception: " + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }
 
         /* instantiate a general repository object */
         GeneralRepository generalRepository = new GeneralRepository();                         // general repository object
@@ -112,6 +87,16 @@ public class ServerGameOfTheRopeGeneralRepository {
         String nameEntryBase = "RegisterHandler";                      // public name of the object that enables the registration
         String nameEntryObject = "GeneralRepository";                  // public name of the general repository object
         Register reg = null;                                           // remote reference to the object that enables the registration
+        Registry registry = null;                                      // remote reference for registration in the RMI registry service
+
+        try {
+            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
+        } catch (RemoteException e) {
+            GenericIO.writelnString("RMI registry creation exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        GenericIO.writelnString("RMI registry was created!");
 
         try {
             reg = (Register) registry.lookup(nameEntryBase);
