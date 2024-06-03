@@ -3,6 +3,14 @@ package interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * Playground interface.
+ * Declares the operations that can be performed on the playground.
+ * Extends the Remote interface, to be able to make RMI calls.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public interface IPlayground extends Remote {
     /**
      * Initiates the trial, updating referee state, trial count, and notifying coaches.

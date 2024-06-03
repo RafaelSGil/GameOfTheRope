@@ -1,5 +1,5 @@
 /**
- * Stubs used by the client side in the Game Of The Rope Simulation
+ * Interfaces used in the Game Of The Rope Simulation
  *
  *  @author [Miguel Cabral]
  *  @author [Rafael Gil]

@@ -18,7 +18,7 @@ import java.rmi.registry.Registry;
  * Client side of the Game of the Rope (coaches).
  *
  * Implementation of a client-server model of type 2 (server replication).
- * Communication is based on a communication channel under the TCP protocol.
+ * Communication is based on Java RMI.
  *
  * @author [Miguel Cabral]
  * @author [Rafael Gil]

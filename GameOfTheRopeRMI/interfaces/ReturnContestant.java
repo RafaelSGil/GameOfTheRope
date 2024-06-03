@@ -6,6 +6,9 @@ import java.io.Serializable;
  *  Data type to return the data to contestants.
  *
  *  Used in calls on remote objects.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class ReturnContestant implements Serializable {
     /**

@@ -3,6 +3,14 @@ package interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * Referee site interface.
+ * Declares the operations that can be performed on the referee site.
+ * Extends the Remote interface, to be able to make RMI calls.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public interface IRefereeSite extends Remote {
     /**
      * Announces the start of a new game to all entities.

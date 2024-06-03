@@ -3,6 +3,15 @@ package interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * Contestants bench interface.
+ * Declares the operations that can be performed on the contestants bench.
+ * Extends the Remote interface, to be able to make RMI calls.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
+
 public interface IContestantsBench extends Remote {
     /**
      * Signal the coaches and contestants to wake up

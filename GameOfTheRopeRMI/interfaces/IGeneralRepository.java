@@ -3,6 +3,14 @@ package interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * General repository interface.
+ * Declares the operations that can be performed on the general repository.
+ * Extends the Remote interface, to be able to make RMI calls.
+ *
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
+ */
 public interface IGeneralRepository extends Remote {
     /**
      * Operation initialization of simulation.

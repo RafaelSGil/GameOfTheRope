@@ -14,6 +14,8 @@ import java.util.Arrays;
  * This class represents the Playground entity in the game of the rope simulation.
  * Its purpose is to serve has the playground for the contestants to play the game of the rope
  *
+ *    Implementation of a client-server model of type 2 (server replication).
+ *    Communication is based on Java RMI.
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */

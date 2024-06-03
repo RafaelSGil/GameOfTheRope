@@ -13,8 +13,8 @@ import genclass.GenericIO;
  * Implementation of a client-server model of type 2 (server replication).
  * Communication is based on Java RMI.
  *
- * @autor [Miguel Cabral]
- * @autor [Rafael Gil]
+ * @author [Miguel Cabral]
+ * @author [Rafael Gil]
  */
 public class ServerGameOfTheRopePlayground {
     /**

@@ -21,6 +21,9 @@ import java.util.*;
  * where they wait to receive instructions, from the coach,
  * about whether they are going to play or not
  *
+ *    Implementation of a client-server model of type 2 (server replication).
+ *    Communication is based on Java RMI.
+ *
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */

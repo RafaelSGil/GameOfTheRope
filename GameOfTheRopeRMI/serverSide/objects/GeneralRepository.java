@@ -20,6 +20,9 @@ import java.util.Objects;
  * which will be printing any alterations and updates to the game data to a file,
  * in order to provide a way to check and debug the unfolding of the game
  *
+ *    Implementation of a client-server model of type 2 (server replication).
+ *    Communication is based on Java RMI.
+ *
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */

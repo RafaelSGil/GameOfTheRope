@@ -2,7 +2,6 @@ package clientSide.entities;
 
 import genclass.GenericIO;
 import interfaces.*;
-
 import java.rmi.RemoteException;
 
 /**

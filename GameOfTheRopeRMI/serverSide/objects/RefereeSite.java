@@ -16,6 +16,9 @@ import java.rmi.RemoteException;
  * It provides a communication point between the Referee entity and other entities (Contestants, Coach)
  * for match related information and updates.
  *
+ *    Implementation of a client-server model of type 2 (server replication).
+ *    Communication is based on Java RMI.
+ *
  * @author [Miguel Cabral]
  * @author [Rafael Gil]
  */
